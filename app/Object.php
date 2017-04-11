@@ -13,15 +13,16 @@ class Object
     public $fields;
     public $schema;
 
-    private static function prepareRawData($data, $schema){
-      foreach ($schema->fields as $field){
-          switch ($field['type']) {
+    private static function prepareRawData($data, $schema)
+    {
+        foreach ($schema->fields as $field) {
+            switch ($field['type']) {
               case 'String':
                   $data[$field['name']] = (String)$data[$field['name']];
                   break;
               case 'Text':
                   $data[$field['name']] = (String)$data[$field['name']];
-                  break;                
+                  break;
               case 'Integer':
                   $data[$field['name']] = (Integer)$data[$field['name']];
                   break;
@@ -33,29 +34,29 @@ class Object
 
                   break;
           }
+        }
 
-      }
-
-      return $data;
+        return $data;
     }
 
-    public function save($token){
-      $url = env('APPERCODE_SERVER');
+    public function save($token)
+    {
+        $url = env('APPERCODE_SERVER');
 
-      $client = new Client;
-      try {
-          $r = $client->put($url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+        $client = new Client;
+        try {
+            $r = $client->put($url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
               'X-Appercode-Session-Token' => $token
           ], 'json' => $this->fields]);
-      }
-      catch (ServerException $e){
-          throw new ObjectSaveException;
-      }
+        } catch (ServerException $e) {
+            throw new ObjectSaveException;
+        }
 
-      return $this;
+        return $this;
     }
 
-    public static function build($data, Schema $schema){
+    public static function build($data, Schema $schema)
+    {
         $object = new static();
         $object->id = $data['id'];
         $object->fields = $data;
@@ -65,9 +66,8 @@ class Object
         return $object;
     }
 
-    public static function byRawData($id, $data, Schema $schema){
-
-
+    public static function byRawData($id, $data, Schema $schema)
+    {
         $object = new static();
         $object->id = $id;
         $object->fields = self::prepareRawData($data, $schema);

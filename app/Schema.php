@@ -9,7 +9,8 @@ class Schema
     public $id;
     public $title;
 
-    public static function build($data){
+    public static function build($data)
+    {
         $schema = new static();
         $schema->id = $data['id'];
         $schema->title = $data['title'] ? $data['title'] : $data['id'];

@@ -26,7 +26,7 @@ class User
     {
         if (session('session-token')) {
             $this->token = session('session-token');
-        }        
+        }
         if (session('refresh-token')) {
             $this->refreshToken = session('refresh-token');
         }
