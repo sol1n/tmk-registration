@@ -1,0 +1,9 @@
+/vendor
+/node_modules
+/public/storage
+Homestead.yaml
+Homestead.json
+.php_cs.cache
+composer.lock
+composer.json
+.env

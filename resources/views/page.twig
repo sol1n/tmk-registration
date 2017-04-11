@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block pageTitle %}{% endblock %}</title>
+  {% block headerCss %}
+    {% include "blocks/headerCss.twig" %}
+  {% endblock %}
+</head>
+
+<body>
+  <div id="wrapper">
+    {% block sidebar %}
+      {% include "blocks/sidebar.twig" %}
+    {% endblock %}
+
+    <div id="page-wrapper" class="gray-bg">
+      {% block header %}
+        {% include "blocks/header.twig" %}
+      {% endblock %}
+      
+      <div class="wrapper wrapper-content">
+        {% block content %}
+          content here
+        {% endblock %}
+
+      </div>
+      
+      {% block footer %}
+        {% include "blocks/footer.twig" %}
+      {% endblock %}
+
+    </div>
+        
+  </div>
+  <script src="{{ asset('/assets/js/jquery-2.1.1.js') }}"></script>
+  <script src="{{ asset('/assets/js/bootstrap.min.js') }}"></script>
+  <script src="{{ asset('/assets/js/plugins/metisMenu/jquery.metisMenu.js') }}"></script>
+</body>
+</html>
