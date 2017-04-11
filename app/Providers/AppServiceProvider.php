@@ -15,11 +15,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer('*', function($view){
+        View::composer(['dashboard', 'schema.*'], function($view){
+            
             $token = session('session-token');
             $manager = new SchemaManager($token);
+            $schemas = $manager->getAll();
 
-            $view->with('schemas', $manager->getAll());
+            $view->with('schemas', $schemas);
         });
     }
 
