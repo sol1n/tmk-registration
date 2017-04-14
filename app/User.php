@@ -13,7 +13,7 @@ class User
     private $token;
     private $refreshToken;
 
-    public function getToken(): string
+    public function token(): string
     {
         if (isset($this->token)) {
             return $this->token;

@@ -17,9 +17,8 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer(['dashboard', 'schema.*'], function($view){
             
-            $token = session('session-token');
-            $manager = new SchemaManager($token);
-            $schemas = $manager->getAll();
+            $manager = new SchemaManager();
+            $schemas = $manager->all();
 
             $view->with('schemas', $schemas);
         });

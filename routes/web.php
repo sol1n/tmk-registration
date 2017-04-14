@@ -11,14 +11,16 @@
 |
 */
 
-Route::get('/login', 'BasicController@ShowAuthForm');
-Route::post('/login', 'BasicController@ProcessLogin');
+Route::get('/login', 'AuthController@ShowAuthForm');
+Route::post('/login', 'AuthController@ProcessLogin');
 
-Route::group(['middleware' => ['appercode']], function(){
-  Route::get('/', 'BasicController@ShowDashboard');
-  Route::get('/{code}/', 'BasicController@ShowCollection');
-  Route::get('/{code}/{object}/', 'BasicController@ShowObject');
-  Route::post('/{code}/{object}/', 'BasicController@SaveObject');
+Route::group(['middleware' => ['appercodeAuth']], function () {
+  Route::get('/', 'CollectionsController@ShowDashboard');
+  Route::get('/{code}/', 'CollectionsController@ShowCollection');
+  Route::get('/{code}/{object}/', 'CollectionsController@ShowObject');
+  Route::post('/{code}/{object}/', 'CollectionsController@SaveObject');
 });
+  
+
 
 
