@@ -1,0 +1,18 @@
+#collections-list>li>a {
+  font-weight: normal;
+  color: #a7b1c2;
+}
+
+#collections-list>li>a>b{
+  color: #fefefe;
+}
+
+.nav>li>a{
+  color: #fefefe;
+}
+
+@media (min-width: 768px){
+  #page-wrapper {
+    min-height: 100vh;
+  }
+}
