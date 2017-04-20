@@ -1,0 +1,57 @@
+{% extends "page.twig" %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>{{ schema.title }}</h5>
+    </div>
+
+    <div class="ibox-content">
+      <div class="buttons-group">
+        <a class="btn btn-primary" href="/{{ schema.id }}/new/">New element</a>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            {% for field in schema.fields %}
+              <th>{{ field.name }}</th>
+            {% endfor %}
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for object in objects %}
+            <tr>
+              <td>
+                <a href="/{{ schema.id }}/{{ object.id }}/">
+                  {{ object.id }}
+                </a>
+              </td>
+              {% for field in schema.fields %}
+                {% if object.fields[field.name] is iterable %}
+                  <td>Array of {{ object.fields[field.name]|length }} values</td>
+                {% else %}
+                  <td>{{ object.fields[field.name] | striptags('<br><b><i><p>') | str_limit(380)  }}</td>
+                {% endif %}
+              {% endfor %}
+              <td class="action-cell">
+                <div class="input-group-btn text-right">
+                    <a href="/{{ schema.id }}/{{ object.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                     <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
+                      <ul class="dropdown-menu pull-right">
+                          <li><a href="/{{ schema.id }}/{{ object.id }}/">Edit</a></li>
+                          <li><a href="/{{ schema.id }}/{{ object.id }}/delete">Delete</a></li>
+                      </ul>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock %}

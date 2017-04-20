@@ -4,42 +4,36 @@
 
   <div class="ibox float-e-margins">
     <div class="ibox-title">
-      <h5>{{ schema.title }}</h5>
+      <h5>Collections list</h5>
     </div>
 
     <div class="ibox-content">
+
+      <div class="buttons-group">
+        <a class="btn btn-primary" href="/{{ schema.id }}/create/">New schema</a>
+      </div>
+
       <table class="table">
         <thead>
           <tr>
             <th>#</th>
-            {% for field in schema.fields %}
-              <th>{{ field.name }}</th>
-            {% endfor %}
+            <th>Title</th>
             <th class="text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {% for object in objects %}
+          {% for schema in schemas %}
             <tr>
-              <td>
-                <a href="/{{ schema.id }}/{{ object.id }}/">
-                  {{ object.id }}
-                </a>
-              </td>
-              {% for field in schema.fields %}
-                {% if object.fields[field.name] is iterable %}
-                  <td>Array of {{ object.fields[field.name]|length }} values</td>
-                {% else %}
-                  <td>{{ object.fields[field.name] | striptags('<br><b><i><p>') | str_limit(380)  }}</td>
-                {% endif %}
-              {% endfor %}
-              <td>
+              <td>{{ schema.id }}</td>
+              <td>{{ schema.title }}</td>
+              <td class="action-cell">
                 <div class="input-group-btn text-right">
-                    <a href="/{{ schema.id }}/{{ object.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                    <a href="/{{ schema.id }}/" tabindex="-1" class="btn btn-white" type="button">List elements</a>
                      <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
                       <ul class="dropdown-menu pull-right">
-                          <li><a href="/{{ schema.id }}/{{ object.id }}/">Edit</a></li>
-                          <li><a href="/{{ schema.id }}/{{ object.id }}/delete">Delete</a></li>
+                          <li><a href="/{{ schema.id }}/">List elements</a></li>
+                          <li><a href="/{{ schema.id }}/edit">Edit</a></li>
+                          <li><a href="/{{ schema.id }}/delete">Delete</a></li>
                       </ul>
                 </div>
               </td>

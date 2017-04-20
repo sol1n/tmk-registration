@@ -86,4 +86,32 @@ class ObjectManager
 
         return $object;
     }
+
+    public function create(Schema $schema, array $fields): Object
+    {
+        $object = Object::create($schema, $fields, $this->user->token());
+        $objects = $this->fetchCollection($schema);
+        $objects->push($object);
+
+        $this->saveCollectionToCache($schema, $objects);
+
+        return $object;
+    }
+
+    public function delete(Schema $schema, $id)
+    {
+        $object = $this->find($schema, $id);
+        $object->delete($this->user->token());
+
+        $objects = $this->fetchCollection($schema);
+
+        $index = $objects->search(function ($item, $key) use ($id) {
+            return $item->id == $id;
+        });
+
+        $objects->forget($index);
+        $this->saveCollectionToCache($schema, $objects);
+
+        return true;
+    }
 }

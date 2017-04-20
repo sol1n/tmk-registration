@@ -1,0 +1,47 @@
+{% extends "page.twig" %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      {% if object.title %}
+        <h5>{{ object.title }}</h5>
+      {% else %}
+        <h5>{{ object.id }}</h5>
+      {% endif %}
+    </div>
+
+    <div class="ibox-content">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/{{ object.id }}" method="post">
+        {{ csrf_field() }}
+
+        {% for field in schema.fields %}
+          <div class="form-group">
+            {% if field.title %}
+              <label class="col-sm-2 control-label">{{ field.title }}</label>
+            {% else %}
+              <label class="col-sm-2 control-label">{{ field.name }}</label>
+            {% endif %}
+              <div class="col-sm-10">
+                {% if field.type == "String" %}
+                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
+                {% elseif field.type == "Json" %}
+                  <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
+                {% elseif field.type == "Integer" %}
+                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
+                {% else %}
+                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
+                {% endif %}
+              </div>
+          </div>  
+        {% endfor %}
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success">Apply</button>
+
+        <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}

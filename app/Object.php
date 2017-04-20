@@ -76,6 +76,30 @@ class Object
         return static::build($schema, $json);
     }
 
+    public static function create(Schema $schema, $fields, $token): Object
+    {
+        $fields = self::prepareRawData($fields, $schema);
+
+        $client = new Client;
+        $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
+            'X-Appercode-Session-Token' => $token
+        ], 'json' => $fields]);
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+
+        return static::build($schema, $json);
+    }
+
+    public function delete($token)
+    {
+        $client = new Client;
+        $r = $client->delete(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+            'X-Appercode-Session-Token' => $token
+        ]]);
+
+        return true;
+    }
+
     public static function list(Schema $schema, $token): Collection
     {
         $list = new Collection;

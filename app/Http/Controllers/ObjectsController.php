@@ -6,14 +6,8 @@ use Illuminate\Http\Request;
 use App\Services\SchemaManager;
 use App\Services\ObjectManager;
 
-class CollectionsController extends Controller
+class ObjectsController extends Controller
 {
-    public function ShowDashboard()
-    {
-        return view('dashboard', [
-        'selected' => 'dashboard'
-      ]);
-    }
 
     public function ShowCollection($schemaCode)
     {
@@ -23,7 +17,7 @@ class CollectionsController extends Controller
         $objectManager = new ObjectManager();
         $objects = $objectManager->all($schema);
 
-        return view('schema/list', [
+        return view('object/list', [
         'selected' => $schema->id,
         'schema' => $schema,
         'objects' => $objects
@@ -38,7 +32,7 @@ class CollectionsController extends Controller
         $objectManager = new ObjectManager();
         $object = $objectManager->find($schema, $objectCode);
 
-        return view('schema/object', [
+        return view('object/form', [
         'selected' => $schema->id,
         'schema' => $schema,
         'object' => $object
@@ -56,5 +50,40 @@ class CollectionsController extends Controller
         $object = $objectManager->save($schema, $objectCode, $fields);
       
         return redirect('/' . $schema->id . '/' . $object->id);
+    }
+
+    public function ShowCreateForm($schemaCode)
+    {
+        $schemaManager = new SchemaManager();
+        $schema = $schemaManager->find($schemaCode);
+
+        return view('object/create', [
+        'selected' => $schema->id,
+        'schema' => $schema,
+        ]);
+    }
+
+    public function CreateObject(Request $request, $schemaCode)
+    {
+        $fields = $request->except('_token');
+
+        $schemaManager = new SchemaManager();
+        $schema = $schemaManager->find($schemaCode);
+
+        $objectManager = new ObjectManager();
+        $object = $objectManager->create($schema, $fields);
+
+        return redirect('/' . $schema->id . '/' . $object->id);
+    }
+
+    public function DeleteObject(Request $request, $schemaCode, $objectCode)
+    {
+        $schemaManager = new SchemaManager();
+        $schema = $schemaManager->find($schemaCode);
+
+        $objectManager = new ObjectManager();
+        $objectManager->delete($schema, $objectCode);
+
+        return redirect('/' . $schema->id . '/');
     }
 }

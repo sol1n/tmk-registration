@@ -15,10 +15,18 @@ Route::get('/login', 'AuthController@ShowAuthForm');
 Route::post('/login', 'AuthController@ProcessLogin');
 
 Route::group(['middleware' => ['appercodeAuth']], function () {
-  Route::get('/', 'CollectionsController@ShowDashboard');
-  Route::get('/{code}/', 'CollectionsController@ShowCollection');
-  Route::get('/{code}/{object}/', 'CollectionsController@ShowObject');
-  Route::post('/{code}/{object}/', 'CollectionsController@SaveObject');
+  
+  Route::get('/', 'SchemasController@ShowDashboard');
+
+  Route::get('/schemas/new/', 'SchemasController@ShowSchemaCreateForm');
+  Route::get('/schemas/', 'SchemasController@ShowSchemaList');
+
+  Route::get('/{code}/', 'ObjectsController@ShowCollection');
+  Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');
+  Route::post('/{code}/create/', 'ObjectsController@CreateObject');
+  Route::get('/{code}/{object}/', 'ObjectsController@ShowObject');
+  Route::post('/{code}/{object}/', 'ObjectsController@SaveObject');
+  Route::get('/{code}/{object}/delete', 'ObjectsController@DeleteObject');
 });
   
 

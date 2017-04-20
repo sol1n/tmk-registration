@@ -24,6 +24,11 @@
 .table>tbody>tr>td {
   overflow-x: hidden;
 }
+
+.table>tbody>tr>td.action-cell {
+  overflow-x: visible;
+}
+
 .table>thead>tr>th {
   overflow-x: hidden;
 }
