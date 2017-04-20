@@ -16,3 +16,14 @@
     min-height: 100vh;
   }
 }
+
+.table {
+  table-layout: fixed;
+}
+
+.table>tbody>tr>td {
+  overflow-x: hidden;
+}
+.table>thead>tr>th {
+  overflow-x: hidden;
+}
