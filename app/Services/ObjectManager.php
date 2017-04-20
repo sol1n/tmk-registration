@@ -8,7 +8,7 @@ use App\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use App\Exceptions\SchemaNotFoundException;
+use App\Exceptions\Object\ObjectNotFoundException;
 
 class ObjectManager
 {
@@ -53,7 +53,15 @@ class ObjectManager
     public function find(Schema $schema, $id): Object
     {
         $objects = $this->fetchCollection($schema);
-        return $objects->where('id', $id)->first();
+        $object = $objects->where('id', $id)->first();
+        if (! is_null($object))
+        {
+            return $object;
+        }
+        else
+        {
+            throw new ObjectNotFoundException;
+        }
     }
 
     public function all(Schema $schema): Collection

@@ -8,7 +8,7 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Support\Collection;
-use App\Exceptions\SchemaNotFoundException;
+use App\Exceptions\Schema\SchemaNotFoundException;
 
 class Schema
 {

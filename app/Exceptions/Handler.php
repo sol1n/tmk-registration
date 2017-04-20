@@ -5,6 +5,8 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use App\Exceptions\Object\ObjectNotFoundException;
+use App\Exceptions\Schema\SchemaNotFoundException;
 
 class Handler extends ExceptionHandler
 {
@@ -44,6 +46,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof ObjectNotFoundException) {
+            return response()->view('errors.object.notfound');
+        }        
+        if ($exception instanceof SchemaNotFoundException) {
+            return response()->view('errors.schema.notfound');
+        }
+
         return parent::render($request, $exception);
     }
 

@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
-use App\Exceptions\ObjectSaveException;
+use App\Exceptions\Object\ObjectSaveException;
 
 class Object
 {

@@ -15,7 +15,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer(['dashboard', 'schema.*'], function($view){
+        View::composer(['dashboard', 'schema.*', 'object.*', 'errors.*'], function($view){
             
             $manager = new SchemaManager();
             $schemas = $manager->all();
