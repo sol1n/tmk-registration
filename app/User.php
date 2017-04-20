@@ -32,15 +32,15 @@ class User
         }
     }
 
-    public static function login(Request $request): User
+    public static function login($credentials): User
     {
         $url = env('APPERCODE_SERVER');
         $client = new Client;
 
         try {
             $r = $client->post($url . 'login', ['json' => [
-              'username' => $request->input('login'),
-              'password' => $request->input('password'),
+              'username' => $credentials['login'],
+              'password' => $credentials['password'],
               'installId' => '',
               'generateRefreshToken' => true
             ]]);
@@ -50,8 +50,8 @@ class User
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
-        $request->session()->put('session-token', $json['sessionId']);
-        $request->session()->put('refresh-token', $json['refreshToken']);
+        request()->session()->put('session-token', $json['sessionId']);
+        request()->session()->put('refresh-token', $json['refreshToken']);
 
         return new static();
     }

@@ -18,7 +18,7 @@ class AuthController extends Controller
     public function ProcessLogin(Request $request)
     {
         try {
-            User::login($request);
+            User::login($request->all());
         } catch (WrongCredentialsException $e) {
             $request->session()->flash('login-error', 'Wrong сredentials data');
             return redirect('/login');
