@@ -16,7 +16,7 @@ class Schema
     public $title;
     public $fields;
 
-    public static function build($data): Schema
+    public static function build(Array $data): Schema
     {
         $schema = new static();
         $schema->id = $data['id'];
@@ -28,7 +28,7 @@ class Schema
         return $schema;
     }
 
-    public static function list($token): Collection
+    public static function list(String $token): Collection
     {
         $client = new Client;
         $r = $client->get(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
@@ -45,7 +45,7 @@ class Schema
         return $result;
     }
 
-    public static function get($id, $token): Schema
+    public static function get(String $id, String $token): Schema
     {
         $client = new Client;
         try {
@@ -59,5 +59,74 @@ class Schema
         $json = json_decode($r->getBody()->getContents(), 1);
 
         return static::build($json);
+    }
+
+    public function save(Array $data, String $token): Schema
+    {
+        $changes = [];
+
+        $fields = $data['fields'];
+        unset($data['fields']);
+
+        foreach ($data as $name => $value){
+            if ($value != $this->{$name}){
+                $changes[] = [
+                    'action' => 'Change',
+                    'key' => $this->id . '.' . $name,
+                    'value' => $value
+                ];
+            }
+        }
+
+        foreach ($fields as $fieldName => $fieldData){
+            $field = [];
+            foreach ($this->fields as $key => $value){
+
+                if ($fieldName == $value['name']){
+                    $field = $value;
+                }
+            }
+
+            if ($fieldData['localized'] == 'false'){
+                $fieldData['localized'] = false;
+            }
+            else{
+                $fieldData['localized'] = true;   
+            }
+
+            foreach ($fieldData as $key => $value){
+                if ($field && $value != $field[$key])
+                {
+                    if ($key == 'name')
+                    {
+                        $changes[] = [
+                            'action' => 'Change',
+                            'key' => $this->id . '.' . $fieldName ,
+                            'value' => $value,
+                        ];  
+                    }
+                    else{
+                        $changes[] = [
+                            'action' => 'Change',
+                            'key' => $this->id . '.' . $fieldName . '.' . $key,
+                            'value' => $value,
+                            'old' => $field
+                        ];
+                    }
+                    
+                }
+            }
+        }
+
+        $client = new Client;
+        try {
+            $r = $client->put(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ], 'json' => $changes]);
+        } catch (RequestException $e) {
+            throw new SchemaNotFoundException;
+        };
+
+        return self::get($this->id, $token);
     }
 }

@@ -51,6 +51,21 @@ class SchemaManager
         return Schema::get($id, $this->user->token());
     }
 
+    public function save(String $id, Array $fields): Schema
+    {
+        $schema = $this->find($id);
+        $schema = $schema->save($fields, $this->user->token());
+
+        $index = $this->list->search(function ($item, $key) use ($id) {
+            return $item->id == $id;
+        });
+
+        $this->list->put($index, $schema);
+        $this->saveToCache($this->list);
+
+        return $schema;
+    }
+
     public function all()
     {
         return $this->list;

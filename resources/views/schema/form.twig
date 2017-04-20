@@ -1,0 +1,91 @@
+{% extends "page.twig" %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>Edit {{ schema.title }}</h5>
+    </div>
+
+    <div class="ibox-content">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/schemas/{{ schema.id }}/edit/" method="post">
+        {{ csrf_field() }}
+
+        <div class="form-group">
+          <label class="col-sm-2 control-label">Title</label>
+          <div class="col-sm-10">
+            <input name="title" id="title" type="text" class="form-control" value="{{ schema.title }}">
+          </div>
+        </div>
+
+        <table class="table">
+          <thead>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th class="text-center">Localized</th>
+          </thead>
+          <tbody>
+            {% for field in schema.fields %}
+              <tr data-id="{{ field.name }}">
+                <td contenteditable>{{ field.name }}</td>
+                <td contenteditable>{{ field.title }}</td>
+                <td>{{ field.type }}</td>
+                <td class="text-center">
+                  {% if (field.localized) %}
+                    <input class="tableCheckbox" type="checkbox" checked=""/>
+                  {% else %}
+                    <input class="tableCheckbox" type="checkbox" />
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-success">Save</button>
+        <button type="submit" class="btn btn-success">Apply</button>
+
+        <a href="/schemas/" class="btn btn-default pull-right">Back</a>
+      </form>
+    </div>
+  </div>
+{% endblock %}
+
+{% block additionalJs %}
+  <script type="text/javascript">
+    $('form').on('submit', function(){
+      var data = {};
+      data.fields = {};
+      var form = $(this);
+      form.find('input').each(function(){
+        if (!$(this).hasClass('tableCheckbox')){
+          data[$(this).attr('name')] = $(this).val();
+        }
+      });
+
+      var table = $('table tbody');
+      table.find('tr').each(function(){
+        var index = $(this).data('id');
+        data.fields[index] = {
+          name: $(this).find('td').eq(0).text(),
+          title: $(this).find('td').eq(1).text(),
+          type: $(this).find('td').eq(2).text(),
+          localized: $(this).find('td').eq(3).find('input:checked').length > 0
+        }
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/schemas/{{ schema.id }}/edit/",
+        data: data,
+        dataType: 'json',
+        success: function(msg){
+          document.location.reload();
+        }
+      });
+
+      return false;
+    })
+  </script>
+{% endblock %}
