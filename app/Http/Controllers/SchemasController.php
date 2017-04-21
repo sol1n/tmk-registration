@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\SchemaManager;
-use App\Services\ObjectManager;
 
 class SchemasController extends Controller
 {
@@ -22,11 +21,31 @@ class SchemasController extends Controller
       ]);
     }
 
-
     public function ShowSchemaCreateForm()
     {
         return view('schema/create', [
         'selected' => 'schema-new',
       ]);
+    }
+
+    public function ShowSchemaEditForm($schemaCode)
+    {
+        $manager = new SchemaManager;
+        $schema = $manager->find($schemaCode);
+
+        return view('schema/form', [
+        'selected' => $schema->id,
+        'schema' => $schema
+      ]);
+    }
+
+    public function EditSchema(Request $request, $schemaCode)
+    {
+        $manager = new SchemaManager;
+
+        $data = $request->except('_token');
+        $schema = $manager->save($schemaCode, $data);
+
+        return response()->json(['status' => 'saved']);        
     }
 }
