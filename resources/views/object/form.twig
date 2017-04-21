@@ -1,5 +1,25 @@
 {% extends "page.twig" %}
 
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ schema.title }} elements</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/schemas/">All schemas</a>
+        </li>        
+        <li>
+            <a href="/{{ schema.id }}">{{ schema.title }}</a>
+        </li>
+        <li class="active">
+            <strong>{{ object.id }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">

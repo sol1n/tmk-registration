@@ -15,9 +15,9 @@
     {% endblock %}
 
     <div id="page-wrapper" class="gray-bg">
-      {% block header %}
-        {% include "blocks/header.twig" %}
-      {% endblock %}
+        <nav class="row wrapper border-bottom white-bg page-heading">
+          {% block breadcrumbs %}{% endblock %}
+        </nav>
       
       <div class="wrapper wrapper-content">
         {% block content %}
