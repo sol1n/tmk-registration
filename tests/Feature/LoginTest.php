@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\User;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
@@ -17,7 +18,12 @@ class LoginTest extends TestCase
 
     public function testNoRedirectWithSession()
     {
-        $this->withSession(['session-token' => env('TEST_TOKEN')]);
+        $user = User::Login([
+            'login' => env('TEST_LOGIN'),
+            'password' => env('TEST_PASSWORD')
+        ], false);
+
+        $this->withSession(['session-token' => $user->token()]);
 
         $response = $this->get('/');
 
