@@ -10,83 +10,82 @@ use App\Exceptions\Object\ObjectNotFoundException;
 
 class ObjectsTest extends TestCase
 {
+    private $schemaManager;
+    private $objectManager;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $user = User::Login([
+            'login' => env('TEST_LOGIN'),
+            'password' => env('TEST_PASSWORD')
+        ], false);
+
+        $this->withSession(['session-token' => $user->token()]);
+        $this->objectManager = new ObjectManager;
+        $this->schemaManager = new SchemaManager;
+    }
+
     public function testCanFindObject()
     {
-        $this->withSession(['session-token' => env('TEST_TOKEN')]);
-
-        $schemaManager = new SchemaManager;
-        $objectManager = new ObjectManager;
-
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
 
-        $schema = $schemaManager->find($schemaName);
-        $object = $objectManager->create($schema, $fields);
+        $schema = $this->schemaManager->find($schemaName);
+        $object = $this->objectManager->create($schema, $fields);
 
         $id = $object->id;
 
-        $wantedObject = $objectManager->Find($schema, $id);
+        $wantedObject = $this->objectManager->find($schema, $id);
 
         $this->assertEquals($id, $wantedObject->id);
+
+        $this->objectManager->delete($schema, $id);
     }
 
     public function testCanCreateObject()
     {
-        $this->withSession(['session-token' => env('TEST_TOKEN')]);
-
-        $schemaManager = new SchemaManager;
-        $objectManager = new ObjectManager;
-
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
 
-        $schema = $schemaManager->find($schemaName);
-        $object = $objectManager->create($schema, $fields);
+        $schema = $this->schemaManager->find($schemaName);
+        $object = $this->objectManager->create($schema, $fields);
 
         $this->assertTrue(! empty($object->id));
 
-        $objectManager->delete($schema, $object->id);
+        $this->objectManager->delete($schema, $object->id);
     }
 
     public function testCanDeleteObject()
     {
-        $this->withSession(['session-token' => env('TEST_TOKEN')]);
-
-        $schemaManager = new SchemaManager;
-        $objectManager = new ObjectManager;
 
         $this->expectException(ObjectNotFoundException::class);
 
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
 
-        $schema = $schemaManager->find($schemaName);
-        $object = $objectManager->create($schema, $fields);
+        $schema = $this->schemaManager->find($schemaName);
+        $object = $this->objectManager->create($schema, $fields);
 
         $id = $object->id;
 
-        $objectManager->delete($schema, $id);
-
-        $objectManager->find($schema, $id);
+        $this->objectManager->delete($schema, $id);
+        $this->objectManager->find($schema, $id);
     }
 
     public function testCanSaveObject()
     {
-        $this->withSession(['session-token' => env('TEST_TOKEN')]);
-
-        $schemaManager = new SchemaManager;
-        $objectManager = new ObjectManager;
-
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
         $updatedFields = ['userId' => 1, 't' => '', 't2' => '', 't3' => '', 'test' => null];
 
-        $schema = $schemaManager->find($schemaName);
-        $object = $objectManager->create($schema, $fields);
-        $object = $objectManager->save($schema, $object->id, $updatedFields);
+        $schema = $this->schemaManager->find($schemaName);
+        $object = $this->objectManager->create($schema, $fields);
+        $object = $this->objectManager->save($schema, $object->id, $updatedFields);
 
         $this->assertEquals(1, $object->fields['userId']);
 
-        $objectManager->delete($schema, $object->id);
+        $this->objectManager->delete($schema, $object->id);
     }
 }

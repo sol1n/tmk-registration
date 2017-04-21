@@ -12,20 +12,20 @@ use App\Exceptions\Object\ObjectNotFoundException;
 
 class ObjectManager
 {
-    private $user;
+    private $token;
 
     const CACHE_ID = 'objects';
     const CACHE_LIFETIME = 60;
 
     public function __construct()
     {
-        $this->user = new User;
+        $user = new User;
+        $this->token = $user->token();
     }
 
     private function saveCollectionToCache(Schema $schema, $data)
     {
         $cacheId = self::CACHE_ID . '-' . $schema->id;
-
         Cache::put($cacheId, $data, self::CACHE_LIFETIME);
     }
 
@@ -44,7 +44,7 @@ class ObjectManager
     {
         $objects = $this->getCollectionFromCache($schema);
         if (is_null($objects)) {
-            $objects = Object::list($schema, $this->user->token());
+            $objects = Object::list($schema, $this->token);
             $this->saveCollectionToCache($schema, $objects);
         }
         return $objects;
@@ -79,7 +79,7 @@ class ObjectManager
         });
 
         $object = $objects->get($index);
-        $object->save($fields, $this->user->token());
+        $object->save($fields, $this->token);
         $objects->put($index, $object);
 
         $this->saveCollectionToCache($schema, $objects);
@@ -89,7 +89,7 @@ class ObjectManager
 
     public function create(Schema $schema, array $fields): Object
     {
-        $object = Object::create($schema, $fields, $this->user->token());
+        $object = Object::create($schema, $fields, $this->token);
         $objects = $this->fetchCollection($schema);
         $objects->push($object);
 
@@ -101,7 +101,7 @@ class ObjectManager
     public function delete(Schema $schema, $id)
     {
         $object = $this->find($schema, $id);
-        $object->delete($this->user->token());
+        $object->delete($this->token);
 
         $objects = $this->fetchCollection($schema);
 
