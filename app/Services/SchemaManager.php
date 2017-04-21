@@ -26,6 +26,13 @@ class SchemaManager
         }
     }
 
+    public static function fieldTypes(): Array
+    {
+        return [
+            'Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json', 'ref Users'
+        ];
+    }
+
     private function getFromCache()
     {
         if (Cache::has(self::CACHE_ID)) {

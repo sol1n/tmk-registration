@@ -35,7 +35,8 @@ class SchemasController extends Controller
 
         return view('schema/form', [
         'selected' => $schema->id,
-        'schema' => $schema
+        'schema' => $schema,
+        'fieldTypes' => SchemaManager::fieldTypes()
       ]);
     }
 

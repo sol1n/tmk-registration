@@ -78,7 +78,7 @@ class Schema
             }
         }
 
-        foreach ($fields as $fieldName => $fieldData){
+        foreach ($fields as $fieldName => &$fieldData){
             $field = [];
             foreach ($this->fields as $key => $value){
 
@@ -90,8 +90,11 @@ class Schema
             if ($fieldData['localized'] == 'false'){
                 $fieldData['localized'] = false;
             }
-            else{
+            elseif ($fieldData['localized'] == 'true'){
                 $fieldData['localized'] = true;   
+            }
+            else{
+                $fieldData['localized'] = false;
             }
 
             foreach ($fieldData as $key => $value){
@@ -105,12 +108,23 @@ class Schema
                             'value' => $value,
                         ];  
                     }
+                    elseif ($key == 'type')
+                    {
+                        $changes[] = [
+                            'action' => 'Delete',
+                            'key' => $this->id . '.' . $fieldName ,
+                        ];
+                        $changes[] = [
+                            'action' => 'New',
+                            'key' => $this->id,
+                            'value' => $fieldData
+                        ];
+                    }
                     else{
                         $changes[] = [
                             'action' => 'Change',
                             'key' => $this->id . '.' . $fieldName . '.' . $key,
                             'value' => $value,
-                            'old' => $field
                         ];
                     }
                     

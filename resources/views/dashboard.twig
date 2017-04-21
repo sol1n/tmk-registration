@@ -21,14 +21,14 @@
             <tr>
               <td>{{ schema.id }}</td>
               <td>{{ schema.title }}</td>
-              <td>
+              <td class="action-cell">
                 <div class="input-group-btn text-right">
                     <a href="/{{ schema.id }}/" tabindex="-1" class="btn btn-white" type="button">List elements</a>
                      <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
                       <ul class="dropdown-menu pull-right">
                           <li><a href="/{{ schema.id }}/">List elements</a></li>
-                          <li><a href="/{{ schema.id }}/edit">Edit</a></li>
-                          <li><a href="/{{ schema.id }}/delete">Delete</a></li>
+                          <li><a href="/schemas/{{ schema.id }}/edit">Edit schema</a></li>
+                          <li><a href="/schemas/{{ schema.id }}/delete">Delete schema</a></li>
                       </ul>
                 </div>
               </td>

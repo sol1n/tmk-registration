@@ -7,7 +7,7 @@
   color: #fefefe;
 }
 
-.nav>li>a{
+.navbar-static-side .nav>li>a{
   color: #fefefe;
 }
 
@@ -40,4 +40,40 @@
 .error-message {
   text-align: center;
   margin-top: 40vh;
+}
+
+.tab-pane-padding {
+  padding: 30px 0 0;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.table {
+  font-size: 13px;
+}
+
+.schema-fields-table {
+  margin-top: 10px;
+}
+
+.table .form-control {
+  padding: 5px;
+  height: 30px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: #2994ea;
+  border-color: #2994ea;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: #2082d0;
+  border-color: #2082d0;
+}
+
+.form-control:focus, .single-line:focus {
+  border-color: #2994ea!important;
 }
