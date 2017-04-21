@@ -5,8 +5,8 @@ namespace App;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use App\Exceptions\UnAuthorizedException;
-use App\Exceptions\WrongCredentialsException;
+use App\Exceptions\User\UnAuthorizedException;
+use App\Exceptions\User\WrongCredentialsException;
 
 class User
 {
@@ -32,7 +32,7 @@ class User
         }
     }
 
-    public static function login($credentials): User
+    public static function login(Array $credentials, Bool $storeSession = true): User
     {
         $url = env('APPERCODE_SERVER');
         $client = new Client;
@@ -50,9 +50,22 @@ class User
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
-        request()->session()->put('session-token', $json['sessionId']);
-        request()->session()->put('refresh-token', $json['refreshToken']);
+        $user = new Static();
+        $user->token = $json['sessionId'];
+        $user->refreshToken = $json['refreshToken'];
 
-        return new static();
+        if ($storeSession)
+        {
+            $user->storeSession();
+        }
+
+        return $user;
+    }
+
+    public function storeSession(): User
+    {
+        request()->session()->put('session-token', $this->token);
+        request()->session()->put('refresh-token', $this->refreshToken);
+        return $this;
     }
 }

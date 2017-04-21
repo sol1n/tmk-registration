@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\User;
 use Illuminate\Http\Request;
-use App\Exceptions\WrongCredentialsException;
+use App\Exceptions\User\WrongCredentialsException;
 
 class AuthController extends Controller
 {
