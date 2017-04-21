@@ -10,17 +10,18 @@ use Illuminate\Support\Collection;
 class SchemaManager
 {
     private $list;
-    private $user;
+    private $token;
 
     const CACHE_ID = 'schemas';
     const CACHE_LIFETIME = 20;
 
     public function __construct()
     {
-        $this->user = new User;
+        $user = new User;
+        $this->token = $user->token();
 
         if (! $this->list = $this->getFromCache()) {
-            $this->list = Schema::list($this->user->token());
+            $this->list = Schema::list($this->token);
             $this->saveToCache($this->list);
         }
     }
@@ -48,7 +49,22 @@ class SchemaManager
             }
         }
 
-        return Schema::get($id, $this->user->token());
+        return Schema::get($id, $this->token);
+    }
+
+    public function save(String $id, Array $fields): Schema
+    {
+        $schema = $this->find($id);
+        $schema = $schema->save($fields, $this->token);
+
+        $index = $this->list->search(function ($item, $key) use ($id) {
+            return $item->id == $id;
+        });
+
+        $this->list->put($index, $schema);
+        $this->saveToCache($this->list);
+
+        return $schema;
     }
 
     public function all()

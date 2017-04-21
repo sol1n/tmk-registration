@@ -20,6 +20,8 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
 
   Route::get('/schemas/new/', 'SchemasController@ShowSchemaCreateForm');
   Route::get('/schemas/', 'SchemasController@ShowSchemaList');
+  Route::get('/schemas/{code}/edit', 'SchemasController@ShowSchemaEditForm');
+  Route::post('/schemas/{code}/edit', 'SchemasController@EditSchema');
 
   Route::get('/{code}/', 'ObjectsController@ShowCollection');
   Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');
