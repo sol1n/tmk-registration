@@ -34,7 +34,13 @@
           <tr>
             <th>#</th>
             {% for field in schema.fields %}
-              <th>{{ field.name }}</th>
+              <th>
+                {% if field.title %}
+                  {{ field.title }}
+                {% else %}
+                  {{ field.name }}
+                {% endif %}
+              </th>
             {% endfor %}
             <th class="text-right">Actions</th>
           </tr>

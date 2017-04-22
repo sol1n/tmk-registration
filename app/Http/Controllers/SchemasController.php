@@ -44,9 +44,20 @@ class SchemasController extends Controller
     {
         $manager = new SchemaManager;
 
-        $data = $request->except('_token');
+        $action = $request->input('action');
+
+        $data = $request->except(['_token', 'action']);
+        $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
+        $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
         $schema = $manager->save($schemaCode, $data);
 
-        return response()->json(['status' => 'saved']);        
+        if ($action == 'save')
+        {
+            return response()->json(['status' => 'saved', 'action' => 'redirect', 'url' => '/schemas/']);
+        }
+        else
+        {
+            return response()->json(['status' => 'saved', 'action' => 'reload']);
+        }
     }
 }

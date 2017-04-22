@@ -41,7 +41,7 @@ class ObjectsController extends Controller
 
     public function SaveObject(Request $request, $schemaCode, $objectCode)
     {
-        $fields = $request->except('_token');
+        $fields = $request->except(['_token', 'action']);
 
         $schemaManager = new SchemaManager();
         $schema = $schemaManager->find($schemaCode);
@@ -49,7 +49,15 @@ class ObjectsController extends Controller
         $objectManager = new ObjectManager();
         $object = $objectManager->save($schema, $objectCode, $fields);
       
-        return redirect('/' . $schema->id . '/' . $object->id);
+        if ($request->input('action') == 'save')
+        {
+            return redirect('/' . $schema->id . '/');    
+        }
+        else
+        {
+            return redirect('/' . $schema->id . '/' . $object->id);
+        }
+        
     }
 
     public function ShowCreateForm($schemaCode)
