@@ -208,7 +208,7 @@
         data: data,
         dataType: 'json',
         success: function(msg){
-          if (msg.status == 'saved'){
+          if (msg.status == 'success'){
             if (msg.action == 'redirect'){
               document.location.href = msg.url;
             }

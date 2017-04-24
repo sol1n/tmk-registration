@@ -9,6 +9,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use Illuminate\Support\Collection;
 use App\Exceptions\Schema\SchemaSaveException;
+use App\Exceptions\Schema\SchemaCreateException;
+use App\Exceptions\Schema\SchemaDeleteException;
 use App\Exceptions\Schema\SchemaNotFoundException;
 
 class Schema
@@ -121,6 +123,39 @@ class Schema
         return $changes;
     }
 
+    public static function create(Array $data, $token): Schema
+    {
+        $fields = [
+            "id" => (String)$data['name'],
+            "title" => (String)$data['title'],
+            "isLogged" => $data['isLogged'],
+            "isDeferredDeletion" => $data['isDeferredDeletion'],
+            "fields" => []
+        ];
+
+        foreach ($data['fields'] as $field)
+        {
+            $fields['fields'][] = [
+                "localized" => $field['localized'] == "true",
+                "name" => (String)$field['name'],
+                "type" => (String)$field['type'],
+                "title" => (String)$field['title']
+            ];
+        }
+
+        $client = new Client;
+        try {
+            $r = $client->post(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ], 'json' => $fields]);
+        } catch (RequestException $e) {
+            throw new SchemaCreateException;
+        };
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+        return self::build($json);
+    }
+
     public static function build(Array $data): Schema
     {
         $schema = new static();
@@ -182,5 +217,19 @@ class Schema
         };
 
         return self::get($this->id, $token);
+    }
+
+    public function delete(String $token): Bool
+    {
+        $client = new Client;
+        try {
+            $r = $client->delete(env('APPERCODE_SERVER')  . 'schemas/' . $this->id, ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ]]);
+        } catch (RequestException $e) {
+            throw new SchemaDeleteException;
+        };
+
+        return true;
     }
 }

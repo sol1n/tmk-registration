@@ -68,13 +68,46 @@ class SchemaManager
             return $item->id == $id;
         });
 
+        if ($index === false)
+        {
+            throw new SchemaNotFoundException;
+        }
+
         $this->list->put($index, $schema);
         $this->saveToCache($this->list);
 
         return $schema;
     }
 
-    public function all()
+    public function create(Array $data): Schema
+    {
+        $schema = Schema::create($data, $this->token);
+        $this->list->push($schema);
+        $this->saveToCache($this->list);
+
+        return $schema;
+    }
+
+    public function delete(String $id): Collection
+    {
+        $index = $this->list->search(function ($item, $key) use ($id) {
+            return $item->id == $id;
+        });
+
+        if ($index === false)
+        {
+            throw new SchemaNotFoundException;
+        }
+
+        $this->list->get($index)->delete($this->token);
+
+        $this->list->forget($index);
+        $this->saveToCache($this->list);
+        
+        return $this->list;
+    }
+
+    public function all(): Collection
     {
         return $this->list;
     }

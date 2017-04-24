@@ -3,15 +3,12 @@
     <ul class="nav metismenu">
 
       <li class="nav-header">
-        <div class="dropdown profile-element"> 
-          
-        </div>
+        <h3 class="application-title">Test</h3>
       </li>
       <li {% if selected == 'dashboard' %}class="active"{% endif %}>
         <a href="/"><span class="nav-label">Dashboard</span></a>
       </li>
     </ul>
-
 
     <ul class="nav metismenu" id="collections-list">
       <li>
@@ -25,12 +22,10 @@
         </a
       </li>
 
-
       {% for schema in schemas %}
-
-      <li {% if selected == schema.id %}class="active"{% endif %}>
-        <a href="/{{ schema.id }}/"><span class="nav-label">{{ schema.id }}</span></a>
-      </li>
+        <li {% if selected == schema.id %}class="active"{% endif %}>
+          <a href="/{{ schema.id }}/"><span class="nav-label">{{ schema.id }}</span></a>
+        </li>
       {% endfor %}
     </ul>
     <ul class="nav metismenu">

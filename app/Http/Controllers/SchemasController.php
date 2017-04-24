@@ -25,7 +25,29 @@ class SchemasController extends Controller
     {
         return view('schema/create', [
         'selected' => 'schema-new',
+        'fieldTypes' => SchemaManager::fieldTypes()
       ]);
+    }
+
+    public function NewSchema(Request $request)
+    {
+        $manager = new SchemaManager;
+
+        $action = $request->input('action');
+        $data = $request->except(['_token', 'action']);
+        $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
+        $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
+
+        $schema = $manager->create($data);
+
+        if ($action == 'save')
+        {
+            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/schemas/']);
+        }
+        else
+        {
+            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/schemas/' . $schema->id . '/edit/']);
+        }
     }
 
     public function ShowSchemaEditForm($schemaCode)
@@ -45,7 +67,6 @@ class SchemasController extends Controller
         $manager = new SchemaManager;
 
         $action = $request->input('action');
-
         $data = $request->except(['_token', 'action']);
         $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
         $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
@@ -53,11 +74,19 @@ class SchemasController extends Controller
 
         if ($action == 'save')
         {
-            return response()->json(['status' => 'saved', 'action' => 'redirect', 'url' => '/schemas/']);
+            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/schemas/']);
         }
         else
         {
-            return response()->json(['status' => 'saved', 'action' => 'reload']);
+            return response()->json(['status' => 'success', 'action' => 'reload']);
         }
+    }
+
+    public function DeleteSchema($schemaCode)
+    {
+        $manager = new SchemaManager;
+        $manager->delete($schemaCode);
+
+        return redirect('/schemas/');
     }
 }
