@@ -35,9 +35,6 @@ class Schema
     {
         $changes = [];
 
-        $fields = $data['fields'];
-        unset($data['fields']);
-
         if (isset($data['deletedFields']))
         {
             $deletedFields = $data['deletedFields'];
@@ -65,50 +62,55 @@ class Schema
             }
         }
         
-        foreach ($fields as $fieldName => &$fieldData){
-            $field = [];
-            $fieldData = $this->prepareField($fieldData);
-            foreach ($this->fields as $key => $value){
+        if (isset($data['fields'])){
+            $fields = $data['fields'];
+            unset($data['fields']);
+            foreach ($fields as $fieldName => &$fieldData){
+                $field = [];
+                $fieldData = $this->prepareField($fieldData);
+                foreach ($this->fields as $key => $value){
 
-                if ($fieldName == $value['name']){
-                    $field = $value;
+                    if ($fieldName == $value['name']){
+                        $field = $value;
+                    }
                 }
-            }
 
-            foreach ($fieldData as $key => $value){
-                if ($field && $value != $field[$key])
-                {
-                    if ($key == 'name')
+                foreach ($fieldData as $key => $value){
+                    if ($field && $value != $field[$key])
                     {
-                        $changes[] = [
-                            'action' => 'Change',
-                            'key' => $this->id . '.' . $fieldName ,
-                            'value' => $value,
-                        ];  
+                        if ($key == 'name')
+                        {
+                            $changes[] = [
+                                'action' => 'Change',
+                                'key' => $this->id . '.' . $fieldName ,
+                                'value' => $value,
+                            ];  
+                        }
+                        elseif ($key == 'type')
+                        {
+                            $changes[] = [
+                                'action' => 'Delete',
+                                'key' => $this->id . '.' . $fieldName ,
+                            ];
+                            $changes[] = [
+                                'action' => 'New',
+                                'key' => $this->id,
+                                'value' => $fieldData
+                            ];
+                        }
+                        else{
+                            $changes[] = [
+                                'action' => 'Change',
+                                'key' => $this->id . '.' . $fieldName . '.' . $key,
+                                'value' => $value,
+                            ];
+                        }
+                        
                     }
-                    elseif ($key == 'type')
-                    {
-                        $changes[] = [
-                            'action' => 'Delete',
-                            'key' => $this->id . '.' . $fieldName ,
-                        ];
-                        $changes[] = [
-                            'action' => 'New',
-                            'key' => $this->id,
-                            'value' => $fieldData
-                        ];
-                    }
-                    else{
-                        $changes[] = [
-                            'action' => 'Change',
-                            'key' => $this->id . '.' . $fieldName . '.' . $key,
-                            'value' => $value,
-                        ];
-                    }
-                    
                 }
             }
         }
+        
 
         foreach ($data as $name => $value){
             if ($value != $this->{$name}){

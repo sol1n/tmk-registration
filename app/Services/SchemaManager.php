@@ -48,7 +48,7 @@ class SchemaManager
     }
 
 
-    public function find($id): Schema
+    public function find(String $id): Schema
     {
         foreach ($this->list as $schema) {
             if ($schema->id == $id) {
