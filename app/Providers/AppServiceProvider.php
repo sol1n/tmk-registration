@@ -31,13 +31,13 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('App\Settings', function($app){
-            return new Settings(request()->user->token());
+            return new Settings();
         });
 
         $this->app->singleton('App\Services\SchemaManager', function($app){
             return new SchemaManager();
         });
-        
+
         $this->app->singleton('App\Services\ObjectManager', function($app){
             return new ObjectManager();
         });
