@@ -1,16 +1,30 @@
 {% extends "page.twig" %}
 
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>Schemas list</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li class="active">
+            <strong>All schemas</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
     <div class="ibox-title">
-      <h5>Collections list</h5>
+      <h5>Schemas list</h5>
     </div>
 
     <div class="ibox-content">
 
       <div class="buttons-group">
-        <a class="btn btn-primary" href="/{{ schema.id }}/create/">New schema</a>
+        <a class="btn btn-primary" href="/schemas/new/">New schema</a>
       </div>
 
       <table class="table">

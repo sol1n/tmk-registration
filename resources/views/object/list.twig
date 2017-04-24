@@ -1,5 +1,22 @@
 {% extends "page.twig" %}
 
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ schema.title }} elements</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/schemas/">All schemas</a>
+        </li>
+        <li class="active">
+            <strong>{{ schema.title }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
@@ -17,7 +34,13 @@
           <tr>
             <th>#</th>
             {% for field in schema.fields %}
-              <th>{{ field.name }}</th>
+              <th>
+                {% if field.title %}
+                  {{ field.title }}
+                {% else %}
+                  {{ field.name }}
+                {% endif %}
+              </th>
             {% endfor %}
             <th class="text-right">Actions</th>
           </tr>

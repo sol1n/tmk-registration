@@ -1,47 +1,221 @@
 {% extends "page.twig" %}
 
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>Schemas list</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>          
+        <li>
+            <a href="/schemas/">All schemas</a>
+        </li>        
+        <li class="active">
+            <strong>New schema</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
     <div class="ibox-title">
-      {% if object.title %}
-        <h5>{{ object.title }}</h5>
-      {% else %}
-        <h5>{{ object.id }}</h5>
-      {% endif %}
+      <h5>New schema</h5>
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/{{ object.id }}" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/new/" method="post">
         {{ csrf_field() }}
+        <input type="hidden" name="action" value="save" />
 
-        {% for field in schema.fields %}
-          <div class="form-group">
-            {% if field.title %}
-              <label class="col-sm-2 control-label">{{ field.title }}</label>
-            {% else %}
-              <label class="col-sm-2 control-label">{{ field.name }}</label>
-            {% endif %}
-              <div class="col-sm-10">
-                {% if field.type == "String" %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% elseif field.type == "Json" %}
-                  <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
-                {% elseif field.type == "Integer" %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% else %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% endif %}
+        <div class="tabs-container">
+          <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#tab-settings">Schema settings</a></li>
+              <li class=""><a data-toggle="tab" href="#tab-fields">Schema fields</a></li>
+          </ul>
+
+          <div class="tab-content">
+
+            <div class="tab-pane tab-pane-padding active" id="tab-settings">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                  <input name="name" id="title" type="text" class="form-control" value="" required>
+                </div>
+              </div>              
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Title</label>
+                <div class="col-sm-10">
+                  <input name="title" id="title" type="text" class="form-control" value="">
+                </div>
               </div>
-          </div>  
-        {% endfor %}
 
-        <button type="submit" class="btn btn-success">Save</button>
-        <button type="submit" class="btn btn-success">Apply</button>
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Deferred deletion</label>
+
+                <div class="col-sm-10">
+                  <label style="padding-top: 7px"> <input type="checkbox" name="isDeferredDeletion"></label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Logged</label>
+
+                <div class="col-sm-10">
+                  <label style="padding-top: 7px"> <input type="checkbox" name="isLogged"></label>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane tab-pane-padding" id="tab-fields">
+              <div class="button-group">
+                <button class="btn btn-primary btn-sm" data-add-row>Add new field</button>
+              </div>
+
+              <table class="table schema-fields-table">
+                <thead>
+                  <th>Name</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th class="text-center">Localized</th>
+                  <th class="text-center">Delete</th>
+                </thead>
+                <tbody>
+                  <tr data-id="new">
+                    <td contenteditable>NewField</td>
+                    <td contenteditable></td>
+                    <td>
+                      <select class="form-control">
+                        {% for type in fieldTypes %}
+                          <option value="{{ type }}">{{ type }}</option>
+                        {% endfor %}
+                      </select>
+                    </td>
+                    <td class="text-center">
+                      <input class="tableCheckbox" type="checkbox" />
+                    </td>
+                    <td class="text-center">
+                      <a href="#delete-row" data-delete-row>
+                        delete field
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+        <hr/>
+
+        <button type="submit" name="action" value="save" class="btn btn-success">Save schema</button>
+        <button type="submit" name="action" value="apply" class="btn btn-success">Apply changes</button>
 
         <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
       </form>
     </div>
   </div>
 
+{% endblock %}
+
+{% block additionalJs %}
+  <script type="text/javascript">
+    $('[data-add-row]').on('click', function(){
+      var table = $('table tbody');
+      var canAddRow = true;
+      table.find('tr').each(function(){
+        var tr = $(this);
+        if (tr.find('td').eq(0).text() == 'NewField'){
+          canAddRow = false;
+        }
+      });
+      if (canAddRow){
+        if (table.find('tr:last').length){
+          var tr = table.find('tr:last').clone();
+        }
+        else{
+          var tr = window.deletedRow;
+        }
+        tr.find('td').eq(0).text('NewField');
+        tr.find('td').eq(1).text('');
+        tr.find('td').eq(2).find('select').val('Text');
+        tr.find('td').eq(3).find('input').prop('checked', false);
+        tr.attr('data-id', 'new');
+        tr.appendTo(table);
+      }
+      return false;
+    });
+
+    $(document).on('click', '[data-delete-row]', function(){
+      var row = $(this).parents('tr');
+      window.deletedRow = row.detach();
+      return false;
+    });
+
+    $('button[type=submit]').on('click', function(){
+      var action = $(this).val();
+      $('input[name=action]').val(action);
+    });
+
+    $('form').on('submit', function(){
+      var data = {};
+      data.fields = [];
+      var form = $(this);
+      form.find('input').each(function(){
+        if (!$(this).hasClass('tableCheckbox')){
+          if ($(this).attr('type') == 'checkbox'){
+            data[$(this).attr('name')] = $(this).is(':checked'); 
+          }
+          else{
+            data[$(this).attr('name')] = $(this).val();
+            if (! $(this).val() && $(this).attr('required')){
+              $(this).focus();
+              return data = false;
+            }
+          }
+        }
+      });
+
+      var table = $('table tbody');
+      if ((data === false) || table.find('tr').length == 0){
+        return false;
+      }
+
+      table.find('tr').each(function(){
+        var row = {
+          name: $(this).find('td').eq(0).text(),
+          title: $(this).find('td').eq(1).text(),
+          type: $(this).find('td').eq(2).find('select').val(),
+          localized: $(this).find('td').eq(3).find('input:checked').length > 0,
+        };
+
+        data.fields.push(row);
+      });
+
+      $.ajax({
+        type: "POST",
+        url: "/schemas/new/",
+        data: data,
+        dataType: 'json',
+        success: function(msg){
+          if (msg.status == 'success'){
+            if (msg.action == 'redirect'){
+              document.location.href = msg.url;
+            }
+            else{
+              document.location.reload();
+            }
+          }
+          else{
+            alert('Saving error');
+          }
+        }
+      });
+
+      return false;
+    })
+  </script>
 {% endblock %}

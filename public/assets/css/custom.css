@@ -1,14 +1,20 @@
 #collections-list>li>a {
-  font-weight: normal;
+  font-weight: 500;
   color: #a7b1c2;
 }
 
 #collections-list>li>a>b{
   color: #fefefe;
+  font-weight: 600;
 }
 
-.nav>li>a{
+.navbar-static-side .nav>li>a{
   color: #fefefe;
+  padding: 8px 20px 8px 25px;
+}
+
+.nav-header {
+  margin-bottom: 15px;
 }
 
 @media (min-width: 768px){
@@ -40,4 +46,57 @@
 .error-message {
   text-align: center;
   margin-top: 40vh;
+}
+
+.tab-pane-padding {
+  padding: 30px 0 0;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.table {
+  font-size: 13px;
+}
+
+.schema-fields-table {
+  margin-top: 10px;
+}
+
+.table .form-control {
+  padding: 5px;
+  height: 30px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: #2994ea;
+  border-color: #2994ea;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: #2082d0;
+  border-color: #2082d0;
+}
+
+.btn-default {
+  background-color: #fff;
+  border-color: #c2c2c2;
+  color: #333;
+}
+
+.btn-default:hover, .btn-default:active, .btn-default:focus {
+  border-color: #a0a0a0;
+  background-color: #fff;
+  color: #333;
+}
+
+.form-control:focus, .single-line:focus {
+  border-color: #2994ea!important;
+}
+
+.application-title {
+  color: #fff;
+  margin-bottom: 6px;
 }

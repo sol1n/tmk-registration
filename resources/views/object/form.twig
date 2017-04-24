@@ -1,5 +1,25 @@
 {% extends "page.twig" %}
 
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ schema.title }} elements</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/schemas/">All schemas</a>
+        </li>        
+        <li>
+            <a href="/{{ schema.id }}">{{ schema.title }}</a>
+        </li>
+        <li class="active">
+            <strong>{{ object.id }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
@@ -36,8 +56,10 @@
           </div>  
         {% endfor %}
 
-        <button type="submit" class="btn btn-success">Save</button>
-        <button type="submit" class="btn btn-success">Apply</button>
+        <hr/>
+
+        <button type="submit" name="action" value="save" class="btn btn-primary">Save object</button>
+        <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
 
         <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
       </form>
