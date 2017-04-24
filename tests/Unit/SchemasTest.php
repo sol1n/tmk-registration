@@ -43,7 +43,7 @@ class SchemasTest extends TestCase
         ], false);
 
         $this->withSession(['session-token' => $user->token()]);
-        $this->schemaManager = new SchemaManager;
+        $this->schemaManager = app(SchemaManager::class);
     }
 
     public function test_fail_on_find_schema_with_wrong_name()

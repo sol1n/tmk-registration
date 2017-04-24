@@ -31,14 +31,12 @@ class SchemasController extends Controller
 
     public function NewSchema(Request $request)
     {
-        $manager = new SchemaManager;
-
         $action = $request->input('action');
         $data = $request->except(['_token', 'action']);
         $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
         $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
 
-        $schema = $manager->create($data);
+        $schema = app(SchemaManager::class)->create($data);
 
         if ($action == 'save')
         {
@@ -52,8 +50,7 @@ class SchemasController extends Controller
 
     public function ShowSchemaEditForm($schemaCode)
     {
-        $manager = new SchemaManager;
-        $schema = $manager->find($schemaCode);
+        $schema = app(SchemaManager::class)->find($schemaCode);
 
         return view('schema/form', [
         'selected' => $schema->id,
@@ -64,13 +61,11 @@ class SchemasController extends Controller
 
     public function EditSchema(Request $request, $schemaCode)
     {
-        $manager = new SchemaManager;
-
         $action = $request->input('action');
         $data = $request->except(['_token', 'action']);
         $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
         $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
-        $schema = $manager->save($schemaCode, $data);
+        $schema = app(SchemaManager::class)->save($schemaCode, $data);
 
         if ($action == 'save')
         {
@@ -84,9 +79,7 @@ class SchemasController extends Controller
 
     public function DeleteSchema($schemaCode)
     {
-        $manager = new SchemaManager;
-        $manager->delete($schemaCode);
-
+        app(SchemaManager::class)->delete($schemaCode);
         return redirect('/schemas/');
     }
 }
