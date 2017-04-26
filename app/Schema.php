@@ -175,7 +175,7 @@ class Schema
     public static function list(String $token): Collection
     {
         $client = new Client;
-        $r = $client->get(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
+        $r = $client->get(env('APPERCODE_SERVER')  . 'schemas/?take=-1', ['headers' => [
             'X-Appercode-Session-Token' => $token
         ]]);
 
