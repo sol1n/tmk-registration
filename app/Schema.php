@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use App\Exceptions\Schema\SchemaSaveException;
 use App\Exceptions\Schema\SchemaCreateException;
 use App\Exceptions\Schema\SchemaDeleteException;
+use App\Exceptions\Schema\SchemaListGetException;
 use App\Exceptions\Schema\SchemaNotFoundException;
 
 class Schema
@@ -175,9 +176,14 @@ class Schema
     public static function list(String $token): Collection
     {
         $client = new Client;
-        $r = $client->get(env('APPERCODE_SERVER')  . 'schemas/?take=-1', ['headers' => [
-            'X-Appercode-Session-Token' => $token
-        ]]);
+        try {
+            $r = $client->get(env('APPERCODE_SERVER')  . 'schemas/?take=-1', ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ]]);
+        }
+        catch (RequestException $e) {
+            throw new SchemaListGetException;
+        };
 
         $json = json_decode($r->getBody()->getContents(), 1);
         $result = new Collection;

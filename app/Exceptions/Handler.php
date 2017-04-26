@@ -7,6 +7,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use App\Exceptions\Object\ObjectNotFoundException;
 use App\Exceptions\Schema\SchemaNotFoundException;
+use App\Exceptions\Schema\SchemaListGetException;
 
 class Handler extends ExceptionHandler
 {
@@ -51,6 +52,10 @@ class Handler extends ExceptionHandler
         }        
         if ($exception instanceof SchemaNotFoundException) {
             return response()->view('errors.schema.notfound');
+        }
+        if ($exception instanceof SchemaListGetException) {
+            $request->user->regenerate();
+            return redirect($request->path());
         }
 
         return parent::render($request, $exception);

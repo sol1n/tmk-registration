@@ -68,4 +68,31 @@ class User
         request()->session()->put('refresh-token', $this->refreshToken);
         return $this;
     }
+
+    public function regenerate(Bool $storeSession = true): User
+    {
+        $url = env('APPERCODE_SERVER');
+        $client = new Client;
+
+        try {
+            $r = $client->post($url . 'login/byToken', [
+                'headers' => ['Content-Type' => 'application/json'], 
+                'body' => '"' . $this->refreshToken . '"']
+            );
+        } catch (RequestException $e) {
+            throw new WrongCredentialsException;
+        }
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+
+        $this->token = $json['sessionId'];
+        $this->refreshToken = $json['refreshToken'];
+
+        if ($storeSession)
+        {
+            $this->storeSession();
+        }
+
+        return $this;
+    }
 }

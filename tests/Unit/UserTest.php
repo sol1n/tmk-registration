@@ -37,4 +37,16 @@ class UserTest extends TestCase
         $user = new User;
         $token = $user->token();
     }
+
+    public function test_can_regenerate_token()
+    {
+        $user = User::Login([
+            'login' => env('TEST_LOGIN'),
+            'password' => env('TEST_PASSWORD')
+        ], false);
+
+        $token = $user->token();
+        $user->regenerate(false);
+        $this->assertNotEquals($token, $user->token());
+    }
 }
