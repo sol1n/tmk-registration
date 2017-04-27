@@ -63,12 +63,19 @@ class ObjectsController extends Controller
 
     public function CreateObject(Request $request, $schemaCode)
     {
-        $fields = $request->except('_token');
+        $fields = $request->except(['_token', 'action']);
 
         $schema = app(SchemaManager::class)->find($schemaCode);
         $object = app(ObjectManager::class)->create($schema, $fields);
 
-        return redirect('/' . $schema->id . '/' . $object->id);
+        if ($request->input('action') == 'save')
+        {
+            return redirect('/' . $schema->id . '/');    
+        }
+        else
+        {
+            return redirect('/' . $schema->id . '/' . $object->id);
+        }
     }
 
     public function DeleteObject(Request $request, $schemaCode, $objectCode)

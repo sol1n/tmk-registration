@@ -45,6 +45,8 @@
               <div class="col-sm-10">
                 {% if field.type == "String" %}
                   <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
+                {% elseif field.type == "Text" %}
+                  <textarea data-html-editor="1" name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name] }}</textarea>
                 {% elseif field.type == "Json" %}
                   <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
                 {% elseif field.type == "Integer" %}
