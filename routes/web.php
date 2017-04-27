@@ -25,6 +25,9 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/schemas/{code}/edit', 'SchemasController@EditSchema');
   Route::get('/schemas/{code}/delete', 'SchemasController@DeleteSchema');
 
+  Route::get('/settings/', 'SettingsController@ShowSettingsForm');
+  Route::post('/settings/', 'SettingsController@SaveSettings');
+
   Route::get('/{code}/', 'ObjectsController@ShowCollection');
   Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');
   Route::post('/{code}/create/', 'ObjectsController@CreateObject');
