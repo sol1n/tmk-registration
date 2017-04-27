@@ -39,14 +39,19 @@
   <script src="{{ asset('/assets/js/plugins/metisMenu/jquery.metisMenu.js') }}"></script>
   <script src="{{ asset('/assets/js/plugins/chosen/chosen.jquery.js') }}"></script>
   <script src="{{ asset('/assets/js/plugins/slimscroll/jquery.slimscroll.min.js') }}"></script>
+  <script src="{{ asset('/assets/js/plugins/summernote/summernote.min.js') }}"></script>
   <script type="text/javascript">
-    $('#collections-list').slimScroll({
-        height: '60vh'
-    });    
-    $('#page-wrapper').slimScroll({
-        height: '100vh'
-    });
-    $('.chosen-select').chosen({width:"100%"});
+    $(function(){
+      $('#collections-list').slimScroll({
+          height: '60vh'
+      });    
+      $('#page-wrapper').slimScroll({
+          height: '100vh'
+      });
+      $('.chosen-select').chosen({width:"100%"});
+      $('[data-html-editor]').summernote({disableResizeEditor: true});
+      $('.note-statusbar').hide(); 
+    })
   </script>
   {% block additionalJs %}{% endblock %}
 </body>
