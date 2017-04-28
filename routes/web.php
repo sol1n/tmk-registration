@@ -29,7 +29,9 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/settings/', 'SettingsController@SaveSettings');
 
   Route::get('/users/', 'UsersController@ShowList');
+  
   Route::get('/roles/', 'RolesController@ShowList');
+  Route::get('/roles/{code}/', 'RolesController@ShowForm');
 
   Route::get('/{code}/', 'ObjectsController@ShowCollection');
   Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');

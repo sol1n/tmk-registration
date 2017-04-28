@@ -29,6 +29,38 @@
         <a class="btn btn-primary" href="/roles/new/">New role</a>
       </div>
 
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Base role</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for role in roles %}
+            <tr>
+              <td>
+                <a href="/roles/{{ role.id }}/">
+                  {{ role.id }}
+                </a>
+              </td>
+              <td>{{ role.baseRoleId }}</td>
+              <td class="action-cell">
+                <div class="input-group-btn text-right">
+                    <a href="/roles/{{ role.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                     <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
+                      <ul class="dropdown-menu pull-right">
+                          <li><a href="/roles/{{ role.id }}/">Edit</a></li>
+                          <li><a href="/roles/{{ role.id }}/delete">Delete</a></li>
+                      </ul>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
     </div>
   </div>
 

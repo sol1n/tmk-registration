@@ -1,0 +1,42 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}{{ role.id }} role{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ role.id }}</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/roles/">All roles</a>
+        </li>        
+        <li class="active">
+            <strong>{{ role.id }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>{{ role.id }}</h5>
+    </div>
+
+    <div class="ibox-content">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/roles/{{ role.id }}" method="post">
+        {{ csrf_field()}}
+
+        <hr/>
+
+        <button type="submit" name="action" value="save" class="btn btn-primary">Save role</button>
+        <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
+        <a href="/{{ schema.id }}/{{ object.id }}/delete" class="btn btn-default pull-right">Delete role</a>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}
