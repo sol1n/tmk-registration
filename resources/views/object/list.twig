@@ -1,5 +1,7 @@
 {% extends "page.twig" %}
 
+{% block pageTitle %}{{ schema.title }} elements{% endblock %}
+
 {% block breadcrumbs %}
   <div class="col-lg-10">
     <h2>{{ schema.title }} elements</h2>
@@ -27,6 +29,7 @@
     <div class="ibox-content">
       <div class="buttons-group">
         <a class="btn btn-primary" href="/{{ schema.id }}/new/">New element</a>
+        <a class="btn btn-default pull-right" href="/schemas/{{ schema.id }}/edit/">Edit schema</a>
       </div>
 
       <table class="table">

@@ -18,15 +18,18 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   
   Route::get('/', 'SchemasController@ShowDashboard');
 
+  Route::get('/schemas/', 'SchemasController@ShowSchemaList');
   Route::get('/schemas/new/', 'SchemasController@ShowSchemaCreateForm');
   Route::post('/schemas/new/', 'SchemasController@NewSchema');
-  Route::get('/schemas/', 'SchemasController@ShowSchemaList');
   Route::get('/schemas/{code}/edit', 'SchemasController@ShowSchemaEditForm');
   Route::post('/schemas/{code}/edit', 'SchemasController@EditSchema');
   Route::get('/schemas/{code}/delete', 'SchemasController@DeleteSchema');
 
   Route::get('/settings/', 'SettingsController@ShowSettingsForm');
   Route::post('/settings/', 'SettingsController@SaveSettings');
+
+  Route::get('/users/', 'UsersController@ShowList');
+  Route::get('/roles/', 'RolesController@ShowList');
 
   Route::get('/{code}/', 'ObjectsController@ShowCollection');
   Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');

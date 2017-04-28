@@ -1,0 +1,35 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}Users list{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>Users list</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li class="active">
+            <strong>All users</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>Users list</h5>
+    </div>
+
+    <div class="ibox-content">
+
+      <div class="buttons-group">
+        <a class="btn btn-primary" href="/users/new/">New user</a>
+      </div>
+
+    </div>
+  </div>
+
+{% endblock %}

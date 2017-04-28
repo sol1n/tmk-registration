@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use App\User;
 
-class appercodeAuth
+class AppercodeAuth
 {
     /**
      * Handle an incoming request.

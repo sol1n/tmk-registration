@@ -1,0 +1,35 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}Roles list{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>Roles list</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li class="active">
+            <strong>All roles</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>Roles list</h5>
+    </div>
+
+    <div class="ibox-content">
+
+      <div class="buttons-group">
+        <a class="btn btn-primary" href="/roles/new/">New role</a>
+      </div>
+
+    </div>
+  </div>
+
+{% endblock %}
