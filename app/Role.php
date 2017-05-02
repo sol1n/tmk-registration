@@ -5,8 +5,10 @@ namespace App;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use App\Exceptions\Role\RoleGetException;
+use App\Exceptions\Role\RoleNotFoundException;
 use App\Exceptions\Role\RoleGetListException;
+use App\Exceptions\Role\RoleCreateException;
+use App\Exceptions\Role\RoleSaveException;
 use Illuminate\Support\Collection;
 
 class Role
@@ -47,15 +49,10 @@ class Role
                 'X-Appercode-Session-Token' => $token
             ]]);
         } catch (RequestException $e) {
-            throw new RoleGetException;
+            throw new RoleNotFoundException;
         };
 
         $data = json_decode($r->getBody()->getContents(), 1);
-
-        if ($data == null)
-        {
-            throw new RoleGetException;
-        }
 
         return new Role($data);
     }
@@ -65,9 +62,57 @@ class Role
         $result = new Collection;
 
         foreach (static::fetch($token) as $raw) {
-            $role = new Role($raw);
+            $result->push(new Role($raw));
         }
 
         return $result;
+    }
+
+    public function delete(String $token): Bool
+    {
+        $client = new Client;
+        try {
+            $r = $client->delete(env('APPERCODE_SERVER')  . 'roles/' . $this->id, ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ]]);
+        } catch (RequestException $e) {
+            throw new RoleDeleteException;
+        };
+
+        return true;
+    }
+
+    public static function create(Array $fields, String $token): Role
+    {
+        $client = new Client;
+        try {
+            $r = $client->post(env('APPERCODE_SERVER')  . 'roles', ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ], 'json' => $fields]);
+        } catch (RequestException $e) {
+            throw new RoleCreateException;
+        };
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+
+        return new Role($json);
+    }
+
+    public function save(Array $fields, String $token): Role
+    {
+        $fields['id'] = $this->id;
+
+        $client = new Client;
+        try {
+            $r = $client->put(env('APPERCODE_SERVER')  . 'roles', ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ], 'json' => $fields]);
+        } catch (RequestException $e) {
+            throw new RoleSaveException;
+        };
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+        
+        return new Role($json);
     }
 }

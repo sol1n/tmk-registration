@@ -1,10 +1,10 @@
 {% extends "page.twig" %}
 
-{% block pageTitle %}{{ role.id }} role{% endblock %}
+{% block pageTitle %}New role{% endblock %}
 
 {% block breadcrumbs %}
   <div class="col-lg-10">
-    <h2>{{ role.id }}</h2>
+    <h2>New role</h2>
     <ol class="breadcrumb">
         <li>
             <a href="/">Dashboard</a>
@@ -13,7 +13,7 @@
             <a href="/roles/">All roles</a>
         </li>        
         <li class="active">
-            <strong>{{ role.id }}</strong>
+            <strong>New role</strong>
         </li>
     </ol>
   </div>
@@ -23,11 +23,11 @@
 
   <div class="ibox float-e-margins">
     <div class="ibox-title">
-      <h5>{{ role.id }}</h5>
+      <h5>New role</h5>
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/roles/{{ role.id }}" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/roles/new/" method="post">
         {{ csrf_field()}}
 
         <input type="hidden" name="action" value="save" />
@@ -35,104 +35,64 @@
         <div class="tabs-container">
           <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#tab-settings">General</a></li>
-              <li><a data-toggle="tab" href="#tab-rights">Role rights</a></li>
-              <li><a data-toggle="tab" href="#tab-total">Total rights</a></li>
+              <li><a data-toggle="tab" href="#tab-adds">Role rights</a></li>
           </ul>
 
           <div class="tab-content">
             <div class="tab-pane tab-pane-padding active" id="tab-settings">
               <div class="form-group">
+                <label class="col-sm-2 control-label">Role ID</label>
+                <div class="col-sm-10">
+                  <input name="id" id="id" type="text" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="form-group">
                 <label class="col-sm-2 control-label">Parent role</label>
                 <div class="col-sm-10">
                   <select name="baseRoleId" class="form-control">
                     <option value="">Not specified</option>
-                    {% for one in roles %}
-                      {% if one.id == role.baseRoleId %}
-                        <option selected value="{{ one.id }}">{{ one.id }}</option>
-                      {% else %}
-                        <option value="{{ one.id }}">{{ one.id }}</option>
-                      {% endif %}
+                    {% for role in roles %}
+                      <option value="{{ role.id }}">{{ role.id }}</option>
                     {% endfor %}
                   </select>
                 </div>
               </div>
             </div>
 
-            <div class="tab-pane tab-pane-padding" id="tab-rights">
+            <div class="tab-pane tab-pane-padding" id="tab-adds">
               <div class="button-group">
                 <button class="btn btn-primary btn-sm" data-add-row>Add new right</button>
               </div>
 
-              <table class="table table-rights">
+              <table class="table schema-fields-table">
                 <thead>
                   <th>Right</th>
                   <th class="text-center">Enabled</th>
                   <th class="text-center">Delete</th>
                 </thead>
                 <tbody>
-                  <tr data-deleted-row>
+                  <tr data-id="new">
                     <td contenteditable>NewRight</td>
                     <td class="text-center">
-                        <input class="tableCheckbox" type="checkbox" checked />
+                      <input class="tableCheckbox" type="checkbox" checked />
                     </td>
                     <td class="text-center">
                       <a href="#delete-row" data-delete-row>
-                        delete right
+                        delete field
                       </a>
                     </td>
                   </tr>
-                  {% for key, right in role.rights.adds %}
-                    <tr>
-                      <td contenteditable>{{ key }}</td>
-                      <td class="text-center">
-                        {% if right %}
-                          <input class="tableCheckbox" type="checkbox" checked />
-                        {% else %}
-                          <input class="tableCheckbox" type="checkbox" />
-                        {% endif %}
-                      </td>
-                      <td class="text-center">
-                        <a href="#delete-row" data-delete-row>
-                          delete right
-                        </a>
-                      </td>
-                    </tr>
-                  {% endfor %}
                 </tbody>
               </table>
             </div>
-
-            <div class="tab-pane tab-pane-padding" id="tab-total">
-              <table class="table">
-                <thead>
-                  <th>Right</th>
-                  <th class="text-center">Enabled</th>
-                </thead>
-                <tbody>
-                  {% for key, right in role.rights.total %}
-                    <tr>
-                      <td>{{ key }}</td>
-                      <td class="text-center">
-                        {% if right %}
-                          <input class="tableCheckbox" disabled type="checkbox" checked />
-                        {% else %}
-                          <input class="tableCheckbox" disabled type="checkbox" />
-                        {% endif %}
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-            </div>
-            
           </div>
         </div>
 
         <hr/>
 
-        <button type="submit" name="action" value="save" class="btn btn-primary">Save role</button>
+        <button type="submit" name="action" value="save" class="btn btn-primary">Create role</button>
         <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
-        <a href="/roles/{{ role.id }}/delete" class="btn btn-default pull-right">Delete role</a>
       </form>
     </div>
   </div>
@@ -142,10 +102,10 @@
 {% block additionalJs %}
   <script type="text/javascript">
     $(function(){
-      window.deletedRow = $('[data-deleted-row]').detach();
+      window.deletedRow = $('[data-id]').detach();
 
       $('[data-add-row]').on('click', function(){
-        var table = $('table.table-rights tbody');
+        var table = $('table tbody');
         var canAddRow = true;
         table.find('tr').each(function(){
           var tr = $(this);
@@ -182,7 +142,7 @@
           }
         });
 
-        var table = $('table.table-rights tbody');
+        var table = $('table tbody');
         if (data === false){
           return false;
         }
@@ -195,7 +155,7 @@
 
         $.ajax({
           type: "POST",
-          url: "/roles/{{ role.id }}/",
+          url: "/roles/new/",
           data: data,
           dataType: 'json',
           success: function(msg){
@@ -211,7 +171,7 @@
               alert('Saving error');
             }
           }
-        });
+        });     
 
         return false;
       });
