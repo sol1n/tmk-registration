@@ -35,6 +35,13 @@
         <div class="tabs-container">
           <ul class="nav nav-tabs">
             <li class="active"><a data-toggle="tab" href="#tab-settings">General</a></li>
+            {% for profile in user.profiles %}
+              {% if profile.object %}
+                <li><a data-toggle="tab" href="#tab-profile-{{ profile.code }}">{{ profile.object.schema.title }}</a></li>
+              {% else %}
+                <li><a data-toggle="tab" href="#tab-profile-{{ profile.code }}">{{ profile.schema.title }}</a></li>
+              {% endif %}
+            {% endfor %}
           </ul>
 
           <div class="tab-content">
@@ -86,6 +93,115 @@
               </div>
 
             </div>
+
+            {% for profile in user.profiles %}
+              {% if profile.object %}
+                <div class="tab-pane tab-pane-padding" id="tab-profile-{{ profile.code }}">
+                  {% for field in profile.object.schema.fields if field.type != 'ref Users' %}
+                    <div class="form-group">
+                      {% if field.title %}
+                        <label class="col-sm-2 control-label">{{ field.title }}</label>
+                      {% else %}
+                        <label class="col-sm-2 control-label">{{ field.name }}</label>
+                      {% endif %}
+                        <div class="col-sm-10">
+                          {% if field.type == "String" %}
+                            <input 
+                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
+                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value="{{ profile.object.fields[field.name] }}"
+                            />
+                          {% elseif field.type == "Text" %}
+                            <textarea 
+                              data-html-editor="1" 
+                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
+                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
+                              class="form-control">
+                                {{ profile.object.fields[field.name] }}
+                            </textarea>
+                          {% elseif field.type == "Json" %}
+                            <textarea 
+                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
+                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
+                              class="form-control">
+                                {{ profile.object.fields[field.name]|json_encode() }}
+                            </textarea>
+                          {% elseif field.type == "Integer" %}
+                            <input 
+                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
+                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value="{{ profile.object.fields[field.name] }}"
+                            />
+                          {% else %}
+                            <input 
+                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
+                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value="{{ profile.object.fields[field.name] }}"
+                            >
+                          {% endif %}
+                        </div>
+                    </div>  
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="tab-pane tab-pane-padding" id="tab-profile-{{ profile.code }}">
+                  <input type="hidden" name="profiles[{{ profile.schema.id }}][link]" value="{{ profile.schema.link }}" />
+                  {% for field in profile.schema.fields if field.type != 'ref Users' %}
+                    <div class="form-group">
+                      {% if field.title %}
+                        <label class="col-sm-2 control-label">{{ field.title }}</label>
+                      {% else %}
+                        <label class="col-sm-2 control-label">{{ field.name }}</label>
+                      {% endif %}
+                        <div class="col-sm-10">
+                          {% if field.type == "String" %}
+                            <input 
+                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
+                              id="{{ profile.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value=""
+                            />
+                          {% elseif field.type == "Text" %}
+                            <textarea 
+                              data-html-editor="1" 
+                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
+                              id="{{ profile.schema.id }}-{{ field.name }}" 
+                              class="form-control"></textarea>
+                          {% elseif field.type == "Json" %}
+                            <textarea 
+                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
+                              id="{{ profile.schema.id }}-{{ field.name }}" 
+                              class="form-control"></textarea>
+                          {% elseif field.type == "Integer" %}
+                            <input 
+                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
+                              id="{{ profile.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value=""
+                            />
+                          {% else %}
+                            <input 
+                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
+                              id="{{ profile.schema.id }}-{{ field.name }}" 
+                              type="text" 
+                              class="form-control" 
+                              value=""
+                            >
+                          {% endif %}
+                        </div>
+                    </div>  
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endfor %}
 
           </div>
         </div>

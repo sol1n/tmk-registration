@@ -2,7 +2,10 @@
 
 namespace App;
 
+use App\Settings;
 use App\Language;
+use App\Services\ObjectManager;
+use App\Services\SchemaManager;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -14,6 +17,7 @@ use App\Exceptions\User\UsersListGetException;
 use App\Exceptions\User\UserNotFoundException;
 use App\Exceptions\User\UserSaveException;
 use App\Exceptions\User\UserCreateException;
+use App\Exceptions\User\UserGetProfilesException;
 
 class User
 {
@@ -37,6 +41,55 @@ class User
         if (session('refresh-token')) {
             $this->refreshToken = session('refresh-token');
         }
+    }
+
+    public function getProfiles(String $token)
+    {
+        $url = env('APPERCODE_SERVER');
+        $client = new Client;
+
+        try {
+            $r = $client->get($url . 'users/' . $this->id . '/profiles', [
+                'headers' => ['X-Appercode-Session-Token' => $token]]
+            );
+        } catch (RequestException $e) {
+            throw new UserGetProfilesException;
+        }
+
+        $json = json_decode($r->getBody()->getContents(), 1);
+
+        $profiles = new Collection;
+
+        if (count($json))
+        {
+            foreach($json as $profile)
+            {
+                $schema = app(SchemaManager::Class)->find($profile['schemaId']);
+                $object = app(ObjectManager::Class)->find($schema, $profile['itemId']);
+                $profiles->put($schema->id, ['object' => $object, 'code' => $schema->id]);
+            }
+        }
+
+
+        $profileSchemas = app(Settings::class)->getProfileSchemas();
+
+        foreach ($profileSchemas as $key => $schema)
+        {
+            $id = $schema->id;
+            $index = $profiles->search(function ($item, $key) use ($id) {
+                return isset($item['object']) && $item['object']->schema->id == $id;
+            });
+
+            if ($index === false)
+            {
+                $schema->link = explode('.', $key)[1];
+                $profiles->put($schema->id, ['schema' => $schema, 'code' => $schema->id]);
+            }
+        }
+
+        $this->profiles = $profiles->sortBy('code');
+
+        return $this;
     }
 
     public static function build(Array $data): User

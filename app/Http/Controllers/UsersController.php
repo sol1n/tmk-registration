@@ -22,7 +22,7 @@ class UsersController extends Controller
     public function ShowForm($userID)
     {
       return view('users/form', [
-        'user' => app(UserManager::Class)->find($userID),
+        'user' => app(UserManager::Class)->findWithProfiles($userID),
         'roles' => app(RoleManager::Class)->all(),
         'languages' => Language::list(),
         'selected' => 'users'
@@ -31,7 +31,12 @@ class UsersController extends Controller
 
     public function SaveUser(Request $request, $userID)
     {
-      $fields = $request->except(['_token', 'action']);
+      $fields = $request->except(['_token', 'action', 'profiles']);
+
+      $profiles = $request->input('profiles');
+
+      app(UserManager::Class)->saveProfiles($userID, $profiles);
+
       if (empty($fields['password']))
       {
         unset($fields['password']);

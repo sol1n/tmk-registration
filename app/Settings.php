@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Services\SchemaManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
@@ -9,6 +10,7 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Cache;
 use App\Exceptions\SettingsSaveException;
 use App\Exceptions\SettingsGetException;
+use Illuminate\Support\Collection;
 
 class Settings
 {
@@ -128,5 +130,15 @@ class Settings
         $this->build($data);
 
         return $this;
+    }
+
+    public function getProfileSchemas(){
+        $result = new Collection;
+        foreach ($this->userProfiles as $raw)
+        {
+            $exploded = explode('.', $raw);
+            $result->put($raw, app(SchemaManager::Class)->find($exploded[0]));
+        }
+        return $result;
     }
 }

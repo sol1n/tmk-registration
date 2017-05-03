@@ -102,4 +102,42 @@ class UserManager
 
         return $this->list;
     }
+
+    public function findWithProfiles(String $id): User
+    {
+        return $this->find($id)->getProfiles($this->token);
+    }
+
+    public function saveProfiles(String $id, Array $profiles)
+    {
+        foreach ($profiles as $schemaCode => $objects)
+        {
+            $schema = app(SchemaManager::Class)->find($schemaCode);
+            if (isset($objects['new']))
+            {
+                $needCreate = false;
+                $fields = $objects['new'];
+                foreach ($fields as &$field)
+                {
+                    if ($field != null)
+                    {
+                        $needCreate = true;
+                    }
+                }
+                if ($needCreate)
+                {
+                    $fields[$objects['link']] = $id;
+                    $object = app(ObjectManager::Class)->create($schema, $fields);
+                }
+            }
+            else
+            {
+                foreach ($objects as $objectCode => $fields)
+                {
+                    $object = app(ObjectManager::Class)->find($schema, $objectCode);
+                    $object = app(ObjectManager::Class)->save($schema, $object->id, $fields);
+                }
+            }
+        }
+    }
 }
