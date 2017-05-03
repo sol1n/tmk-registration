@@ -29,13 +29,18 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/settings/', 'SettingsController@SaveSettings');
 
   Route::get('/users/', 'UsersController@ShowList');
+  Route::get('/users/new/', 'UsersController@ShowCreateForm');
+  Route::post('/users/new/', 'UsersController@CreateUser');
+  Route::get('/users/{id}/', 'UsersController@ShowForm');
+  Route::post('/users/{id}/', 'UsersController@SaveUser');
+  Route::get('/users/{code}/delete', 'UsersController@DeleteUser');
   
   Route::get('/roles/', 'RolesController@ShowList');
   Route::get('/roles/new/', 'RolesController@ShowCreateForm');
   Route::post('/roles/new/', 'RolesController@CreateRole');
   Route::get('/roles/{code}/', 'RolesController@ShowForm');
   Route::post('/roles/{code}/', 'RolesController@SaveRole');
-  Route::get('/roles/{code}/delete', 'RolesController@DeleteRole');
+  Route::get('/roles/{code}/delete', 'RolesController@DeleteRole'); 
 
   Route::get('/{code}/', 'ObjectsController@ShowCollection');
   Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');

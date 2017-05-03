@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use App\Services\ObjectManager;
 use App\Services\SchemaManager;
 use App\Services\RoleManager;
+use App\Services\UserManager;
 use App\Settings;
 
 class AppServiceProvider extends ServiceProvider
@@ -45,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton('App\Services\RoleManager', function($app){
             return new RoleManager();
+        });
+
+        $this->app->singleton('App\Services\UserManager', function($app){
+            return new UserManager();
         });
     }
 }

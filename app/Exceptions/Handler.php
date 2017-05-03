@@ -10,6 +10,7 @@ use App\Exceptions\Role\RoleNotFoundException;
 use App\Exceptions\Role\RoleGetListException;
 use App\Exceptions\Schema\SchemaNotFoundException;
 use App\Exceptions\Schema\SchemaListGetException;
+use App\Exceptions\User\UserNotFoundException;
 
 class Handler extends ExceptionHandler
 {
@@ -57,6 +58,9 @@ class Handler extends ExceptionHandler
         }        
         if ($exception instanceof RoleNotFoundException) {
             return response()->view('errors.role.notfound');
+        }        
+        if ($exception instanceof UserNotFoundException) {
+            return response()->view('errors.user.notfound');
         }
         if ($exception instanceof SchemaListGetException) {
             $request->user->regenerate();
