@@ -23,8 +23,8 @@ class ObjectsTest extends TestCase
         ], false);
 
         $this->withSession(['session-token' => $user->token()]);
-        $this->objectManager = new ObjectManager;
-        $this->schemaManager = new SchemaManager;
+        $this->objectManager = app(ObjectManager::class);
+        $this->schemaManager = app(SchemaManager::class);
     }
 
     public function test_can_find_object()

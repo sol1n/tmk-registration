@@ -6,7 +6,11 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use App\Exceptions\Object\ObjectNotFoundException;
+use App\Exceptions\Role\RoleNotFoundException;
+use App\Exceptions\Role\RoleGetListException;
 use App\Exceptions\Schema\SchemaNotFoundException;
+use App\Exceptions\Schema\SchemaListGetException;
+use App\Exceptions\User\UserNotFoundException;
 
 class Handler extends ExceptionHandler
 {
@@ -51,6 +55,20 @@ class Handler extends ExceptionHandler
         }        
         if ($exception instanceof SchemaNotFoundException) {
             return response()->view('errors.schema.notfound');
+        }        
+        if ($exception instanceof RoleNotFoundException) {
+            return response()->view('errors.role.notfound');
+        }        
+        if ($exception instanceof UserNotFoundException) {
+            return response()->view('errors.user.notfound');
+        }
+        if ($exception instanceof SchemaListGetException) {
+            $request->user->regenerate();
+            return redirect($request->path());
+        }        
+        if ($exception instanceof RoleGetListException) {
+            $request->user->regenerate();
+            return redirect($request->path());
         }
 
         return parent::render($request, $exception);

@@ -1,5 +1,7 @@
 {% extends "page.twig" %}
 
+{% block pageTitle %}{{ schema.title }} new element{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
@@ -23,6 +25,8 @@
                   <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
                 {% elseif field.type == "Json" %}
                   <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
+                {% elseif field.type == "Text" %}
+                  <textarea data-html-editor="1" name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name] }}</textarea>
                 {% elseif field.type == "Integer" %}
                   <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
                 {% else %}
@@ -32,8 +36,8 @@
           </div>  
         {% endfor %}
 
-        <button type="submit" class="btn btn-success">Save</button>
-        <button type="submit" class="btn btn-success">Apply</button>
+        <button type="submit" name="action" value="save" class="btn btn-primary">Save object</button>
+        <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
 
         <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
       </form>

@@ -6,6 +6,7 @@ use App\User;
 use App\Schema;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use App\Exceptions\Schema\SchemaNotFoundException;
 
 class SchemaManager
 {

@@ -52,6 +52,7 @@ class Object
     public function save(array $fields, $token): Object
     {
         $this->fields = static::prepareRawData($fields, $this->schema);
+
         $client = new Client;
         try {
             $r = $client->put(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
@@ -79,7 +80,6 @@ class Object
     public static function create(Schema $schema, $fields, $token): Object
     {
         $fields = self::prepareRawData($fields, $schema);
-
         $client = new Client;
         $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
             'X-Appercode-Session-Token' => $token

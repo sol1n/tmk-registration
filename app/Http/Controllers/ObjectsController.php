@@ -11,11 +11,8 @@ class ObjectsController extends Controller
 
     public function ShowCollection($schemaCode)
     {
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
-
-        $objectManager = new ObjectManager();
-        $objects = $objectManager->all($schema);
+        $schema = app(SchemaManager::class)->find($schemaCode);
+        $objects = app(ObjectManager::class)->all($schema);
 
         return view('object/list', [
         'selected' => $schema->id,
@@ -26,11 +23,8 @@ class ObjectsController extends Controller
 
     public function ShowObject($schemaCode, $objectCode)
     {
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
-
-        $objectManager = new ObjectManager();
-        $object = $objectManager->find($schema, $objectCode);
+        $schema = app(SchemaManager::class)->find($schemaCode);
+        $object = app(ObjectManager::class)->find($schema, $objectCode);
 
         return view('object/form', [
         'selected' => $schema->id,
@@ -43,11 +37,8 @@ class ObjectsController extends Controller
     {
         $fields = $request->except(['_token', 'action']);
 
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
-
-        $objectManager = new ObjectManager();
-        $object = $objectManager->save($schema, $objectCode, $fields);
+        $schema = app(SchemaManager::class)->find($schemaCode);
+        $object = app(ObjectManager::class)->save($schema, $objectCode, $fields);
       
         if ($request->input('action') == 'save')
         {
@@ -62,8 +53,7 @@ class ObjectsController extends Controller
 
     public function ShowCreateForm($schemaCode)
     {
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
+        $schema = app(SchemaManager::class)->find($schemaCode);
 
         return view('object/create', [
         'selected' => $schema->id,
@@ -73,24 +63,25 @@ class ObjectsController extends Controller
 
     public function CreateObject(Request $request, $schemaCode)
     {
-        $fields = $request->except('_token');
+        $fields = $request->except(['_token', 'action']);
 
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
+        $schema = app(SchemaManager::class)->find($schemaCode);
+        $object = app(ObjectManager::class)->create($schema, $fields);
 
-        $objectManager = new ObjectManager();
-        $object = $objectManager->create($schema, $fields);
-
-        return redirect('/' . $schema->id . '/' . $object->id);
+        if ($request->input('action') == 'save')
+        {
+            return redirect('/' . $schema->id . '/');    
+        }
+        else
+        {
+            return redirect('/' . $schema->id . '/' . $object->id);
+        }
     }
 
     public function DeleteObject(Request $request, $schemaCode, $objectCode)
     {
-        $schemaManager = new SchemaManager();
-        $schema = $schemaManager->find($schemaCode);
-
-        $objectManager = new ObjectManager();
-        $objectManager->delete($schema, $objectCode);
+        $schema = app(SchemaManager::class)->find($schemaCode);
+        app(ObjectManager::class)->delete($schema, $objectCode);
 
         return redirect('/' . $schema->id . '/');
     }
