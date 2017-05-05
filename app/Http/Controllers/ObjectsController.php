@@ -2,87 +2,52 @@
 
 namespace App\Http\Controllers;
 
+use App\Schema;
 use Illuminate\Http\Request;
-use App\Services\SchemaManager;
 use App\Services\ObjectManager;
 
 class ObjectsController extends Controller
 {
-
-    public function ShowCollection($schemaCode)
+    public function ShowCollection(Schema $schema, ObjectManager $manager)
     {
-        $schema = app(SchemaManager::class)->find($schemaCode);
-        $objects = app(ObjectManager::class)->all($schema);
-
         return view('object/list', [
         'selected' => $schema->id,
         'schema' => $schema,
-        'objects' => $objects
+        'objects' => $manager->all($schema)
       ]);
     }
 
-    public function ShowObject($schemaCode, $objectCode)
+    public function ShowObject(Schema $schema, ObjectManager $manager, $id)
     {
-        $schema = app(SchemaManager::class)->find($schemaCode);
-        $object = app(ObjectManager::class)->find($schema, $objectCode);
-
         return view('object/form', [
         'selected' => $schema->id,
         'schema' => $schema,
-        'object' => $object
+        'object' => $manager->find($schema, $id)
       ]);
     }
 
-    public function SaveObject(Request $request, $schemaCode, $objectCode)
+    public function SaveObject(Request $request, Schema $schema, ObjectManager $manager, $id)
     {
         $fields = $request->except(['_token', 'action']);
-
-        $schema = app(SchemaManager::class)->find($schemaCode);
-        $object = app(ObjectManager::class)->save($schema, $objectCode, $fields);
-      
-        if ($request->input('action') == 'save')
-        {
-            return redirect('/' . $schema->id . '/');    
-        }
-        else
-        {
-            return redirect('/' . $schema->id . '/' . $object->id);
-        }
-        
+        return $manager->save($schema, $id, $fields)->httpResponse();
     }
 
-    public function ShowCreateForm($schemaCode)
+    public function ShowCreateForm(Schema $schema)
     {
-        $schema = app(SchemaManager::class)->find($schemaCode);
-
         return view('object/create', [
         'selected' => $schema->id,
         'schema' => $schema,
         ]);
     }
 
-    public function CreateObject(Request $request, $schemaCode)
+    public function CreateObject(Request $request, Schema $schema, ObjectManager $manager)
     {
         $fields = $request->except(['_token', 'action']);
-
-        $schema = app(SchemaManager::class)->find($schemaCode);
-        $object = app(ObjectManager::class)->create($schema, $fields);
-
-        if ($request->input('action') == 'save')
-        {
-            return redirect('/' . $schema->id . '/');    
-        }
-        else
-        {
-            return redirect('/' . $schema->id . '/' . $object->id);
-        }
+        return $manager->create($schema, $fields)->httpResponse();
     }
 
-    public function DeleteObject(Request $request, $schemaCode, $objectCode)
+    public function DeleteObject(Schema $schema, ObjectManager $manager, $id)
     {
-        $schema = app(SchemaManager::class)->find($schemaCode);
-        app(ObjectManager::class)->delete($schema, $objectCode);
-
-        return redirect('/' . $schema->id . '/');
+        return $manager->delete($schema, $id)->httpResponse('list');
     }
 }

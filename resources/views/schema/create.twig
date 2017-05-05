@@ -29,7 +29,7 @@
     <div class="ibox-content">
       <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/new/" method="post">
         {{ csrf_field() }}
-        <input type="hidden" name="action" value="save" />
+        <input type="hidden" name="action" value="list" />
 
         <div class="tabs-container">
           <ul class="nav nav-tabs">
@@ -113,8 +113,8 @@
 
         <hr/>
 
-        <button type="submit" name="action" value="save" class="btn btn-success">Save schema</button>
-        <button type="submit" name="action" value="apply" class="btn btn-success">Apply changes</button>
+        <button type="submit" name="action" value="list" class="btn btn-success">Save schema</button>
+        <button type="submit" name="action" value="form" class="btn btn-success">Apply changes</button>
 
         <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
       </form>

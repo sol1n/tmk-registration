@@ -18,11 +18,19 @@ use App\Exceptions\User\UserNotFoundException;
 use App\Exceptions\User\UserSaveException;
 use App\Exceptions\User\UserCreateException;
 use App\Exceptions\User\UserGetProfilesException;
+use App\Traits\Controllers\ModelActions;
 
 class User
 {
+    use ModelActions;
+
     private $token;
     private $refreshToken;
+
+    protected function baseUrl(): String
+    {
+        return 'users';
+    } 
 
     public function token(): string
     {
@@ -261,7 +269,7 @@ class User
         return self::build($json);
     }
 
-    public function delete(String $token): Bool
+    public function delete(String $token): User
     {
         $client = new Client;
         try {
@@ -273,6 +281,6 @@ class User
             throw new UserDeleteException;
         };
 
-        return true;
+        return $this;
     }
 }

@@ -9,12 +9,19 @@ use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use App\Exceptions\Object\ObjectSaveException;
+use App\Traits\Controllers\ModelActions;
 
 class Object
 {
+    use ModelActions;
+
     public $fields;
     public $schema;
-    public $urls;
+
+    protected function baseUrl(): String
+    {
+        return $this->schema->id;
+    }
 
     private static function prepareRawData(array $data, Schema $schema): array
     {
@@ -90,14 +97,14 @@ class Object
         return static::build($schema, $json);
     }
 
-    public function delete($token)
+    public function delete($token): Object
     {
         $client = new Client;
         $r = $client->delete(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
             'X-Appercode-Session-Token' => $token
         ]]);
 
-        return true;
+        return $this;
     }
 
     public static function list(Schema $schema, $token): Collection

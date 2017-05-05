@@ -13,14 +13,28 @@ use App\Exceptions\Schema\SchemaCreateException;
 use App\Exceptions\Schema\SchemaDeleteException;
 use App\Exceptions\Schema\SchemaListGetException;
 use App\Exceptions\Schema\SchemaNotFoundException;
+use App\Traits\Controllers\ModelActions;
+
 
 class Schema
 {
+    use ModelActions;
+
     public $id;
     public $title;
     public $fields;
     public $isDeferredDeletion;
     public $isLogged;
+
+    protected function baseUrl(): String
+    {
+        return 'schemas';
+    }
+
+    private function getSingleUrl(): String
+    {
+        return '/' . $this->baseUrl() . '/' . $this->id . '/edit/';
+    }
 
     private function prepareField(Array $field): Array
     {
@@ -49,20 +63,6 @@ class Schema
             }
         }
 
-        if (isset($data['newFields']))
-        {
-            $newFields = $data['newFields'];
-            unset($data['newFields']);
-
-            foreach ($newFields as $fieldName => $fieldData){
-                $changes[] = [
-                    'action' => 'New',
-                    'key' => $this->id,
-                    'value' => $this->prepareField($fieldData)
-                ];
-            }
-        }
-        
         if (isset($data['fields'])){
             $fields = $data['fields'];
             unset($data['fields']);
@@ -111,8 +111,21 @@ class Schema
                 }
             }
         }
-        
 
+        if (isset($data['newFields']))
+        {
+            $newFields = $data['newFields'];
+            unset($data['newFields']);
+
+            foreach ($newFields as $fieldName => $fieldData){
+                $changes[] = [
+                    'action' => 'New',
+                    'key' => $this->id,
+                    'value' => $this->prepareField($fieldData)
+                ];
+            }
+        }
+        
         foreach ($data as $name => $value){
             if ($value != $this->{$name}){
                 $changes[] = [
@@ -227,7 +240,7 @@ class Schema
         return self::get($this->id, $token);
     }
 
-    public function delete(String $token): Bool
+    public function delete(String $token): Schema
     {
         $client = new Client;
         try {
@@ -238,6 +251,6 @@ class Schema
             throw new SchemaDeleteException;
         };
 
-        return true;
+        return $this;
     }
 }

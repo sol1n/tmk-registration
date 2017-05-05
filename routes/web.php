@@ -21,9 +21,9 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::get('/schemas/', 'SchemasController@ShowSchemaList');
   Route::get('/schemas/new/', 'SchemasController@ShowSchemaCreateForm');
   Route::post('/schemas/new/', 'SchemasController@NewSchema');
-  Route::get('/schemas/{code}/edit', 'SchemasController@ShowSchemaEditForm');
-  Route::post('/schemas/{code}/edit', 'SchemasController@EditSchema');
-  Route::get('/schemas/{code}/delete', 'SchemasController@DeleteSchema');
+  Route::get('/schemas/{schema}/edit', 'SchemasController@ShowSchemaEditForm');
+  Route::post('/schemas/{id}/edit', 'SchemasController@EditSchema');
+  Route::get('/schemas/{id}/delete', 'SchemasController@DeleteSchema');
 
   Route::get('/settings/', 'SettingsController@ShowSettingsForm');
   Route::post('/settings/', 'SettingsController@SaveSettings');
@@ -42,12 +42,12 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/roles/{code}/', 'RolesController@SaveRole');
   Route::get('/roles/{code}/delete', 'RolesController@DeleteRole'); 
 
-  Route::get('/{code}/', 'ObjectsController@ShowCollection');
-  Route::get('/{code}/new/', 'ObjectsController@ShowCreateForm');
-  Route::post('/{code}/create/', 'ObjectsController@CreateObject');
-  Route::get('/{code}/{object}/', 'ObjectsController@ShowObject');
-  Route::post('/{code}/{object}/', 'ObjectsController@SaveObject');
-  Route::get('/{code}/{object}/delete', 'ObjectsController@DeleteObject');
+  Route::get('/{schema}/', 'ObjectsController@ShowCollection');
+  Route::get('/{schema}/new/', 'ObjectsController@ShowCreateForm');
+  Route::post('/{schema}/create/', 'ObjectsController@CreateObject');
+  Route::get('/{schema}/{object}/', 'ObjectsController@ShowObject');
+  Route::post('/{schema}/{object}/', 'ObjectsController@SaveObject');
+  Route::get('/{schema}/{object}/delete', 'ObjectsController@DeleteObject');
 });
   
 

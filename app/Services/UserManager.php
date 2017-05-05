@@ -84,7 +84,7 @@ class UserManager
         return $user;
     }
 
-    public function delete(String $id): Collection
+    public function delete(String $id): User
     {
         $index = $this->list->search(function ($item, $key) use ($id) {
             return $item->id == $id;
@@ -95,12 +95,11 @@ class UserManager
             throw new UserNotFoundException;
         }
 
-        $user = $this->list->get($index);
-        $user->delete($this->token);
+        $user = $this->list->get($index)->delete($this->token);
         $this->list->forget($index);
         $this->saveToCache($this->list);
 
-        return $this->list;
+        return $user;
     }
 
     public function findWithProfiles(String $id): User

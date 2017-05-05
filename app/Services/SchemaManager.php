@@ -89,7 +89,7 @@ class SchemaManager
         return $schema;
     }
 
-    public function delete(String $id): Collection
+    public function delete(String $id): Schema
     {
         $index = $this->list->search(function ($item, $key) use ($id) {
             return $item->id == $id;
@@ -100,12 +100,12 @@ class SchemaManager
             throw new SchemaNotFoundException;
         }
 
-        $this->list->get($index)->delete($this->token);
+        $schema = $this->list->get($index)->delete($this->token);
 
         $this->list->forget($index);
         $this->saveToCache($this->list);
         
-        return $this->list;
+        return $schema;
     }
 
     public function all(): Collection

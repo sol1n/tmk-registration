@@ -100,9 +100,7 @@ class ObjectManager
 
     public function delete(Schema $schema, $id)
     {
-        $object = $this->find($schema, $id);
-        $object->delete($this->token);
-
+        $object = $this->find($schema, $id)->delete($this->token);
         $objects = $this->fetchCollection($schema);
 
         $index = $objects->search(function ($item, $key) use ($id) {
@@ -112,6 +110,6 @@ class ObjectManager
         $objects->forget($index);
         $this->saveCollectionToCache($schema, $objects);
 
-        return true;
+        return $object;
     }
 }

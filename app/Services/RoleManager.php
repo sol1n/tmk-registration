@@ -57,7 +57,7 @@ class RoleManager
         return $this->list;
     }
 
-    public function delete(String $id): Collection
+    public function delete(String $id): Role
     {
         $index = $this->list->search(function ($item, $key) use ($id) {
             return $item->id == $id;
@@ -68,12 +68,12 @@ class RoleManager
             throw new RoleNotFoundException;
         }
 
-        $this->list->get($index)->delete($this->token);
+        $role = $this->list->get($index)->delete($this->token);
 
         $this->list->forget($index);
         $this->saveToCache($this->list);
         
-        return $this->list;
+        return $role;
     }
 
     public function create(Array $fields): Role

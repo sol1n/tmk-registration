@@ -10,9 +10,17 @@ use App\Exceptions\Role\RoleGetListException;
 use App\Exceptions\Role\RoleCreateException;
 use App\Exceptions\Role\RoleSaveException;
 use Illuminate\Support\Collection;
+use App\Traits\Controllers\ModelActions;
 
 class Role
 {
+    use ModelActions;
+
+    protected function baseUrl(): String
+    {
+        return 'roles';
+    } 
+
     private function __construct(Array $data)
     {
         $this->id = $data['id'];
@@ -68,7 +76,7 @@ class Role
         return $result;
     }
 
-    public function delete(String $token): Bool
+    public function delete(String $token): Role
     {
         $client = new Client;
         try {
@@ -79,7 +87,7 @@ class Role
             throw new RoleDeleteException;
         };
 
-        return true;
+        return $this;
     }
 
     public static function create(Array $fields, String $token): Role

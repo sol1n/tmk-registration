@@ -7,82 +7,59 @@ use App\Services\RoleManager;
 
 class RolesController extends Controller
 {
-    public function ShowList()
+    public function ShowList(RoleManager $manager)
     {
         return view('roles/list', [
-        'roles' => app(RoleManager::Class)->all(),
+        'roles' => $manager->all(),
         'selected' => 'roles'
       ]);
     }
 
-    public function ShowForm($roleCode)
+    public function ShowForm(RoleManager $manager, $id)
     {
         return view('roles/form', [
-        'role' => app(RoleManager::Class)->find($roleCode),
-        'roles' => app(RoleManager::Class)->all(),
+        'role' => $manager->find($id),
+        'roles' => $manager->all(),
         'selected' => 'roles'
       ]);
     }
 
-    public function ShowCreateForm()
+    public function ShowCreateForm(RoleManager $manager)
     {
         return view('roles/create', [
-        'roles' => app(RoleManager::Class)->all(),
+        'roles' => $manager->all(),
         'selected' => 'roles'
       ]);
     }
 
-    public function DeleteRole($roleCode)
-    {
-        app(RoleManager::Class)->delete($roleCode);
-        return redirect('/roles/');
-    }
-
-    public function CreateRole(Request $request)
+    public function CreateRole(RoleManager $manager, Request $request)
     {
         $fields = $request->except(["_token", "action"]);
 
-        if (isset($fields['rights']))
-        {
-            foreach ($fields['rights'] as $key => $value)
-            {
+        if (isset($fields['rights'])) {
+            foreach ($fields['rights'] as $key => $value) {
                 $fields['rights'][$key] = $fields['rights'][$key] == true;
             }
         }
         
-        $role = app(RoleManager::Class)->create($fields);
-        if ($request->input('action') == 'save')
-        {
-            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/roles/']);  
-        }
-        else
-        {
-            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/roles/' . $role->id . '/']);
-        }
-        
+        return $manager->create($fields)->jsonResponse();
     }
 
-    public function SaveRole(Request $request, $roleCode)
+    public function SaveRole(RoleManager $manager, Request $request, $id)
     {
         $fields = $request->except(["_token", "action"]);
 
-        if (isset($fields['rights']))
-        {
-            foreach ($fields['rights'] as $key => $value)
-            {
+        if (isset($fields['rights'])) {
+            foreach ($fields['rights'] as $key => $value) {
                 $fields['rights'][$key] = $fields['rights'][$key] == true;
             }
         }
         
-        $role = app(RoleManager::Class)->save($roleCode, $fields);
-        if ($request->input('action') == 'save')
-        {
-            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/roles/']);  
-        }
-        else
-        {
-            return response()->json(['status' => 'success', 'action' => 'redirect', 'url' => '/roles/' . $role->id . '/']);
-        }
-        
+        return $manager->save($id, $fields)->jsonResponse();
+    }
+
+    public function DeleteRole(RoleManager $manager, $id)
+    {
+        return $manager->delete($id)->httpResponse('list');
     }
 }
