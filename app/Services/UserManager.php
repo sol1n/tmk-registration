@@ -3,103 +3,22 @@
 namespace App\Services;
 
 use App\User;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Collection;
-use App\Exceptions\User\UserNotFoundException;
+use App\Traits\Services\CacheableList;
 
 class UserManager
 {
-    private $list;
+    use CacheableList;
+
     private $token;
 
-    const CACHE_ID = 'users3';
-    const CACHE_LIFETIME = 10;
+    protected $model = User::class;
+    protected $cacheLifetime = 10;
 
     public function __construct()
     {
         $user = new User;
         $this->token = $user->token();
-
-        if (! $this->list = $this->getFromCache()) {
-            $this->list = User::list($this->token);
-            $this->saveToCache($this->list);
-        }
-    }
-
-    private function getFromCache()
-    {
-        if (Cache::has(self::CACHE_ID)) {
-            return Cache::get(self::CACHE_ID);
-        } else {
-            return null;
-        }
-    }
-
-    private function saveToCache(Collection $data)
-    {
-        Cache::put(self::CACHE_ID, $data, self::CACHE_LIFETIME);
-    }
-
-    public function all(): Collection
-    {
-        return $this->list;
-    }
-
-    public function find($id): User
-    {
-        foreach ($this->list as $user) {
-            if ($user->id == $id) {
-                return $user;
-            }
-        }
-        return User::get($id, $this->token);
-    }
-
-    public function save(String $id, Array $fields): User
-    {
-        $index = $this->list->search(function ($item, $key) use ($id) {
-            return $item->id == $id;
-        });
-
-        if ($index === false)
-        {
-            throw new UserNotFoundException;
-        }
-
-        $user = $this->list->get($index);
-        $user = $user->save($fields, $this->token);
-        $this->list->put($index, $user);
-
-        $this->saveToCache($this->list);
-
-        return $user;
-    }
-
-    public function create(Array $fields): User
-    {
-        $user = User::create($fields, $this->token);
-        $this->list->push($user);
-        $this->saveToCache($this->list);
-
-        return $user;
-    }
-
-    public function delete(String $id): User
-    {
-        $index = $this->list->search(function ($item, $key) use ($id) {
-            return $item->id == $id;
-        });
-
-        if ($index === false)
-        {
-            throw new UserNotFoundException;
-        }
-
-        $user = $this->list->get($index)->delete($this->token);
-        $this->list->forget($index);
-        $this->saveToCache($this->list);
-
-        return $user;
+        $this->initList();
     }
 
     public function findWithProfiles(String $id): User
@@ -107,34 +26,29 @@ class UserManager
         return $this->find($id)->getProfiles($this->token);
     }
 
-    public function saveProfiles(String $id, Array $profiles)
+    public function saveProfiles(String $id, array $profiles)
     {
-        foreach ($profiles as $schemaCode => $objects)
-        {
-            $schema = app(SchemaManager::Class)->find($schemaCode);
-            if (isset($objects['new']))
-            {
+        $schemaManager = app(SchemaManager::class);
+        $objectManager = app(ObjectManager::class);
+
+        foreach ($profiles as $schemaCode => $objects) {
+            $schema = $schemaManager->find($schemaCode);
+            if (isset($objects['new'])) {
                 $needCreate = false;
                 $fields = $objects['new'];
-                foreach ($fields as &$field)
-                {
-                    if ($field != null)
-                    {
+                foreach ($fields as &$field) {
+                    if ($field != null) {
                         $needCreate = true;
                     }
                 }
-                if ($needCreate)
-                {
+                if ($needCreate) {
                     $fields[$objects['link']] = $id;
-                    $object = app(ObjectManager::Class)->create($schema, $fields);
+                    $object = $objectManager->create($schema, $fields);
                 }
-            }
-            else
-            {
-                foreach ($objects as $objectCode => $fields)
-                {
-                    $object = app(ObjectManager::Class)->find($schema, $objectCode);
-                    $object = app(ObjectManager::Class)->save($schema, $object->id, $fields);
+            } else {
+                foreach ($objects as $objectCode => $fields) {
+                    $object = $objectManager->find($schema, $objectCode);
+                    $object = $objectManager->save($schema, $object->id, $fields);
                 }
             }
         }

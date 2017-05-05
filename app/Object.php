@@ -8,7 +8,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\ClientException;
 use App\Exceptions\Object\ObjectSaveException;
+use App\Exceptions\Object\ObjectNotFoundException;
 use App\Traits\Controllers\ModelActions;
 
 class Object
@@ -75,9 +77,13 @@ class Object
     public static function get(Schema $schema, $id, $token): Object
     {
         $client = new Client;
-        $r = $client->get(env('APPERCODE_SERVER') . 'objects/' . $schema->id . '/' . $id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
-        ]]);
+        try {
+            $r = $client->get(env('APPERCODE_SERVER') . 'objects/' . $schema->id . '/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ]]);
+        } catch (ClientException $e) {
+            throw new ObjectNotFoundException;
+        }
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
