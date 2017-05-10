@@ -7,3 +7,4 @@ Homestead.json
 composer.lock
 composer.json
 .env
+.idea
