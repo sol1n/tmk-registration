@@ -22,10 +22,18 @@ class SchemaManager
         $this->initList();
     }
 
-    public static function fieldTypes(): array
+    public function fieldTypes(): array
     {
-        return [
-            'Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json', 'ref Users'
+        $result = [
+            'basic' => ['Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json'],
+            'refs' => ['ref Users']
         ];
+
+        foreach ($this->list as $schema)
+        {
+            $result['refs'][] = 'ref ' . $schema->id;
+        }
+
+        return $result;
     }
 }

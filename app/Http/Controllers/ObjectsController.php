@@ -22,7 +22,7 @@ class ObjectsController extends Controller
         return view('object/form', [
         'selected' => $schema->id,
         'schema' => $schema,
-        'object' => $manager->find($schema, $id)
+        'object' => $manager->find($schema, $id)->withRelations()
       ]);
     }
 
@@ -36,7 +36,7 @@ class ObjectsController extends Controller
     {
         return view('object/create', [
         'selected' => $schema->id,
-        'schema' => $schema,
+        'schema' => $schema->withRelations(),
         ]);
     }
 

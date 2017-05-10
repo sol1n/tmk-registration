@@ -53,6 +53,28 @@
                   <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
                 {% elseif field.type == "Integer" %}
                   <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
+                {% elseif field.type == "ref Users" %}
+                  <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+                    <option value="">Not specified</option>
+                    {% for user in object.relations['ref Users'] %}
+                      {% if user.id == object.fields[field.name].id %}
+                        <option selected value="{{ user.id }}">{{ user.username }}</option>
+                      {% else %}
+                        <option value="{{ user.id }}">{{ user.username }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                {% elseif 'ref ' in field.type %}
+                  <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+                    <option value="">Not specified</option>
+                    {% for element in object.relations[field.type] %}
+                      {% if element.id == object.fields[field.name].id %}
+                        <option selected value="{{ element.id }}">{{ element.id }}</option>
+                      {% else %}
+                        <option value="{{ element.id }}">{{ element.id }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
                 {% else %}
                   <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
                 {% endif %}

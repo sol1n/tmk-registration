@@ -55,6 +55,14 @@ class Object
           }
         }
 
+        foreach ($data as $key => $value)
+        {
+            if (is_null($value))
+            {
+                unset($data[$key]);
+            }
+        }
+
         return $data;
     }
 
@@ -93,6 +101,7 @@ class Object
     public static function create(Schema $schema, $fields, $token): Object
     {
         $fields = self::prepareRawData($fields, $schema);
+
         $client = new Client;
         $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
             'X-Appercode-Session-Token' => $token
@@ -143,5 +152,70 @@ class Object
         $object->schema = $schema;
 
         return $object;
+    }
+
+    private function getUserRelation($field)
+    {
+        if (! isset($this->relations['ref Users']))
+        {
+            $users = app(\App\Services\UserManager::Class)->all();
+            $this->relations['ref Users'] = $users;    
+        }
+        
+        if (isset($this->fields[$field['name']]))
+        {
+            $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
+        }
+        else
+        {
+            $this->fields[$field['name']] = null;
+        }
+    }
+
+    private function getObjectRelation($field, Schema $schema)
+    {
+        $index = 'ref ' . $schema->id;
+        if (! isset($this->relations[$index]))
+        {
+            $elements = app(\App\Services\ObjectManager::Class)->all($schema);
+            $this->relations[$index] = $elements;    
+        }
+        
+        if (isset($this->fields[$field['name']]))
+        {
+            $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+        }
+        else
+        {
+            $this->fields[$field['name']] = null;
+        }
+    }
+
+    private function getRelation($field)
+    {
+        $code = str_replace('ref ', '', $field['type']);
+        if ($code == 'Users')
+        {
+            $this->getUserRelation($field);
+        }
+        else
+        {
+            $schema = app(\App\Services\SchemaManager::Class)->find($code);
+            $this->getObjectRelation($field, $schema);
+        }
+    }
+
+    public function withRelations(): Object
+    {
+        $this->relations = [];
+
+        foreach ($this->schema->fields as $field)
+        {
+            if (mb_strpos($field['type'], 'ref ') !== false)
+            {
+                $this->getRelation($field);
+            }
+        }
+        return $this;
     }
 }

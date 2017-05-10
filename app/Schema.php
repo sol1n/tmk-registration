@@ -253,4 +253,52 @@ class Schema
 
         return $this;
     }
+
+    private function getUserRelation()
+    {
+        if (! isset($this->relations['ref Users']))
+        {
+            $users = app(\App\Services\UserManager::Class)->all();
+            $this->relations['ref Users'] = $users;    
+        }
+    }
+
+    private function getObjectRelation(Schema $schema)
+    {
+        $index = 'ref ' . $schema->id;
+        if (! isset($this->relations[$index]))
+        {
+            $elements = app(\App\Services\ObjectManager::Class)->all($schema);
+            $this->relations[$index] = $elements;    
+        }
+    }
+
+    private function getRelation($field)
+    {
+        $code = str_replace('ref ', '', $field['type']);
+        if ($code == 'Users')
+        {
+            $this->getUserRelation();
+        }
+        else
+        {
+            $schema = app(\App\Services\SchemaManager::Class)->find($code);
+            $this->getObjectRelation($schema);
+        }
+    }
+
+    public function withRelations()
+    {
+        $this->relations = [];
+
+        foreach ($this->fields as $key => $field)
+        {
+            if (mb_strpos($field['type'], 'ref ') !== false)
+            {
+                $this->getRelation($field);
+            }
+        }
+
+        return $this;
+    }
 }

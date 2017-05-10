@@ -90,9 +90,24 @@
                     <td contenteditable></td>
                     <td>
                       <select class="form-control">
-                        {% for type in fieldTypes %}
-                          <option value="{{ type }}">{{ type }}</option>
-                        {% endfor %}
+                        <optgroup label="Basic types">
+                          {% for type in fieldTypes.basic %}
+                            {% if field.type == type %}
+                              <option value="{{ type }}" selected>{{ type }}</option>
+                            {% else %}
+                              <option value="{{ type }}">{{ type }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </optgroup>
+                         <optgroup label="Ref types">
+                          {% for type in fieldTypes.refs %}
+                            {% if field.type == type %}
+                              <option value="{{ type }}" selected>{{ type }}</option>
+                            {% else %}
+                              <option value="{{ type }}">{{ type }}</option>
+                            {% endif %}
+                          {% endfor %}
+                        </optgroup>
                       </select>
                     </td>
                     <td class="text-center">

@@ -26,7 +26,7 @@ class SchemasController extends Controller
     {
         return view('schema/create', [
         'selected' => 'schema-new',
-        'fieldTypes' => $manager::fieldTypes()
+        'fieldTypes' => $manager->fieldTypes()
       ]);
     }
 
@@ -44,7 +44,7 @@ class SchemasController extends Controller
         return view('schema/form', [
         'selected' => $schema->id,
         'schema' => $schema,
-        'fieldTypes' => $manager::fieldTypes()
+        'fieldTypes' => $manager->fieldTypes()
       ]);
     }
 
