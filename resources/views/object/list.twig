@@ -59,6 +59,24 @@
               {% for field in schema.fields %}
                 {% if object.fields[field.name] is iterable %}
                   <td>Array of {{ object.fields[field.name]|length }} values</td>
+                {% elseif 'ref Users' == field.type %}
+                   <td>
+                    {% set element = schema.relations[field.type].where('id', object.fields[field.name]).first() %}
+                    {% if element %}
+                      <a href="/users/{{ element.id }}/">
+                        {{ element.shortView() }}
+                      </a>
+                    {% endif %}
+                  </td>
+                {% elseif 'ref ' in field.type %}
+                  <td>
+                    {% set element = schema.relations[field.type].where('id', object.fields[field.name]).first() %}
+                    {% if element %}
+                      <a href="/{{ element.schema.id }}/{{ element.id }}/">
+                        {{ element.shortView() }}
+                      </a>
+                    {% endif %}
+                  </td>
                 {% else %}
                   <td>{{ object.fields[field.name] | striptags('<br><b><i><p>') | str_limit(380)  }}</td>
                 {% endif %}

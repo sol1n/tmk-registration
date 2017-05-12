@@ -12,7 +12,7 @@ class ObjectsController extends Controller
     {
         return view('object/list', [
         'selected' => $schema->id,
-        'schema' => $schema,
+        'schema' => $schema->withRelations(),
         'objects' => $manager->all($schema)
       ]);
     }

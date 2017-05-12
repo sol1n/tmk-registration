@@ -283,4 +283,9 @@ class User
 
         return $this;
     }
+
+    public function shortView(): String
+    {
+        return $this->username;
+    }
 }

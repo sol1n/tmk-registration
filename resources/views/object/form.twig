@@ -69,9 +69,9 @@
                     <option value="">Not specified</option>
                     {% for element in object.relations[field.type] %}
                       {% if element.id == object.fields[field.name].id %}
-                        <option selected value="{{ element.id }}">{{ element.id }}</option>
+                        <option selected value="{{ element.id }}">{{ element.shortView() }}</option>
                       {% else %}
-                        <option value="{{ element.id }}">{{ element.id }}</option>
+                        <option value="{{ element.id }}">{{ element.shortView() }}</option>
                       {% endif %}
                     {% endfor %}
                   </select>

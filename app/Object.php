@@ -218,4 +218,24 @@ class Object
         }
         return $this;
     }
+
+    public function shortView(): String
+    {
+        if (isset($this->schema->viewData->shortView))
+        {
+            $template = $this->schema->viewData->shortView;
+            foreach ($this->fields as $key => $field){
+                if (is_string($field) && mb_strpos($template, ":$key:") !== false)
+                {
+                    $template = str_replace(":$key:", $field, $template);
+                }
+            }
+            $template = str_replace(":id:", $this->id, $template);
+            return $template;
+        }
+        else
+        {
+            return $id;
+        }
+    }
 }

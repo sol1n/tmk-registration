@@ -50,6 +50,25 @@ class Schema
     {
         $changes = [];
 
+        if (isset($data['viewData']))
+        {
+            $viewData = $data['viewData'];
+            unset($data['viewData']);
+
+            $this->viewData = ($this->viewData) ? [] : $this->viewData;
+
+            foreach ($viewData as $key => $field)
+            {
+                $this->viewData[$key] = $field;
+            }
+            
+            $changes[] = [
+                'action' => 'Change',
+                'key' => $this->id . '.viewData',
+                'value' => json_encode($this->viewData),
+            ];
+        }
+
         if (isset($data['deletedFields']))
         {
             $deletedFields = $data['deletedFields'];
@@ -146,6 +165,7 @@ class Schema
             "title" => (String)$data['title'],
             "isLogged" => $data['isLogged'],
             "isDeferredDeletion" => $data['isDeferredDeletion'],
+            "viewData" => $data['viewData'],
             "fields" => []
         ];
 
@@ -182,6 +202,7 @@ class Schema
         $schema->updatedAt = new Carbon($data['updatedAt']);
         $schema->isDeferredDeletion = $data['isDeferredDeletion'];
         $schema->isLogged = $data['isLogged'];
+        $schema->viewData = is_array($data['viewData']) ? $data['viewData'] : json_decode($data['viewData']);
 
         return $schema;
     }
