@@ -96,6 +96,7 @@
                   <th>Name</th>
                   <th>Title</th>
                   <th>Type</th>
+                  <th class="text-center">Multiple</th>
                   <th class="text-center">Localized</th>
                   <th class="text-center">Delete</th>
                 </thead>
@@ -126,6 +127,13 @@
                           </optgroup>
                         </select>
                       </td>
+                      <td class="text-center">
+                        {% if (field.multiple) %}
+                          <input class="tableCheckbox" type="checkbox" checked=""/>
+                        {% else %}
+                          <input class="tableCheckbox" type="checkbox" />
+                        {% endif %}
+                      </td>                      
                       <td class="text-center">
                         {% if (field.localized) %}
                           <input class="tableCheckbox" type="checkbox" checked=""/>
@@ -174,6 +182,7 @@
         tr.find('td').eq(2).find('select').val('Text');
         tr.find('td').eq(3).find('input').prop('checked', false);
         tr.find('td').eq(4).find('input').prop('checked', false);
+        tr.find('td').eq(5).find('input').prop('checked', false);
         tr.attr('data-id', 'new');
         tr.appendTo(table);
       }
@@ -208,8 +217,9 @@
           name: $(this).find('td').eq(0).text(),
           title: $(this).find('td').eq(1).text(),
           type: $(this).find('td').eq(2).find('select').val(),
-          localized: $(this).find('td').eq(3).find('input:checked').length > 0,
-          deleted: $(this).find('td').eq(4).find('input:checked').length > 0
+          multiple: $(this).find('td').eq(3).find('input:checked').length > 0,
+          localized: $(this).find('td').eq(4).find('input:checked').length > 0,
+          deleted: $(this).find('td').eq(5).find('input:checked').length > 0
         };
         var index = $(this).data('id');
 

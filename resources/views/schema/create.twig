@@ -91,6 +91,7 @@
                   <th>Name</th>
                   <th>Title</th>
                   <th>Type</th>
+                  <th class="text-center">Multiple</th>
                   <th class="text-center">Localized</th>
                   <th class="text-center">Delete</th>
                 </thead>
@@ -120,6 +121,9 @@
                         </optgroup>
                       </select>
                     </td>
+                    <td class="text-center">
+                      <input class="tableCheckbox" type="checkbox" />
+                    </td>                    
                     <td class="text-center">
                       <input class="tableCheckbox" type="checkbox" />
                     </td>
@@ -170,6 +174,7 @@
         tr.find('td').eq(1).text('');
         tr.find('td').eq(2).find('select').val('Text');
         tr.find('td').eq(3).find('input').prop('checked', false);
+        tr.find('td').eq(4).find('input').prop('checked', false);
         tr.attr('data-id', 'new');
         tr.appendTo(table);
       }
@@ -216,7 +221,8 @@
           name: $(this).find('td').eq(0).text(),
           title: $(this).find('td').eq(1).text(),
           type: $(this).find('td').eq(2).find('select').val(),
-          localized: $(this).find('td').eq(3).find('input:checked').length > 0,
+          multiple: $(this).find('td').eq(3).find('input:checked').length > 0,
+          localized: $(this).find('td').eq(4).find('input:checked').length > 0,
         };
 
         data.fields.push(row);

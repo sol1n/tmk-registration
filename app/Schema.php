@@ -39,9 +39,15 @@ class Schema
     private function prepareField(Array $field): Array
     {
         $field['localized'] = $field['localized'] == 'true';
+        $field['multiple'] = isset($field['multiple']) && $field['multiple'] == 'true';
         $field['title'] = (String) $field['title'];
+
         if (isset($field['deleted'])){
             unset($field['deleted']);
+        }
+        if ($field['multiple'])
+        {
+            $field['type'] = "[" . $field['type'] . "]";
         }
         return $field;
     }
@@ -105,6 +111,22 @@ class Schema
                                 'key' => $this->id . '.' . $fieldName ,
                                 'value' => $value,
                             ];  
+                        }                        
+                        if ($key == 'multiple')
+                        {
+                            $newValue = $value ? '[' . $field['type'] . ']' : $field['type'];
+                            $newFieldDate = $fieldData;
+                            unset($newFieldDate['multiple']);
+                            $newFieldDate['type'] = $newValue;
+                            $changes[] = [
+                                'action' => 'Delete',
+                                'key' => $this->id . '.' . $fieldName ,
+                            ];
+                            $changes[] = [
+                                'action' => 'New',
+                                'key' => $this->id,
+                                'value' => $newFieldDate
+                            ];
                         }
                         elseif ($key == 'type')
                         {
@@ -171,10 +193,15 @@ class Schema
 
         foreach ($data['fields'] as $field)
         {
+            $type = (String)$field['type'];
+            if ($field['multiple'] == 'true')
+            {
+                $type = "[$type]";
+            }
             $fields['fields'][] = [
                 "localized" => $field['localized'] == "true",
                 "name" => (String)$field['name'],
-                "type" => (String)$field['type'],
+                "type" => $type,
                 "title" => (String)$field['title']
             ];
         }
@@ -203,6 +230,19 @@ class Schema
         $schema->isDeferredDeletion = $data['isDeferredDeletion'];
         $schema->isLogged = $data['isLogged'];
         $schema->viewData = is_array($data['viewData']) ? $data['viewData'] : json_decode($data['viewData']);
+
+        foreach ($schema->fields as &$field)
+        {
+            if (mb_strpos($field['type'], '[') !== false)
+            {
+                $field['multiple'] = true;
+                $field['type'] = preg_replace('/\[(.+)\]/', '\1', $field['type']);
+            }
+            else
+            {
+                $field['multiple'] = false;
+            }
+        }
 
         return $schema;
     }
