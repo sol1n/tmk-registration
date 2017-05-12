@@ -12,7 +12,7 @@ class UsersController extends Controller
     public function ShowList(UserManager $manager)
     {
         return view('users/list', [
-        'users' => $manager->all(),
+        'users' => $manager->allWithProfiles(),
         'languages' => Language::list(),
         'selected' => 'users'
       ]);

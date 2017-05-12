@@ -158,7 +158,7 @@ class Object
     {
         if (! isset($this->relations['ref Users']))
         {
-            $users = app(\App\Services\UserManager::Class)->all();
+            $users = app(\App\Services\UserManager::Class)->allWithProfiles();
             $this->relations['ref Users'] = $users;    
         }
         
@@ -225,7 +225,7 @@ class Object
         {
             $template = $this->schema->viewData->shortView;
             foreach ($this->fields as $key => $field){
-                if (is_string($field) && mb_strpos($template, ":$key:") !== false)
+                if ((is_string($field) || is_numeric($field)) && mb_strpos($template, ":$key:") !== false)
                 {
                     $template = str_replace(":$key:", $field, $template);
                 }
@@ -238,4 +238,5 @@ class Object
             return $id;
         }
     }
+
 }

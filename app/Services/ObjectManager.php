@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Cache;
 class ObjectManager
 {
     private $token;
-    private $list;
+    private $lists;
 
     protected $model = Object::class;
     protected $cacheLifetime = 10;
@@ -20,13 +20,20 @@ class ObjectManager
     {
         $user = new User;
         $this->token = $user->token();
+        $this->lists = new Collection;
     }
 
     private function initList(Schema $schema)
     {
-        if (! $this->list = $this->getFromCache($schema)) {
-            $this->list = $this->model::list($schema, $this->token);
-            $this->saveToCache($schema, $this->list);
+        if (! $this->lists->has($schema->id))
+        {
+            if (! $objects = $this->getFromCache($schema)) 
+            {
+                $objects = $this->model::list($schema, $this->token);
+                $this->saveToCache($schema, $objects);
+            }
+
+            $this->lists->put($schema->id, $objects);
         }
     }
 
@@ -55,7 +62,7 @@ class ObjectManager
     public function find(Schema $schema, $id): Object
     {
         $this->initList($schema);
-        $object = $this->list->where('id', $id)->first();
+        $object = $this->lists->get($schema->id)->where('id', $id)->first();
         if (! is_null($object)) {
             return $object;
         } else {
@@ -66,22 +73,24 @@ class ObjectManager
     public function all(Schema $schema): Collection
     {
         $this->initList($schema);
-        return $this->list;
+        return $this->lists->get($schema->id);
     }
 
     public function save(Schema $schema, $id, array $fields): Object
     {
         $this->initList($schema);
+        $list = $this->lists->get($schema->id);
 
-        $index = $this->list->search(function ($item, $key) use ($id) {
+        $index = $list->search(function ($item, $key) use ($id) {
             return $item->id == $id;
         });
 
-        $object = $this->list->get($index);
+        $object = $list->get($index);
         $object->save($fields, $this->token);
-        $this->list->put($index, $object);
+        $list->put($index, $object);
 
-        $this->saveToCache($schema, $this->list);
+        $this->saveToCache($schema, $list);
+        $this->lists->put($schema->id, $list);
 
         return $object;
     }
@@ -90,9 +99,9 @@ class ObjectManager
     {
         $object = $this->model::create($schema, $fields, $this->token);
         $this->initList($schema);
-        $this->list->push($object);
+        $this->lists->get($schema->id)->push($object);
 
-        $this->saveToCache($schema, $this->list);
+        $this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
     }
@@ -102,12 +111,12 @@ class ObjectManager
         $this->initList($schema);
         $object = $this->find($schema, $id)->delete($this->token);
 
-        $index = $this->list->search(function ($item, $key) use ($id) {
+        $index = $this->lists->get($schema->id)->search(function ($item, $key) use ($id) {
             return $item->id == $id;
         });
 
-        $this->list->forget($index);
-        $this->saveToCache($schema, $this->list);
+        $this->lists->get($schema->id)->forget($index);
+        $this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
     }

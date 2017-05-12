@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\User;
+use Illuminate\Support\Collection;
 use App\Traits\Services\CacheableList;
 
 class UserManager
@@ -24,6 +25,36 @@ class UserManager
     public function findWithProfiles(String $id): User
     {
         return $this->find($id)->getProfiles($this->token);
+    }
+
+    public function allWithProfiles(): Collection
+    {
+        $elements = new Collection;
+        $profileSchemas = app(\App\Settings::class)->getProfileSchemas();
+        foreach ($profileSchemas as $key => $schema)
+        {
+            $elements->put($key, app(ObjectManager::class)->all($schema));
+        }
+
+        $this->list = $this->list->each(function($user) use ($elements){
+            $user->profiles = new Collection;
+            foreach ($elements as $key => $profiles)
+            {
+                $fieldName = explode('.', $key)[1];
+                $schemaName = explode('.', $key)[0];
+                $index = $profiles->search(function($profile, $i) use ($fieldName, $user) {
+                   return $profile->fields[$fieldName] == $user->id;
+                });
+
+                if ($index !== false)
+                {
+                    $user->profiles->put($schemaName, ['object' => $profiles->get($index)]);
+                }
+            }
+            
+        });
+
+        return $this->list;
     }
 
     public function saveProfiles(String $id, array $profiles)

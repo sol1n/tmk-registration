@@ -279,7 +279,7 @@ class Schema
     {
         if (! isset($this->relations['ref Users']))
         {
-            $users = app(\App\Services\UserManager::Class)->all();
+            $users = app(\App\Services\UserManager::Class)->allWithProfiles();
             $this->relations['ref Users'] = $users;    
         }
     }

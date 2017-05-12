@@ -33,7 +33,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Name</th>
+            <th>Login</th>
             <th>Role</th>
             <th>Language</th>
             <th class="text-right">Actions</th>
@@ -44,7 +44,7 @@
             <tr>
               <td>
                 <a href="/users/{{ user.id }}/">
-                  {{ user.id }}
+                  {{ user.shortView() }}
                 </a>
               </td>
               <td>

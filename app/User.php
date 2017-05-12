@@ -78,7 +78,6 @@ class User
             }
         }
 
-
         $profileSchemas = app(Settings::class)->getProfileSchemas();
 
         foreach ($profileSchemas as $key => $schema)
@@ -286,6 +285,35 @@ class User
 
     public function shortView(): String
     {
-        return $this->username;
+        if (isset(app(\App\Settings::Class)->properties['usersShortView']))
+        {
+            $template = app(\App\Settings::Class)->properties['usersShortView'];
+            if (isset($this->profiles) && (!$this->profiles->isEmpty()))
+            {
+                foreach ($this->profiles as $schema => $profile){
+                    if (isset($profile['object']))
+                    {
+                       foreach ($profile['object']->fields as $code => $value)
+                       {
+                            if ((is_string($value) || is_numeric($value)) && mb_strpos($template, ":$schema.$code:") !== false)
+                            {
+                                $template = str_replace(":$schema.$code:", $value, $template);
+                            }
+                       }
+                    }
+                }
+                $template = str_replace(":id:", $this->id, $template);
+                $template = str_replace(":username:", $this->username, $template);
+                return $template;
+            }
+            else
+            {
+                return $this->username;
+            }
+        }
+        else
+        {
+            return $this->username;
+        }
     }
 }
