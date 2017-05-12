@@ -29,7 +29,8 @@ class SchemasTest extends TestCase
                     'title' => 'testSchemaFieldName',
                     'type' => 'String'
                 ]
-            ]
+            ],
+            'viewData' => []
         ];
     }
 
