@@ -87,4 +87,12 @@ class UserManager
             }
         }
     }
+
+    public function getMappedUsers(String $keyField = 'id', String $valueField = 'username'): Collection
+    {
+        $result = $this->all()->mapWithKeys(function ($item) use($keyField, $valueField) {
+            return [$item->{$keyField} => $item->{$valueField}];
+        });
+        return $result;
+    }
 }

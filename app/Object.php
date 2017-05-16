@@ -235,7 +235,7 @@ class Object
         }
         else
         {
-            return $id;
+            return $this->id;
         }
     }
 

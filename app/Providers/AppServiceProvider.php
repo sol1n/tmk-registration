@@ -19,7 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer(['dashboard', 'schema.*', 'object.*', 'errors.*', 'settings.*', 'users.*', 'roles.*'], function($view){
+        View::composer(['dashboard', 'schema.*', 'object.*', 'errors.*', 'settings.*', 'users.*', 'roles.*', 'files.*'], function($view){
             $view->with('schemas', app(SchemaManager::class)->all());
             $view->with('settings', app(Settings::class));
         });

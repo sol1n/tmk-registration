@@ -1,0 +1,65 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}Files{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="col-lg-10">
+        <h2>Files</h2>
+        <ol class="breadcrumb">
+            <li>
+                <a href="/">Dashboard</a>
+            </li>
+            <li class="active">
+                <strong>All files</strong>
+            </li>
+        </ol>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+    <div class="ibox float-e-margins">
+        <div class="ibox-title">
+            <h5>Files</h5>
+        </div>
+
+        <div class="ibox-content files-content">
+            {#<div class="buttons-group">#}
+                {#<a class="btn btn-primary" href="/{{ schema.id }}/new/">New element</a>#}
+                {#<a class="btn btn-default pull-right" href="/schemas/{{ schema.id }}/edit/">Edit schema</a>#}
+            {#</div>#}
+            <div id="file-content">
+                <file-table :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :file-list="{{ fileTree|json_encode() }}"></file-table>
+            </div>
+            {#<div class="row">#}
+                {#<div class="col-md-10">#}
+                    {#<input placeholder="search" type="text" class="form-control">#}
+                {#</div>#}
+            {#</div>#}
+            {#<br>#}
+            {#<table class="table">#}
+                {#<thead>#}
+                {#<tr>#}
+                    {#<th>#</th>#}
+                    {#<th></th>#}
+                    {#<th>Name</th>#}
+                    {#<th>Size</th>#}
+                    {#<th>Created At</th>#}
+                    {#<th>Owner</th>#}
+                    {#<th>Permissions</th>#}
+                    {#<th class="text-center">Shared</th>#}
+                    {#<th class="text-right">Actions</th>#}
+                {#</tr>#}
+                {#</thead>#}
+                {#<tbody>#}
+                {#{% for treeItem in fileTree %}#}
+                    {#{% include 'files/_file-table-body.twig' %}#}
+                {#{% endfor %}#}
+                {#</tbody>#}
+            {#</table>#}
+        </div>
+    </div>
+
+    <script src="{{ asset('/js/files.js') }}"></script>
+
+{% endblock %}

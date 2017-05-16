@@ -40,7 +40,21 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/roles/new/', 'RolesController@CreateRole');
   Route::get('/roles/{code}/', 'RolesController@ShowForm');
   Route::post('/roles/{code}/', 'RolesController@SaveRole');
-  Route::get('/roles/{code}/delete', 'RolesController@DeleteRole'); 
+  Route::get('/roles/{code}/delete', 'RolesController@DeleteRole');
+
+  Route::get('/files/set-order/', 'FilesController@SetOrder');
+  Route::post('/files/add-folder/', 'FilesController@AddFolder');
+  Route::post('/files/upload-file/', 'FilesController@UploadFile');
+  Route::get('/files/search', 'FilesController@Search');
+  Route::post('/files/delete/', 'FilesController@Delete');
+  Route::post('/files/restore/', 'FilesController@Restore');
+  Route::get('/files/edit/{id}', 'FilesController@Edit');
+  Route::post('/files/edit/{id}', 'FilesController@Save');
+  Route::get('/files/get/{id}', 'FilesController@GetFile');
+  Route::get('/files/{id?}', 'FilesController@ShowFolder')
+        ->where('id','^[a-zA-Z0-9-_\/]+$');
+
+  //Route::get('/files/folder/{id}', 'FilesController@ShowFolder');
 
   Route::get('/{schema}/', 'ObjectsController@ShowCollection');
   Route::get('/{schema}/new/', 'ObjectsController@ShowCreateForm');
@@ -48,6 +62,7 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::get('/{schema}/{object}/', 'ObjectsController@ShowObject');
   Route::post('/{schema}/{object}/', 'ObjectsController@SaveObject');
   Route::get('/{schema}/{object}/delete', 'ObjectsController@DeleteObject');
+
 });
   
 
