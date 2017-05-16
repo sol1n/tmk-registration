@@ -10,7 +10,7 @@
 
 .navbar-static-side .nav>li>a{
   color: #fefefe;
-  padding: 8px 20px 8px 25px;
+  padding: 6px 20px 6px 25px;
 }
 
 .nav-header {
@@ -280,4 +280,8 @@
   cursor: pointer;
   color: #1c84c6;
   margin-right: 1em;
+}
+
+.form-control-multiple {
+  margin-bottom: 10px;
 }

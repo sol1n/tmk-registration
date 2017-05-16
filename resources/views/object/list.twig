@@ -58,7 +58,31 @@
               </td>
               {% for field in schema.fields %}
                 {% if object.fields[field.name] is iterable %}
-                  <td>Array of {{ object.fields[field.name]|length }} values</td>
+                  {% if field.type == "ref Users" %}
+                    <td>
+                      {% for key, related in object.fields[field.name] %}
+                        {% set user = schema.relations[field.type].where('id',related).first() %}
+                        {% if key == object.fields[field.name]|length - 1 %}
+                          <a href="/users/{{ user.id }}/">{{ user.shortView() }}</a>
+                        {% else %}
+                          <a href="/users/{{ user.id }}/">{{ user.shortView() }}</a>,
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% elseif 'ref ' in field.type %}
+                    <td>
+                      {% for key, related in object.fields[field.name] %}
+                        {% set element = schema.relations[field.type].where('id',related).first() %}
+                        {% if key == object.fields[field.name]|length - 1 %}
+                          <a href="/{{ element.schema.id }}/{{ element.id }}/">{{ element.shortView() }}</a>
+                        {% else %}
+                          <a href="/{{ element.schema.id }}/{{ element.id }}/">{{ element.shortView() }}</a>,
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% else %}
+                    <td>Array of {{ object.fields[field.name]|length }} values</td>
+                  {% endif %}
                 {% elseif 'ref Users' == field.type %}
                    <td>
                     {% set element = schema.relations[field.type].where('id', object.fields[field.name]).first() %}

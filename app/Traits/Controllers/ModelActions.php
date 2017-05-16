@@ -7,12 +7,12 @@ use App\Exceptions\ActionNotFoundException;
 
 trait ModelActions
 {
-    private function getListUrl(): String
+    public function getListUrl(): String
     {
         return '/' . $this->baseUrl() . '/';
     }
 
-    private function getSingleUrl(): String
+    public function getSingleUrl(): String
     {
         return '/' . $this->baseUrl() .'/' . $this->id . '/';
     }

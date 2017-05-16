@@ -12,10 +12,11 @@ use GuzzleHttp\Exception\ClientException;
 use App\Exceptions\Object\ObjectSaveException;
 use App\Exceptions\Object\ObjectNotFoundException;
 use App\Traits\Controllers\ModelActions;
+use App\Traits\Models\FieldsFormats;
 
 class Object
 {
-    use ModelActions;
+    use ModelActions, FieldsFormats;
 
     public $fields;
     public $schema;
@@ -25,50 +26,9 @@ class Object
         return $this->schema->id;
     }
 
-    private static function prepareRawData(array $data, Schema $schema): array
+    public function save($data, $token): Object
     {
-        $systemFields = ['id', 'createdAt', 'updatedAt', 'ownerId'];
-        foreach ($systemFields as $field) {
-            if (array_key_exists($field, $data)) {
-                unset($data[$field]);
-            }
-        }
-
-        foreach ($schema->fields as $field) {
-            switch ($field['type']) {
-              case 'String':
-                  $data[$field['name']] = (String)$data[$field['name']];
-                  break;
-              case 'Text':
-                  $data[$field['name']] = (String)$data[$field['name']];
-                  break;
-              case 'Integer':
-                  $data[$field['name']] = (Integer)$data[$field['name']];
-                  break;
-              case 'Double':
-                  $data[$field['name']] = (Float)$data[$field['name']];
-                  break;
-              
-              default:
-
-                  break;
-          }
-        }
-
-        foreach ($data as $key => $value)
-        {
-            if (is_null($value))
-            {
-                unset($data[$key]);
-            }
-        }
-
-        return $data;
-    }
-
-    public function save(array $fields, $token): Object
-    {
-        $this->fields = static::prepareRawData($fields, $this->schema);
+        $this->fields = static::prepareRawData($data, $this->schema);
 
         $client = new Client;
         try {
@@ -164,7 +124,17 @@ class Object
         
         if (isset($this->fields[$field['name']]))
         {
-            $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
+            if (is_array($this->fields[$field['name']]))
+            {
+                foreach ($this->fields[$field['name']] as $k => $v)
+                {
+                    $this->fields[$field['name']][$k] =  app(\App\Services\UserManager::Class)->find($v);
+                }
+            }
+            else
+            {
+                $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
+            }
         }
         else
         {
@@ -183,7 +153,17 @@ class Object
         
         if (isset($this->fields[$field['name']]))
         {
-            $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+            if (is_array($this->fields[$field['name']]))
+            {
+                foreach ($this->fields[$field['name']] as $k => $v)
+                {
+                    $this->fields[$field['name']][$k] =  app(\App\Services\ObjectManager::Class)->find($schema, $v);
+                }
+            }
+            else
+            {
+                $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+            }
         }
         else
         {
