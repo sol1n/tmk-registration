@@ -133,11 +133,19 @@ class Settings
 
     public function getProfileSchemas()
     {
-        $result = new Collection;
-        foreach ($this->userProfiles as $raw) {
-            $exploded = explode('.', $raw);
-            $result->put($raw, app(SchemaManager::class)->find($exploded[0]));
+        if ($this->userProfiles)
+        {
+            $result = new Collection;
+            foreach ($this->userProfiles as $raw) {
+                $exploded = explode('.', $raw);
+                $result->put($raw, app(SchemaManager::class)->find($exploded[0]));
+            }
         }
+        else
+        {
+            $result = null;
+        }
+        
         return $result;
     }
 }

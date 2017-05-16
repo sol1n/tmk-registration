@@ -31,29 +31,32 @@ class UserManager
     {
         $elements = new Collection;
         $profileSchemas = app(\App\Settings::class)->getProfileSchemas();
-        foreach ($profileSchemas as $key => $schema)
+        if ($profileSchemas)
         {
-            $elements->put($key, app(ObjectManager::class)->all($schema));
-        }
-
-        $this->list = $this->list->each(function($user) use ($elements){
-            $user->profiles = new Collection;
-            foreach ($elements as $key => $profiles)
+            foreach ($profileSchemas as $key => $schema)
             {
-                $fieldName = explode('.', $key)[1];
-                $schemaName = explode('.', $key)[0];
-                $index = $profiles->search(function($profile, $i) use ($fieldName, $user) {
-                   return $profile->fields[$fieldName] == $user->id;
-                });
-
-                if ($index !== false)
-                {
-                    $user->profiles->put($schemaName, ['object' => $profiles->get($index)]);
-                }
+                $elements->put($key, app(ObjectManager::class)->all($schema));
             }
-            
-        });
 
+            $this->list = $this->list->each(function($user) use ($elements){
+                $user->profiles = new Collection;
+                foreach ($elements as $key => $profiles)
+                {
+                    $fieldName = explode('.', $key)[1];
+                    $schemaName = explode('.', $key)[0];
+                    $index = $profiles->search(function($profile, $i) use ($fieldName, $user) {
+                       return $profile->fields[$fieldName] == $user->id;
+                    });
+
+                    if ($index !== false)
+                    {
+                        $user->profiles->put($schemaName, ['object' => $profiles->get($index)]);
+                    }
+                }
+                
+            });
+        }
+        
         return $this->list;
     }
 
