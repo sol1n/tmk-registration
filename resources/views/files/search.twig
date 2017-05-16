@@ -26,7 +26,7 @@
             <h5>Files</h5>
         </div>
 
-        <div class="ibox-content">
+        <div class="ibox-content files-content">
             <div id="file-content">
                 <file-table :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :file-list="{{ files|json_encode() }}"></file-table>
             </div>

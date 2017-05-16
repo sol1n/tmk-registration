@@ -42,10 +42,16 @@ Route::group(['middleware' => ['appercodeAuth']], function () {
   Route::post('/roles/{code}/', 'RolesController@SaveRole');
   Route::get('/roles/{code}/delete', 'RolesController@DeleteRole');
 
-  Route::get('/files/', 'FilesController@ShowTree');
   Route::get('/files/set-order/', 'FilesController@SetOrder');
+  Route::post('/files/add-folder/', 'FilesController@AddFolder');
+  Route::post('/files/upload-file/', 'FilesController@UploadFile');
   Route::get('/files/search', 'FilesController@Search');
-  Route::get('/files/{id}', 'FilesController@ShowFolder')
+  Route::post('/files/delete/', 'FilesController@Delete');
+  Route::post('/files/restore/', 'FilesController@Restore');
+  Route::get('/files/edit/{id}', 'FilesController@Edit');
+  Route::post('/files/edit/{id}', 'FilesController@Save');
+  Route::get('/files/get/{id}', 'FilesController@GetFile');
+  Route::get('/files/{id?}', 'FilesController@ShowFolder')
         ->where('id','^[a-zA-Z0-9-_\/]+$');
 
   //Route::get('/files/folder/{id}', 'FilesController@ShowFolder');

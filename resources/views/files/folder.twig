@@ -6,23 +6,14 @@
 
 {% block breadcrumbs %}
     <div class="col-lg-10">
-        <h2></h2>
+        <h2>Documents</h2>
         <ol class="breadcrumb">
             <li>
                 <a href="/">Dashboard</a>
             </li>
             <li>
-                <a href="/files">All files</a>
+                <strong>Files</strong>
             </li>
-            {% for item in breadcrumbs %}
-                <li class="{{ loop.last ? 'active' : '' }}">
-                    {% if loop.last %}
-                        <strong>{{ item.name }}</strong>
-                    {% else %}
-                        <a href="{{ item.link }}">{{ item.name }}</a>
-                    {% endif %}
-                </li>
-            {% endfor %}
         </ol>
     </div>
 {% endblock %}
@@ -31,17 +22,36 @@
 
     <div class="ibox float-e-margins">
         <div class="ibox-title">
-            <h5>{{ folderName }}</h5>
+            <ol class="breadcrumb files-breadcrumb">
+                {% for item in breadcrumbs %}
+                    <li class="{{ loop.last ? 'active' : '' }}">
+                        {% if loop.last %}
+                            {{ item.name }}
+                        {% else %}
+                            <a href="{{ item.link }}">{{ item.name }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
         </div>
 
-        <div class="ibox-content">
+        <div class="ibox-content files-content">
             {#<div class="buttons-group">#}
             {#<a class="btn btn-primary" href="/{{ schema.id }}/new/">New element</a>#}
             {#<a class="btn btn-default pull-right" href="/schemas/{{ schema.id }}/edit/">Edit schema</a>#}
             {#</div>#}
-
+            {#<form method="post" action="/files/upload-file" enctype="multipart/form-data" class="inline-block" id="file-upload-form">#}
+                {#{{ csrf_field() }}#}
+                {#<div class="fileinput fileinput-new" data-provides="fileinput">#}
+                        {#<span class="btn btn-primary btn-file"><span class="fileinput-new">Upload file</span>#}
+                        {#<input @change="fileChange($event.target.name, $event.target.files);" type="file" name="fileUpload"/></span>#}
+                    {#<span class="fileinput-filename"></span>#}
+                    {#<a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">×</a>#}
+                    {#<button type="submit">asd</button>#}
+                {#</div>#}
+            {#</form>#}
             <div id="file-content">
-                <file-table :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :file-list="{{ folder.children|json_encode() }}"></file-table>
+                <file-table :base-link="'{{ folder.link }}'" :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :parent-id="'{{ folder.id }}'" :file-list="{{ children|json_encode() }}"></file-table>
             </div>
 
             {#<div class="row">#}
