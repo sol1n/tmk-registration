@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\User;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -62,11 +63,8 @@ class Handler extends ExceptionHandler
         if ($exception instanceof UserNotFoundException) {
             return response()->view('errors.user.notfound');
         }
-        if ($exception instanceof SchemaListGetException) {
-            $request->user->regenerate();
-            return redirect($request->path());
-        }        
-        if ($exception instanceof RoleGetListException) {
+        if ($exception instanceof SchemaListGetException || $exception instanceof RoleGetListException) {
+            $request->user = isset($request->user) ? $request->user : new User;
             $request->user->regenerate();
             return redirect($request->path());
         }
