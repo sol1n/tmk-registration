@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -10,9 +11,17 @@ use App\Exceptions\Role\RoleGetListException;
 use App\Exceptions\Role\RoleCreateException;
 use App\Exceptions\Role\RoleSaveException;
 use Illuminate\Support\Collection;
+use App\Traits\Controllers\ModelActions;
 
 class Role
 {
+    use ModelActions;
+
+    protected function baseUrl(): String
+    {
+        return 'roles';
+    } 
+
     private function __construct(Array $data)
     {
         $this->id = $data['id'];
@@ -25,12 +34,12 @@ class Role
         return $this;
     }
 
-    private static function fetch(String $token): Array
+    private static function fetch(Backend $backend): Array
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'roles', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . 'roles', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new RoleGetListException;
@@ -41,12 +50,12 @@ class Role
         return $data;
     }
 
-    public static function get(String $id, String $token): Role
+    public static function get(String $id, Backend $backend): Role
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'roles/' . $id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . 'roles/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new RoleNotFoundException;
@@ -57,37 +66,37 @@ class Role
         return new Role($data);
     }
 
-    public static function list(String $token): Collection
+    public static function list(Backend $backend): Collection
     {
         $result = new Collection;
 
-        foreach (static::fetch($token) as $raw) {
+        foreach (static::fetch($backend) as $raw) {
             $result->push(new Role($raw));
         }
 
         return $result;
     }
 
-    public function delete(String $token): Bool
+    public function delete(Backend $backend): Role
     {
         $client = new Client;
         try {
-            $r = $client->delete(env('APPERCODE_SERVER')  . 'roles/' . $this->id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->delete($backend->url  . 'roles/' . $this->id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new RoleDeleteException;
         };
 
-        return true;
+        return $this;
     }
 
-    public static function create(Array $fields, String $token): Role
+    public static function create(Array $fields, Backend $backend): Role
     {
         $client = new Client;
         try {
-            $r = $client->post(env('APPERCODE_SERVER')  . 'roles', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->post($backend->url  . 'roles', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $fields]);
         } catch (RequestException $e) {
             throw new RoleCreateException;
@@ -98,14 +107,14 @@ class Role
         return new Role($json);
     }
 
-    public function save(Array $fields, String $token): Role
+    public function save(Array $fields, Backend $backend): Role
     {
         $fields['id'] = $this->id;
 
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER')  . 'roles', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->put($backend->url  . 'roles', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $fields]);
         } catch (RequestException $e) {
             throw new RoleSaveException;

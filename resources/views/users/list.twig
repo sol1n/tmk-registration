@@ -7,7 +7,7 @@
     <h2>Users list</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li class="active">
             <strong>All users</strong>
@@ -26,14 +26,14 @@
     <div class="ibox-content">
 
       <div class="buttons-group">
-        <a class="btn btn-primary" href="/users/new/">New user</a>
+        <a class="btn btn-primary" href="/{{ backend.code }}/users/new/">New user</a>
       </div>
 
       <table class="table">
         <thead>
           <tr>
             <th>#</th>
-            <th>Name</th>
+            <th>Login</th>
             <th>Role</th>
             <th>Language</th>
             <th class="text-right">Actions</th>
@@ -43,28 +43,28 @@
           {% for user in users %}
             <tr>
               <td>
-                <a href="/users/{{ user.id }}/">
-                  {{ user.id }}
+                <a href="{{ user.getSingleUrl() }}">
+                  {{ user.shortView() }}
                 </a>
               </td>
               <td>
-                <a href="/users/{{ user.id }}/">
+                <a href="{{ user.getSingleUrl() }}">
                   {{ user.username }}
                 </a>
               </td>
               <td>
-                <a href="/roles/{{ user.roleId }}/">
+                <a href="/{{ backend.code }}/roles/{{ user.roleId }}/">
                   {{ user.roleId }}
                 </a>
               </td>
               <td>{{ user.language.long }}</td>
               <td class="action-cell">
                 <div class="input-group-btn text-right">
-                    <a href="/users/{{ user.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                    <a href="{{ user.getSingleUrl() }}" tabindex="-1" class="btn btn-white" type="button">Edit</a>
                      <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
                       <ul class="dropdown-menu pull-right">
-                          <li><a href="/users/{{ user.id }}/">Edit</a></li>
-                          <li><a href="/users/{{ user.id }}/delete">Delete</a></li>
+                          <li><a href="{{ user.getSingleUrl() }}">Edit</a></li>
+                          <li><a href="{{ user.getSingleUrl() }}delete">Delete</a></li>
                       </ul>
                 </div>
               </td>

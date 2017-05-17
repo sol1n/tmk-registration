@@ -1,0 +1,94 @@
+{% extends "page.twig" %}
+
+{% set folderName = folder.name ? folder.name : folder.id  %}
+
+{% block pageTitle %} folder - {{ folderName }}{% endblock %}
+
+{% block headerCss %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('/assets/css/plugins/chosen/chosen.css') }}">
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="col-lg-10">
+    <h2>Documents</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>
+        <li>
+            <a href="/files">Files</a>
+        </li>
+        <li class="active">
+            <strong>{{ file.name }}</strong>
+        </li>
+    </ol>
+</div>
+{% endblock %}
+
+{% block additionalJs %}
+    {{ parent() }}
+    <script src="{{ asset('/assets/js/plugins/chosen/chosen.jquery.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="ibox float-e-margins">
+    <div class="ibox-title">
+        <ol class="breadcrumb files-breadcrumb">
+            {% for item in breadcrumbs %}
+            <li class="{{ loop.last ? 'active' : '' }}">
+                {% if loop.last %}
+                    {{ item.name }}
+                {% else %}
+                    <a href="{{ item.link }}">{{ item.name }}</a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+
+    <div class="ibox-content">
+        <form action="/files/edit/{{ file.id }}" class="form-horizontal" method="post" enctype="multipart/form-data">
+            {{ csrf_field() }}
+            <input type="hidden" name="backLink" value="{{ backLink }}">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Name</label>
+                <div class="col-sm-10">
+                    <input name="name" required id="name" type="text" class="form-control" value="{{ file.name }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Parent</label>
+                <div class="col-sm-10">
+                    <select name="parentId" class="chosen-select" required>
+                        {% for item in folders %}
+                            <option {{ item.id == file.parentId ? 'selected' : '' }} value="{{ item.id }}">{{ item.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            {% if file.fileType == 'file' %}
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">File</label>
+                    <div class="col-sm-10">
+                        <a href="/files/get/{{ file.id }}">{{ file.name }} ({{ file.getSize() }})</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">New file</label>
+                    <div class="col-sm-10">
+                        <input type="file" name="file" class="form-control">
+                    </div>
+                </div>
+            {% endif %}
+            <hr/>
+
+            <button type="submit" name="action" value="save" class="btn btn-primary">Save object</button>
+            <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
+            <a href="{{ backLink }}" class="btn btn-default pull-right">Back</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

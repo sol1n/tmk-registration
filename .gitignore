@@ -4,6 +4,5 @@
 Homestead.yaml
 Homestead.json
 .php_cs.cache
-composer.lock
-composer.json
 .env
+.idea

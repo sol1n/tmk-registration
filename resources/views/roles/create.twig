@@ -7,10 +7,10 @@
     <h2>New role</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li>
-            <a href="/roles/">All roles</a>
+            <a href="/{{ backend.code }}/roles/">All roles</a>
         </li>        
         <li class="active">
             <strong>New role</strong>
@@ -27,10 +27,10 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/roles/new/" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/roles/new/" method="post">
         {{ csrf_field()}}
 
-        <input type="hidden" name="action" value="save" />
+        <input type="hidden" name="action" value="list" />
 
         <div class="tabs-container">
           <ul class="nav nav-tabs">
@@ -91,8 +91,8 @@
 
         <hr/>
 
-        <button type="submit" name="action" value="save" class="btn btn-primary">Create role</button>
-        <button type="submit" name="action" value="apply" class="btn btn-primary">Apply changes</button>
+        <button type="submit" name="action" value="list" class="btn btn-primary">Create role</button>
+        <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
       </form>
     </div>
   </div>
@@ -155,7 +155,7 @@
 
         $.ajax({
           type: "POST",
-          url: "/roles/new/",
+          url: "/{{ backend.code }}/roles/new/",
           data: data,
           dataType: 'json',
           success: function(msg){

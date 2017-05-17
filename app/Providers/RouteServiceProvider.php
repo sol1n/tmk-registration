@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Backend;
+use App\Services\SchemaManager;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
@@ -26,6 +29,7 @@ class RouteServiceProvider extends ServiceProvider
         //
 
         parent::boot();
+        $this->bootModelBindings();
     }
 
     /**
@@ -40,6 +44,17 @@ class RouteServiceProvider extends ServiceProvider
         $this->mapWebRoutes();
 
         //
+    }
+
+    protected function bootModelBindings()
+    {
+        Route::bind('schema', function ($code) {
+            return app(SchemaManager::Class)->find($code);
+        });        
+
+        Route::bind('backend', function ($code) {
+            return app(Backend::Class);
+        });
     }
 
     /**

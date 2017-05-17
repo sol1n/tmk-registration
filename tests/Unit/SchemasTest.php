@@ -27,9 +27,11 @@ class SchemasTest extends TestCase
                     'localized' => false,
                     'name' => 'testSchemaField',
                     'title' => 'testSchemaFieldName',
-                    'type' => 'String'
+                    'type' => 'String',
+                    'multiple' => false
                 ]
-            ]
+            ],
+            'viewData' => []
         ];
     }
 

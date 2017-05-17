@@ -1,0 +1,14 @@
+{% if (value) %}
+  <input 
+    checked 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="checkbox"
+  />
+{% else %}
+  <input 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="checkbox"
+  >
+{% endif %}

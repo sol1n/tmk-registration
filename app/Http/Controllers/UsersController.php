@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Backend;
 use App\Language;
 use App\Services\UserManager;
 use App\Services\RoleManager;
@@ -10,77 +10,56 @@ use Illuminate\Http\Request;
 
 class UsersController extends Controller
 {
-    public function ShowList()
+    public function ShowList(UserManager $manager)
     {
         return view('users/list', [
-        'users' => app(UserManager::Class)->all(),
+        'users' => $manager->allWithProfiles(),
         'languages' => Language::list(),
         'selected' => 'users'
       ]);
     }
 
-    public function ShowForm($userID)
+    public function ShowForm(UserManager $manager, RoleManager $roles, Backend $backend, $id)
     {
-      return view('users/form', [
-        'user' => app(UserManager::Class)->findWithProfiles($userID),
-        'roles' => app(RoleManager::Class)->all(),
+        return view('users/form', [
+        'user' => $manager->findWithProfiles($id),
+        'roles' => $roles->all(),
         'languages' => Language::list(),
         'selected' => 'users'
       ]);
     }
 
-    public function SaveUser(Request $request, $userID)
+    public function SaveUser(Request $request, UserManager $manager, Backend $backend, $id)
     {
-      $fields = $request->except(['_token', 'action', 'profiles']);
+        $fields = $request->except(['_token', 'action', 'profiles']);
+        $profiles = $request->input('profiles');
 
-      $profiles = $request->input('profiles');
+        $manager->saveProfiles($id, $profiles);
 
-      app(UserManager::Class)->saveProfiles($userID, $profiles);
+        if (empty($fields['password'])) {
+            unset($fields['password']);
+        }
 
-      if (empty($fields['password']))
-      {
-        unset($fields['password']);
-      }
-
-      $user = app(UserManager::Class)->save($userID, $fields);
-
-      if ($request->input('action') == 'save')
-      {
-        return redirect('/users/');
-      }
-      else
-      {
-        return redirect('/users/' . $user->id . '/');
-      }
+        return $manager->save($id, $fields)->httpResponse();
     }
 
-    public function ShowCreateForm()
+    public function ShowCreateForm(RoleManager $manager)
     {
-      return view('users/create', [
-        'roles' => app(RoleManager::Class)->all(),
+        return view('users/create', [
+        'roles' => $manager->all(),
         'languages' => Language::list(),
         'selected' => 'users'
       ]);
     }
 
-    public function CreateUser(Request $request)
+    public function CreateUser(Request $request, UserManager $manager)
     {
-      $fields = $request->except(['_token', 'action']);
-      $user = app(UserManager::Class)->create($fields);
-
-      if ($request->input('action') == 'save')
-      {
-        return redirect('/users/');
-      }
-      else
-      {
-        return redirect('/users/' . $user->id . '/');
-      }
+        $fields = $request->except(['_token', 'action']);
+        return $manager->create($fields)->httpResponse();
     }
 
-    public function DeleteUser($userID)
+    public function DeleteUser(UserManager $manager, Backend $backend, $id)
     {
-      $user = app(UserManager::Class)->delete($userID);
-      return redirect('/users/');
+        return $manager->delete($id)->httpResponse('list');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Backend;
 use Illuminate\Http\Request;
 use App\Exceptions\User\WrongCredentialsException;
 
@@ -15,15 +16,15 @@ class AuthController extends Controller
       ]);
     }
 
-    public function ProcessLogin(Request $request)
+    public function ProcessLogin(Backend $backend, Request $request)
     {
         try {
-            User::login($request->all());
+            User::login($backend, $request->all());
         } catch (WrongCredentialsException $e) {
             $request->session()->flash('login-error', 'Wrong сredentials data');
-            return redirect('/login');
+            return redirect('/' . $backend->code . '/login/');
         }
 
-        return redirect('/');
+        return redirect($backend->code . '/');
     }
 }
