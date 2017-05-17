@@ -75,6 +75,13 @@ trait FieldsFormats
             {
                 $data = null;
             }
+            else
+            {
+                if (is_array($data))
+                {
+                    $data = json_encode($data);
+                }
+            }
         }
 
         return $data;

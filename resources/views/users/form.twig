@@ -105,46 +105,13 @@
                         <label class="col-sm-2 control-label">{{ field.name }}</label>
                       {% endif %}
                         <div class="col-sm-10">
-                          {% if field.type == "String" %}
-                            <input 
-                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
-                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value="{{ profile.object.fields[field.name] }}"
-                            />
-                          {% elseif field.type == "Text" %}
-                            <textarea 
-                              data-html-editor="1" 
-                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
-                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
-                              class="form-control">
-                                {{ profile.object.fields[field.name] }}
-                            </textarea>
-                          {% elseif field.type == "Json" %}
-                            <textarea 
-                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
-                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
-                              class="form-control">
-                                {{ profile.object.fields[field.name]|json_encode() }}
-                            </textarea>
-                          {% elseif field.type == "Integer" %}
-                            <input 
-                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
-                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value="{{ profile.object.fields[field.name] }}"
-                            />
-                          {% else %}
-                            <input 
-                              name="profiles[{{ profile.object.schema.id }}][{{ profile.object.id }}][{{ field.name }}]" 
-                              id="{{ profile.object.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value="{{ profile.object.fields[field.name] }}"
-                            >
-                          {% endif %}
+                          {% set value = profile.object.fields[field.name] %}
+                          {% set id = "profiles-" ~ profile.object.schema.id ~ "-" ~ field.name %}
+                          {% set name = "profiles[" ~ profile.object.schema.id ~ "][" ~ profile.object.id ~ "][" ~ field.name ~ "]" %}
+                          {%  
+                              include 'fields/renderer' 
+                              with {'field': field, 'id': id, 'name': name, 'relations': profile.object.relations, 'value': null} only 
+                          %}
                         </div>
                     </div>  
                   {% endfor %}
@@ -160,49 +127,18 @@
                         <label class="col-sm-2 control-label">{{ field.name }}</label>
                       {% endif %}
                         <div class="col-sm-10">
-                          {% if field.type == "String" %}
-                            <input 
-                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
-                              id="{{ profile.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value=""
-                            />
-                          {% elseif field.type == "Text" %}
-                            <textarea 
-                              data-html-editor="1" 
-                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
-                              id="{{ profile.schema.id }}-{{ field.name }}" 
-                              class="form-control"></textarea>
-                          {% elseif field.type == "Json" %}
-                            <textarea 
-                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
-                              id="{{ profile.schema.id }}-{{ field.name }}" 
-                              class="form-control"></textarea>
-                          {% elseif field.type == "Integer" %}
-                            <input 
-                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
-                              id="{{ profile.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value=""
-                            />
-                          {% else %}
-                            <input 
-                              name="profiles[{{ profile.schema.id }}][new][{{ field.name }}]" 
-                              id="{{ profile.schema.id }}-{{ field.name }}" 
-                              type="text" 
-                              class="form-control" 
-                              value=""
-                            >
-                          {% endif %}
+                          {% set id = "profiles-" ~ profile.schema.id ~ "-" ~ field.name %}
+                          {% set name = "profiles[" ~ profile.schema.id ~ "][new][" ~ field.name ~ "]" %}
+                          {%  
+                              include 'fields/renderer' 
+                              with {'field': field, 'id': id, 'name': name, 'relations': profile.schema.relations, 'value': null} only 
+                          %}
                         </div>
                     </div>  
                   {% endfor %}
                 </div>
               {% endif %}
             {% endfor %}
-
           </div>
         </div>
 

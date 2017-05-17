@@ -1,0 +1,14 @@
+<select 
+  name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+  id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}" 
+  class="form-control"
+>
+  <option value="">Not specified</option>
+  {% for element in relations[field.type] %}
+    {% if element.id == value.id %}
+      <option value="{{ element.id }}">{{ element.shortView() }}</option>
+    {% else %}
+      <option value="{{ element.id }}">{{ element.shortView() }}</option>
+    {% endif %}
+  {% endfor %}
+</select>

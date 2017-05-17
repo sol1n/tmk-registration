@@ -1,0 +1,17 @@
+{% if value %}
+  <input 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="text" 
+    class="form-control" 
+    value="{{ value }}"
+  />
+{% else %}
+  <input 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="text" 
+    class="form-control" 
+    value=""
+  />
+{% endif %}

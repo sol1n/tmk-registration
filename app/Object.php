@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\ClientException;
 use App\Exceptions\Object\ObjectSaveException;
+use App\Exceptions\Object\ObjectCreateException;
 use App\Exceptions\Object\ObjectNotFoundException;
 use App\Traits\Controllers\ModelActions;
 use App\Traits\Models\FieldsFormats;
@@ -63,9 +64,13 @@ class Object
         $fields = self::prepareRawData($fields, $schema);
 
         $client = new Client;
-        $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
-        ], 'json' => $fields]);
+        try {
+            $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
+                'X-Appercode-Session-Token' => $token
+            ], 'json' => $fields]);
+        } catch (ServerException $e) {
+            throw new ObjectCreateException;
+        }
 
         $json = json_decode($r->getBody()->getContents(), 1);
 

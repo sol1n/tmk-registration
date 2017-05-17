@@ -1,0 +1,25 @@
+{% if value %}
+  <div class="input-group date form-control-multiple">
+    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+    <input 
+      data-datepicker="1" 
+      name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+      id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}" 
+      type="text" 
+      class="form-control" 
+      value="{{ value }}"
+    >
+  </div>
+{% else %}
+  <div class="input-group date form-control-multiple">
+    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+    <input 
+      data-datepicker="1" 
+      name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+      id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+      type="text" 
+      class="form-control" 
+      value=""
+    >
+  </div>
+{% endif %}

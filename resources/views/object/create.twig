@@ -41,91 +41,10 @@
               <label class="col-sm-2 control-label">{{ field.name }}</label>
             {% endif %}
               <div class="col-sm-10">
-                {% if field.multiple %}
-                  {% if 'ref ' in field.type %}                  
-                    <select name="{{ field.name }}[]" id="{{ field.name }}" class="chosen-select" multiple>
-                      <option value="">Not specified</option>
-                      {% for element in schema.relations[field.type] %}
-                        <option value="{{ element.id }}">{{ element.shortView() }}</option>
-                      {% endfor %}
-                    </select>
-                  {% elseif field.type == "String" %}
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                  {% elseif field.type == "Integer" %}
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                  {% elseif field.type == "Double" %}
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">                  
-                  {% elseif field.type == "Uuid" %}
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">                  
-                  {% elseif field.type == "Money" %}
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">
-                    <input name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple">                  
-                  {% elseif field.type == "DateTime" %}
-                    <div class="input-group date form-control-multiple">
-                      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                      <input data-datepicker="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control">
-                    </div>                    
-                    <div class="input-group date form-control-multiple">
-                      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                      <input data-datepicker="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control">
-                    </div>                  
-                    <div class="input-group date form-control-multiple">
-                      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                      <input data-datepicker="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control">
-                    </div>
-                  {% elseif field.type == "Text" %}
-                    <textarea data-html-editor="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                    <textarea data-html-editor="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                    <textarea data-html-editor="1" name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                  {% elseif field.type == "Json" %}
-                    <textarea name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                    <textarea name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                    <textarea name="{{ field.name }}[]" id="{{ field.name }}" type="text" class="form-control form-control-multiple"></textarea>
-                  {% endif %}
-                {% else %}
-                  {% if field.type == "String" %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="">
-                  {% elseif field.type == "Boolean" %}
-                    <input type="checkbox" name="{{ field.name }}" id="{{ field.name }}" style="margin-top: 10px; display: inline-block" />          
-                  {% elseif field.type == "Integer" %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="">                    
-                  {% elseif field.type == "Double" %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="">
-                  {% elseif field.type == "Money" %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value=""> 
-                  {% elseif field.type == "DateTime" %}
-                    <div class="input-group date">
-                      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                      <input data-datepicker="1" name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="">
-                    </div>
-                  {% elseif field.type == "Uuid" %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="">
-                  {% elseif field.type == "Json" %}
-                    <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control"></textarea>
-                  {% elseif field.type == "Text" %}
-                    <textarea data-html-editor="1" name="{{ field.name }}" id="{{ field.name }}" class="form-control"></textarea>
-                  {% elseif field.type == "Json" %}
-                    <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control"></textarea>
-                  {% elseif 'ref ' in field.type %}
-                    <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
-                      <option value="">Not specified</option>
-                      {% for element in schema.relations[field.type] %}
-                        <option value="{{ element.id }}">{{ element.id }}</option>
-                      {% endfor %}
-                    </select>
-                  {% else %}
-                    <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                  {% endif %}
-                {% endif %}
+                {%  
+                    include 'fields/renderer' 
+                    with {'name': field.name, 'id': field.name, 'field': field, 'relations': schema.relations, 'value': null} only 
+                %}
               </div>
           </div>  
         {% endfor %}
