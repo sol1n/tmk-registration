@@ -7,13 +7,13 @@
     <h2>{{ schema.title }} elements</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li>
-            <a href="/schemas/">All schemas</a>
+            <a href="/{{ backend.code }}/schemas/">All schemas</a>
         </li>        
         <li>
-            <a href="/{{ schema.id }}">{{ schema.title }}</a>
+            <a href="/{{ backend.code }}/{{ schema.id }}">{{ schema.title }}</a>
         </li>
         <li class="active">
             <strong>New element</strong>
@@ -30,7 +30,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/create/" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/{{ schema.id }}/create/" method="post">
         {{ csrf_field() }}
 
         {% for field in schema.fields %}
@@ -52,7 +52,7 @@
         <button type="submit" name="action" value="list" class="btn btn-primary">Save object</button>
         <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
 
-        <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
+        <a href="/{{ backend.code }}/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
       </form>
     </div>
   </div>

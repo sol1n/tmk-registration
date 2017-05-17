@@ -7,7 +7,7 @@
     <h2>Roles list</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li class="active">
             <strong>All roles</strong>
@@ -26,7 +26,7 @@
     <div class="ibox-content">
 
       <div class="buttons-group">
-        <a class="btn btn-primary" href="/roles/new/">New role</a>
+        <a class="btn btn-primary" href="/{{ backend.code }}/roles/new/">New role</a>
       </div>
 
       <table class="table">
@@ -41,18 +41,18 @@
           {% for role in roles %}
             <tr>
               <td>
-                <a href="/roles/{{ role.id }}/">
+                <a href="{{ role.getSingleUrl() }}">
                   {{ role.id }}
                 </a>
               </td>
               <td>{{ role.baseRoleId }}</td>
               <td class="action-cell">
                 <div class="input-group-btn text-right">
-                    <a href="/roles/{{ role.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                    <a href="{{ role.getSingleUrl() }}" tabindex="-1" class="btn btn-white" type="button">Edit</a>
                      <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
                       <ul class="dropdown-menu pull-right">
-                          <li><a href="/roles/{{ role.id }}/">Edit</a></li>
-                          <li><a href="/roles/{{ role.id }}/delete">Delete</a></li>
+                          <li><a href="{{ role.getSingleUrl() }}">Edit</a></li>
+                          <li><a href="{{ role.getSingleUrl() }}delete">Delete</a></li>
                       </ul>
                 </div>
               </td>

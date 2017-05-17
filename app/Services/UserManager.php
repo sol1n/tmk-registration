@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\User;
+use App\Backend;
 use Illuminate\Support\Collection;
 use App\Traits\Services\CacheableList;
 
@@ -17,14 +18,13 @@ class UserManager
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
         $this->initList();
     }
 
     public function findWithProfiles(String $id): User
     {
-        return $this->find($id)->getProfiles($this->token);
+        return $this->find($id)->getProfiles($this->backend);
     }
 
     public function allWithProfiles(): Collection

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
@@ -31,9 +32,9 @@ class Schema
         return 'schemas';
     }
 
-    private function getSingleUrl(): String
+    public function getSingleUrl(): String
     {
-        return '/' . $this->baseUrl() . '/' . $this->id . '/edit/';
+        return '/' . app(Backend::Class)->code . '/' . $this->baseUrl() . '/' . $this->id . '/edit/';
     }
 
     private function prepareField(Array $field): Array
@@ -112,7 +113,7 @@ class Schema
                                 'value' => $value,
                             ];  
                         }                        
-                        if ($key == 'multiple')
+                        elseif ($key == 'multiple')
                         {
                             $newValue = $value ? '[' . $field['type'] . ']' : $field['type'];
                             $newFieldDate = $fieldData;
@@ -180,7 +181,7 @@ class Schema
         return $changes;
     }
 
-    public static function create(Array $data, $token): Schema
+    public static function create(Array $data, Backend $backend): Schema
     {
         $fields = [
             "id" => (String)$data['name'],
@@ -208,8 +209,8 @@ class Schema
 
         $client = new Client;
         try {
-            $r = $client->post(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->post($backend->url  . 'schemas', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $fields]);
         } catch (RequestException $e) {
             throw new SchemaCreateException;
@@ -247,12 +248,12 @@ class Schema
         return $schema;
     }
 
-    public static function list(String $token): Collection
+    public static function list(Backend $backend): Collection
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER')  . 'schemas/?take=-1', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url  . 'schemas/?take=-1', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         }
         catch (RequestException $e) {
@@ -269,12 +270,12 @@ class Schema
         return $result;
     }
 
-    public static function get(String $id, String $token): Schema
+    public static function get(String $id, Backend $backend): Schema
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER')  . 'schemas/' . $id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url  . 'schemas/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new SchemaNotFoundException;
@@ -285,28 +286,28 @@ class Schema
         return static::build($json);
     }
 
-    public function save(Array $data, String $token): Schema
+    public function save(Array $data, Backend $backend): Schema
     {
         $changes = $this->getChanges($data);
 
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER')  . 'schemas', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->put($backend->url  . 'schemas', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $changes]);
         } catch (RequestException $e) {
             throw new SchemaSaveException;
         };
 
-        return self::get($this->id, $token);
+        return self::get($this->id, $backend);
     }
 
-    public function delete(String $token): Schema
+    public function delete(Backend $backend): Schema
     {
         $client = new Client;
         try {
-            $r = $client->delete(env('APPERCODE_SERVER')  . 'schemas/' . $this->id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->delete($backend->url  . 'schemas/' . $this->id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new SchemaDeleteException;

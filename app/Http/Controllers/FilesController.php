@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\File;
+use App\Backend;
 use App\Helpers\AjaxResponse;
 use App\Object;
 use App\Services\FileManager;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Session;
 
 class FilesController extends Controller
 {
-    public function ShowTree()
+    public function ShowTree(Backend $backend)
     {
         $u = new User();
         //dd(File::tree($u->token()));
@@ -29,7 +30,7 @@ class FilesController extends Controller
     }
 
 
-    public function ShowFolder(String $id = '')
+    public function ShowFolder(Backend $backend, String $id = '')
     {
 //        app(FileManager::class)->deleteFile('8606198e-04b9-46a3-8f66-ec7a36d4bbaf');
         $route = $id ? explode('/',$id) : [];
@@ -48,7 +49,7 @@ class FilesController extends Controller
         ]);
     }
 
-    public function GetFile($id) {
+    public function GetFile(Backend $backend, $id) {
         $result = app(FileManager::class)->getFile($id);
         $filePath = $result['filepath'];
         $file = $result['file'];
@@ -152,7 +153,7 @@ class FilesController extends Controller
         return response()->json($response);
     }
 
-    public function Edit($id)
+    public function Edit(Backend $backend, $id)
     {
         $file = app(FileManager::class)->one($id);
         $folders = app(FileManager::class)->getFolders();
@@ -166,7 +167,7 @@ class FilesController extends Controller
         ]);
     }
 
-    public function Save(Request $request, $id) {
+    public function Save(Request $request, Backend $backend, $id) {
         $fields = $request->except(['_token', 'action']);
         $file = $request->file('file');
 

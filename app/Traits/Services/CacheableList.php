@@ -2,6 +2,7 @@
 
 namespace App\Traits\Services;
 
+use App\Backend;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -11,7 +12,7 @@ trait CacheableList
 
     private function getCacheTag(): String
     {
-        return $this->model;
+        return app(Backend::Class)->code . '-' . $this->model;
     }
 
     private function getFromCache()
@@ -34,7 +35,7 @@ trait CacheableList
     private function initList()
     {
         if (! $this->list = $this->getFromCache()) {
-            $this->list = $this->model::list($this->token);
+            $this->list = $this->model::list($this->backend);
             $this->saveToCache($this->list);
         }
     }
@@ -46,7 +47,7 @@ trait CacheableList
                 return $element;
             }
         }
-        $element = $this->model::get($id, $this->token);
+        $element = $this->model::get($id, $this->backend);
         $this->list->push($element);
         $this->saveToCache($this->list);
 
@@ -55,7 +56,7 @@ trait CacheableList
 
     public function create(array $data)
     {
-        $element = $this->model::create($data, $this->token);
+        $element = $this->model::create($data, $this->backend);
         $this->list->push($element);
         $this->saveToCache($this->list);
 
@@ -64,7 +65,7 @@ trait CacheableList
 
     public function save(String $id, array $fields)
     {
-        $element = $this->find($id)->save($fields, $this->token);
+        $element = $this->find($id)->save($fields, $this->backend);
 
         $index = $this->list->search(function ($item, $key) use ($element) {
             return $item->id == $element->id;
@@ -84,7 +85,7 @@ trait CacheableList
             return $item->id == $element->id;
         });
 
-        $element = $this->list->get($index)->delete($this->token);
+        $element = $this->list->get($index)->delete($this->backend);
 
         $this->list->forget($index);
         $this->saveToCache($this->list);

@@ -7,10 +7,10 @@
     <h2>{{ role.id }}</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li>
-            <a href="/roles/">All roles</a>
+            <a href="/{{ backend.code }}/roles/">All roles</a>
         </li>        
         <li class="active">
             <strong>{{ role.id }}</strong>
@@ -27,7 +27,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/roles/{{ role.id }}" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/roles/{{ role.id }}" method="post">
         {{ csrf_field()}}
 
         <input type="hidden" name="action" value="list" />
@@ -132,7 +132,7 @@
 
         <button type="submit" name="action" value="list" class="btn btn-primary">Save role</button>
         <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
-        <a href="/roles/{{ role.id }}/delete" class="btn btn-default pull-right">Delete role</a>
+        <a href="/{{ backend.code }}/roles/{{ role.id }}/delete" class="btn btn-default pull-right">Delete role</a>
       </form>
     </div>
   </div>
@@ -195,7 +195,7 @@
 
         $.ajax({
           type: "POST",
-          url: "/roles/{{ role.id }}/",
+          url: "/{{ backend.code }}/roles/{{ role.id }}/",
           data: data,
           dataType: 'json',
           success: function(msg){

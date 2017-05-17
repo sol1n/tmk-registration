@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Backend;
 use App\Settings;
 use App\Language;
 use Illuminate\Http\Request;
@@ -37,7 +38,7 @@ class SettingsController extends Controller
         $fields = $request->except(["_token", "action"]);
         $fields['emailSettings']['ssl'] = isset($fields['emailSettings']['ssl']) && $fields['emailSettings']['ssl'] == 'on';
 
-        $settings->save($fields);
+        $settings->save($fields, app(Backend::Class));
 
         return back();
     }

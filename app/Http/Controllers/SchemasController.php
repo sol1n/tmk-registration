@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Schema;
+use App\Backend;
 use Illuminate\Http\Request;
 use App\Services\SchemaManager;
 
@@ -39,7 +40,7 @@ class SchemasController extends Controller
         return $manager->create($data)->jsonResponse();
     }
 
-    public function ShowSchemaEditForm(SchemaManager $manager, Schema $schema)
+    public function ShowSchemaEditForm(SchemaManager $manager, Backend $backend, Schema $schema)
     {
         return view('schema/form', [
         'selected' => $schema->id,
@@ -48,7 +49,7 @@ class SchemasController extends Controller
       ]);
     }
 
-    public function EditSchema(SchemaManager $manager, Request $request, String $id)
+    public function EditSchema(SchemaManager $manager, Backend $backend, Request $request, String $id)
     {
         $action = $request->input('action');
         $data = $request->except(['_token', 'action']);
@@ -58,7 +59,7 @@ class SchemasController extends Controller
         return $manager->save($id, $data)->jsonResponse();
     }
 
-    public function DeleteSchema(SchemaManager $manager, String $id)
+    public function DeleteSchema(SchemaManager $manager, Backend $backend, String $id)
     {
         return $manager->delete($id)->httpResponse('list');
     }

@@ -2,6 +2,7 @@
 
 namespace App\Traits\Controllers;
 
+use App\Backend;
 use Illuminate\Http\Request;
 use App\Exceptions\ActionNotFoundException;
 
@@ -9,12 +10,12 @@ trait ModelActions
 {
     public function getListUrl(): String
     {
-        return '/' . $this->baseUrl() . '/';
+        return '/' . app(Backend::Class)->code . '/' . $this->baseUrl() . '/';
     }
 
     public function getSingleUrl(): String
     {
-        return '/' . $this->baseUrl() .'/' . $this->id . '/';
+        return '/' . app(Backend::Class)->code . '/' . $this->baseUrl() .'/' . $this->id . '/';
     }
 
     public function httpResponse($action = null)

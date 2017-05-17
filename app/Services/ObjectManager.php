@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\User;
+use App\Backend;
 use App\Object;
 use App\Schema;
 use Illuminate\Support\Collection;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Cache;
 
 class ObjectManager
 {
-    private $token;
+    private $backend;
     private $lists;
 
     protected $model = Object::class;
@@ -18,8 +18,7 @@ class ObjectManager
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
         $this->lists = new Collection;
     }
 
@@ -29,7 +28,7 @@ class ObjectManager
         {
             if (! $objects = $this->getFromCache($schema)) 
             {
-                $objects = $this->model::list($schema, $this->token);
+                $objects = $this->model::list($schema, $this->backend);
                 $this->saveToCache($schema, $objects);
             }
 
@@ -39,7 +38,7 @@ class ObjectManager
 
     private function getCacheTag(Schema $schema): String
     {
-        return $this->model . '-' . $schema->id;
+        return app(Backend::Class)->code . '-'. $this->model . '-' . $schema->id;
     }
 
     private function saveToCache(Schema $schema, Collection $data)
@@ -66,7 +65,7 @@ class ObjectManager
         if (! is_null($object)) {
             return $object;
         } else {
-            return $this->model::get($schema, $id, $this->token);
+            return $this->model::get($schema, $id, $this->backend);
         }
     }
 
@@ -86,7 +85,7 @@ class ObjectManager
         });
 
         $object = $list->get($index);
-        $object->save($fields, $this->token);
+        $object->save($fields, $this->backend);
         $list->put($index, $object);
 
         $this->saveToCache($schema, $list);
@@ -97,7 +96,7 @@ class ObjectManager
 
     public function create(Schema $schema, array $fields): Object
     {
-        $object = $this->model::create($schema, $fields, $this->token);
+        $object = $this->model::create($schema, $fields, $this->backend);
         $this->initList($schema);
         $this->lists->get($schema->id)->push($object);
 
@@ -109,7 +108,7 @@ class ObjectManager
     public function delete(Schema $schema, $id): Object
     {
         $this->initList($schema);
-        $object = $this->find($schema, $id)->delete($this->token);
+        $object = $this->find($schema, $id)->delete($this->backend);
 
         $index = $this->lists->get($schema->id)->search(function ($item, $key) use ($id) {
             return $item->id == $id;

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\User;
 use App\Schema;
+use App\Backend;
 use App\Traits\Services\CacheableList;
 
 class SchemaManager
@@ -17,8 +18,7 @@ class SchemaManager
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
         $this->initList();
     }
 

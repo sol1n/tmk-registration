@@ -11,10 +11,10 @@
 |
 */
 
-Route::get('/login', 'AuthController@ShowAuthForm');
-Route::post('/login', 'AuthController@ProcessLogin');
+Route::get('/{backend}/login', 'AuthController@ShowAuthForm');
+Route::post('/{backend}/login', 'AuthController@ProcessLogin');
 
-Route::group(['middleware' => ['appercodeAuth']], function () {
+Route::group(['prefix' => '{backend}','middleware' => ['appercodeAuth']], function () {
   
   Route::get('/', 'SchemasController@ShowDashboard');
 

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Backend;
 use App\Services\SchemaManager;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +50,10 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::bind('schema', function ($code) {
             return app(SchemaManager::Class)->find($code);
+        });        
+
+        Route::bind('backend', function ($code) {
+            return app(Backend::Class);
         });
     }
 

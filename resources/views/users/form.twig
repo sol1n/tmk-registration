@@ -7,10 +7,10 @@
     <h2>{{ role.id }}</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>        
         <li>
-            <a href="/users/">All users</a>
+            <a href="/{{ backend.code }}/users/">All users</a>
         </li>        
         <li class="active">
             <strong>{{ user.username }}</strong>
@@ -27,7 +27,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/users/{{ user.id }}" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="{{ user.getSingleUrl() }}" method="post">
         {{ csrf_field()}}
 
         <input type="hidden" name="action" value="list" />
@@ -110,7 +110,7 @@
                           {% set name = "profiles[" ~ profile.object.schema.id ~ "][" ~ profile.object.id ~ "][" ~ field.name ~ "]" %}
                           {%  
                               include 'fields/renderer' 
-                              with {'field': field, 'id': id, 'name': name, 'relations': profile.object.relations, 'value': null} only 
+                              with {'field': field, 'id': id, 'name': name, 'relations': profile.object.relations, 'value': value} only 
                           %}
                         </div>
                     </div>  
@@ -146,7 +146,7 @@
 
         <button type="submit" name="action" value="list" class="btn btn-primary">Save user</button>
         <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
-        <a href="/users/{{ user.id }}/delete" class="btn btn-default pull-right">Delete user</a>
+        <a href="{{ user.getSingleUrl() }}delete" class="btn btn-default pull-right">Delete user</a>
       </form>
     </div>
   </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Backend;
 use App\Language;
 use App\Services\UserManager;
 use App\Services\RoleManager;
@@ -18,7 +19,7 @@ class UsersController extends Controller
       ]);
     }
 
-    public function ShowForm(UserManager $manager, RoleManager $roles, $id)
+    public function ShowForm(UserManager $manager, RoleManager $roles, Backend $backend, $id)
     {
         return view('users/form', [
         'user' => $manager->findWithProfiles($id),
@@ -28,7 +29,7 @@ class UsersController extends Controller
       ]);
     }
 
-    public function SaveUser(Request $request, UserManager $manager, $id)
+    public function SaveUser(Request $request, UserManager $manager, Backend $backend, $id)
     {
         $fields = $request->except(['_token', 'action', 'profiles']);
         $profiles = $request->input('profiles');
@@ -57,7 +58,7 @@ class UsersController extends Controller
         return $manager->create($fields)->httpResponse();
     }
 
-    public function DeleteUser(UserManager $manager, $id)
+    public function DeleteUser(UserManager $manager, Backend $backend, $id)
     {
         return $manager->delete($id)->httpResponse('list');
     }

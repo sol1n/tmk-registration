@@ -9,6 +9,7 @@ use App\Services\SchemaManager;
 use App\Services\RoleManager;
 use App\Services\UserManager;
 use App\Settings;
+use App\Backend;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
             $view->with('schemas', app(SchemaManager::class)->all());
             $view->with('settings', app(Settings::class));
         });
+
+        View::composer('*', function($view){
+            $view->with('backend', app(Backend::Class));
+        });
     }
 
     /**
@@ -32,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton('App\Backend', function($app){
+            return new Backend();
+        });
+
         $this->app->singleton('App\Settings', function($app){
             return new Settings();
         });

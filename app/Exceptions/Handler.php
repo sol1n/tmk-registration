@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\User;
+use App\Backend;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -65,7 +66,7 @@ class Handler extends ExceptionHandler
         }
         if ($exception instanceof SchemaListGetException || $exception instanceof RoleGetListException) {
             $request->user = isset($request->user) ? $request->user : new User;
-            $request->user->regenerate();
+            $request->user->regenerate(app(Backend::Class));
             return redirect($request->path());
         }
 

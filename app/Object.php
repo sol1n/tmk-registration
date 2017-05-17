@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use GuzzleHttp\Client;
@@ -27,14 +28,14 @@ class Object
         return $this->schema->id;
     }
 
-    public function save($data, $token): Object
+    public function save($data, Backend $backend): Object
     {
         $this->fields = static::prepareRawData($data, $this->schema);
 
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
-              'X-Appercode-Session-Token' => $token
+            $r = $client->put($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+              'X-Appercode-Session-Token' => $backend->token
           ], 'json' => $this->fields]);
         } catch (ServerException $e) {
             throw new ObjectSaveException;
@@ -43,12 +44,12 @@ class Object
         return $this;
     }
 
-    public static function get(Schema $schema, $id, $token): Object
+    public static function get(Schema $schema, $id, Backend $backend): Object
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'objects/' . $schema->id . '/' . $id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . 'objects/' . $schema->id . '/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (ClientException $e) {
             throw new ObjectNotFoundException;
@@ -59,14 +60,14 @@ class Object
         return static::build($schema, $json);
     }
 
-    public static function create(Schema $schema, $fields, $token): Object
+    public static function create(Schema $schema, $fields, Backend $backend): Object
     {
         $fields = self::prepareRawData($fields, $schema);
 
         $client = new Client;
         try {
-            $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->post($backend->url . 'objects/' . $schema->id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $fields]);
         } catch (ServerException $e) {
             throw new ObjectCreateException;
@@ -77,24 +78,23 @@ class Object
         return static::build($schema, $json);
     }
 
-    public function delete($token): Object
+    public function delete(Backend $backend): Object
     {
         $client = new Client;
-        $r = $client->delete(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->delete($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ]]);
 
         return $this;
     }
 
-    public static function list(Schema $schema, $token): Collection
+    public static function list(Schema $schema, Backend $backend): Collection
     {
         $list = new Collection;
 
-        $url = env('APPERCODE_SERVER');
         $client = new Client;
-        $r = $client->get($url . 'objects/' . $schema->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->get($backend->url . 'objects/' . $schema->id, ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ]]);
 
         $json = json_decode($r->getBody()->getContents(), 1);

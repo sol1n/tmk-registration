@@ -7,10 +7,10 @@
     <h2>Schemas list</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>          
         <li>
-            <a href="/schemas/">All schemas</a>
+            <a href="/{{ backend.code }}/schemas/">All schemas</a>
         </li>        
         <li class="active">
             <strong>New schema</strong>
@@ -27,7 +27,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/new/" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/schemas/new/" method="post">
         {{ csrf_field() }}
         <input type="hidden" name="action" value="list" />
 
@@ -145,7 +145,7 @@
         <button type="submit" name="action" value="list" class="btn btn-success">Save schema</button>
         <button type="submit" name="action" value="form" class="btn btn-success">Apply changes</button>
 
-        <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
+        <a href="/{{ backend.code }}/schemas/" class="btn btn-default pull-right">Back</a>
       </form>
     </div>
   </div>
@@ -230,7 +230,7 @@
 
       $.ajax({
         type: "POST",
-        url: "/schemas/new/",
+        url: "/{{ backend.code }}/schemas/new/",
         data: data,
         dataType: 'json',
         success: function(msg){

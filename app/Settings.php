@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use App\Services\SchemaManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,7 +15,6 @@ use Illuminate\Support\Collection;
 
 class Settings
 {
-    private $token;
     public $title;
     public $languages;
     public $userProfiles;
@@ -33,26 +33,23 @@ class Settings
 
     private function getCacheTag(): String
     {
-        return self::class;
+        return app(Backend::Class)->code . '-' . self::class;
     }
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
-
         if (! $data = $this->getFromCache()) {
-            $data = $this->fetch($this->token);
+            $data = $this->fetch(app(Backend::Class));
         }
         $this->build($data);
     }
 
-    private function fetch(String $token): array
+    private function fetch(Backend $backend): array
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'settings', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . 'settings', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new SettingsGetException;
@@ -100,7 +97,7 @@ class Settings
         }
     }
 
-    public function save(array $data): Settings
+    public function save(array $data, Backend $backend): Settings
     {
         foreach ($data as $key => $value) {
             if ($this->{$key} != $value) {
@@ -117,14 +114,14 @@ class Settings
 
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER') . 'settings', ['headers' => [
-                'X-Appercode-Session-Token' => $this->token
+            $r = $client->put($backend->url . 'settings', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $json]);
         } catch (RequestException $e) {
             throw new SettingsSaveException;
         };
 
-        $data = $this->fetch($this->token);
+        $data = $this->fetch($backend);
 
         $this->build($data);
 

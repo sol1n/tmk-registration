@@ -7,7 +7,7 @@
     <h2>Edit {{ schema.title }}</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>
         <li class="active">
             <strong>Settings</strong>
@@ -24,7 +24,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/settings/" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/settings/" method="post">
         {{ csrf_field() }}
         <input type="hidden" name="action" value="save" />
 

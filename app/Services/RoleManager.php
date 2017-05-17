@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\User;
+use App\Backend;
 use App\Role;
 use App\Traits\Services\CacheableList;
 
@@ -10,15 +10,14 @@ class RoleManager
 {
     use CacheableList;
 
-    private $token;
+    private $backend;
 
     protected $model = Role::class;
     protected $cacheLifetime = 5;
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
         $this->initList();
     }
 }
