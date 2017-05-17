@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use App\Settings;
 use App\Language;
 use App\Services\ObjectManager;
@@ -18,11 +19,19 @@ use App\Exceptions\User\UserNotFoundException;
 use App\Exceptions\User\UserSaveException;
 use App\Exceptions\User\UserCreateException;
 use App\Exceptions\User\UserGetProfilesException;
+use App\Traits\Controllers\ModelActions;
 
 class User
 {
+    use ModelActions;
+
     private $token;
     private $refreshToken;
+
+    protected function baseUrl(): String
+    {
+        return 'users';
+    } 
 
     public function token(): string
     {
@@ -35,22 +44,22 @@ class User
 
     public function __construct()
     {
-        if (session('session-token')) {
-            $this->token = session('session-token');
+        $backend = app(Backend::Class);
+        if (session($backend->code . '-session-token')) {
+            $this->token = session($backend->code . '-session-token');
         }
-        if (session('refresh-token')) {
-            $this->refreshToken = session('refresh-token');
+        if (session($backend->code . '-refresh-token')) {
+            $this->refreshToken = session($backend->code .'-refresh-token');
         }
     }
 
-    public function getProfiles(String $token)
+    public function getProfiles(Backend $backend)
     {
-        $url = env('APPERCODE_SERVER');
         $client = new Client;
 
         try {
-            $r = $client->get($url . 'users/' . $this->id . '/profiles', [
-                'headers' => ['X-Appercode-Session-Token' => $token]]
+            $r = $client->get($backend->url . 'users/' . $this->id . '/profiles', [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token]]
             );
         } catch (RequestException $e) {
             throw new UserGetProfilesException;
@@ -69,7 +78,6 @@ class User
                 $profiles->put($schema->id, ['object' => $object, 'code' => $schema->id]);
             }
         }
-
 
         $profileSchemas = app(Settings::class)->getProfileSchemas();
 
@@ -118,13 +126,12 @@ class User
         return $user;
     }
 
-    public static function login(Array $credentials, Bool $storeSession = true): User
+    public static function login(Backend $backend, Array $credentials, Bool $storeSession = true): User
     {
-        $url = env('APPERCODE_SERVER');
         $client = new Client;
 
         try {
-            $r = $client->post($url . 'login', ['json' => [
+            $r = $client->post($backend->url . 'login', ['json' => [
               'username' => $credentials['login'],
               'password' => $credentials['password'],
               'installId' => '',
@@ -136,7 +143,6 @@ class User
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
-
         $user = new self();
         $user->id = $json['userId'];
         $user->roleId = $json['roleId'];
@@ -145,26 +151,25 @@ class User
 
         if ($storeSession)
         {
-            $user->storeSession();
+            $user->storeSession($backend);
         }
 
         return $user;
     }
 
-    public function storeSession(): User
+    public function storeSession(Backend $backend): User
     {
-        request()->session()->put('session-token', $this->token);
-        request()->session()->put('refresh-token', $this->refreshToken);
+        request()->session()->put($backend->code . '-session-token', $this->token);
+        request()->session()->put($backend->code . '-refresh-token', $this->refreshToken);
         return $this;
     }
 
-    public function regenerate(Bool $storeSession = true): User
+    public function regenerate(Backend $backend, Bool $storeSession = true): User
     {
-        $url = env('APPERCODE_SERVER');
         $client = new Client;
 
         try {
-            $r = $client->post($url . 'login/byToken', [
+            $r = $client->post($backend->url . 'login/byToken', [
                 'headers' => ['Content-Type' => 'application/json'], 
                 'body' => '"' . $this->refreshToken . '"']
             );
@@ -179,18 +184,18 @@ class User
 
         if ($storeSession)
         {
-            $this->storeSession();
+            $this->storeSession($backend);
         }
 
         return $this;
     }
 
-    public static function list(String $token): Collection
+    public static function list(Backend $backend): Collection
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER')  . 'users/?take=-1', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url  . 'users/?take=-1', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         }
         catch (RequestException $e) {
@@ -208,12 +213,12 @@ class User
         return $result;
     }
 
-    public static function get(String $id, String $token): User
+    public static function get(String $id, Backend $backend): User
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER')  . 'users/' . $id, ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url  . 'users/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         }
         catch (RequestException $e) {
@@ -225,12 +230,12 @@ class User
         return self::build($json);
     }
 
-    public function save(Array $fields, String $token): User
+    public function save(Array $fields, Backend $backend): User
     {
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER')  . 'users/' . $this->id, [
-                'headers' => ['X-Appercode-Session-Token' => $token],
+            $r = $client->put($backend->url  . 'users/' . $this->id, [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
                 'json' => $fields
             ]);
         }
@@ -243,12 +248,12 @@ class User
         return self::build($json);
     }
 
-    public static function create(Array $fields, String $token): User
+    public static function create(Array $fields, Backend $backend): User
     {
         $client = new Client;
         try {
-            $r = $client->post(env('APPERCODE_SERVER')  . 'users/', [
-                'headers' => ['X-Appercode-Session-Token' => $token],
+            $r = $client->post($backend->url  . 'users/', [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
                 'json' => $fields
             ]);
         }
@@ -261,18 +266,52 @@ class User
         return self::build($json);
     }
 
-    public function delete(String $token): Bool
+    public function delete(Backend $backend): User
     {
         $client = new Client;
         try {
-            $r = $client->delete(env('APPERCODE_SERVER')  . 'users/' . $this->id, [
-                'headers' => ['X-Appercode-Session-Token' => $token],
+            $r = $client->delete($backend->url  . 'users/' . $this->id, [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
             ]);
         }
         catch (RequestException $e) {
             throw new UserDeleteException;
         };
 
-        return true;
+        return $this;
+    }
+
+    public function shortView(): String
+    {
+        if (isset(app(\App\Settings::Class)->properties['usersShortView']))
+        {
+            $template = app(\App\Settings::Class)->properties['usersShortView'];
+            if (isset($this->profiles) && (!$this->profiles->isEmpty()))
+            {
+                foreach ($this->profiles as $schema => $profile){
+                    if (isset($profile['object']))
+                    {
+                       foreach ($profile['object']->fields as $code => $value)
+                       {
+                            if ((is_string($value) || is_numeric($value)) && mb_strpos($template, ":$schema.$code:") !== false)
+                            {
+                                $template = str_replace(":$schema.$code:", $value, $template);
+                            }
+                       }
+                    }
+                }
+                $template = str_replace(":id:", $this->id, $template);
+                $template = str_replace(":username:", $this->username, $template);
+                return $template;
+            }
+            else
+            {
+                return $this->username;
+            }
+        }
+        else
+        {
+            return $this->username;
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Backend;
 use App\Services\SchemaManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,7 +15,6 @@ use Illuminate\Support\Collection;
 
 class Settings
 {
-    private $token;
     public $title;
     public $languages;
     public $userProfiles;
@@ -29,28 +29,27 @@ class Settings
     public $updatedAt;
     public $isDeleted;
 
-    const CACHE_ID = 'settings';
-    const CACHE_LIFETIME = 5;
+    protected $cacheLifetime = 10;
 
+    private function getCacheTag(): String
+    {
+        return app(Backend::Class)->code . '-' . self::class;
+    }
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
-
-        if (! $data = self::getFromCache())
-        {
-            $data = self::fetch($this->token);
+        if (! $data = $this->getFromCache()) {
+            $data = $this->fetch(app(Backend::Class));
         }
         $this->build($data);
     }
 
-    private static function fetch(String $token): Array
+    private function fetch(Backend $backend): array
     {
         $client = new Client;
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'settings', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . 'settings', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new SettingsGetException;
@@ -58,12 +57,12 @@ class Settings
 
         $data = json_decode($r->getBody()->getContents(), 1);
         
-        self::saveToCache($data);
+        $this->saveToCache($data);
 
         return $data;
     }
 
-    private function build(Array $data): Settings
+    private function build(array $data): Settings
     {
         $this->title = $data['title'];
         $this->languages = $data['languages'];
@@ -82,63 +81,68 @@ class Settings
         return $this;
     }
 
-    private static function saveToCache($data)
+    private function saveToCache($data)
     {
-        Cache::put(self::CACHE_ID, $data, self::CACHE_LIFETIME);
+        if (env('APPERCODE_ENABLE_CACHING') == 1) {
+            Cache::put($this->getCacheTag(), $data, $this->cacheLifetime);
+        }
     }
 
-    private static function getFromCache()
+    private function getFromCache()
     {
-        if (Cache::has(self::CACHE_ID)) {
-            return Cache::get(self::CACHE_ID);
+        if (Cache::has($this->getCacheTag()) && (env('APPERCODE_ENABLE_CACHING') == 1)) {
+            return Cache::get($this->getCacheTag());
         } else {
             return null;
         }
     }
 
-    public function save(Array $data): Settings
+    public function save(array $data, Backend $backend): Settings
     {
-
-        foreach ($data as $key => $value)
-        {
-            if ($this->{$key} != $value)
-            {
-                $this->{$key} = $value;    
+        foreach ($data as $key => $value) {
+            if ($this->{$key} != $value) {
+                $this->{$key} = $value;
             }
         }
 
         $json = [];
-        foreach ($this as $key => $value)
-        {
-            if ($key != 'token')
-            {
+        foreach ($this as $key => $value) {
+            if ($key != 'token') {
                 $json[$key] = $value;
             }
         }
 
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER') . 'settings', ['headers' => [
-                'X-Appercode-Session-Token' => $this->token
+            $r = $client->put($backend->url . 'settings', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $json]);
         } catch (RequestException $e) {
             throw new SettingsSaveException;
         };
 
-        $data = self::fetch($this->token);
+        $data = $this->fetch($backend);
 
         $this->build($data);
 
         return $this;
     }
 
-    public function getProfileSchemas(){
-        $result = new Collection;
-        foreach ($this->userProfiles as $raw)
+    public function getProfileSchemas()
+    {
+        if ($this->userProfiles)
         {
-            $exploded = explode('.', $raw);
-            $result->put($raw, app(SchemaManager::Class)->find($exploded[0]));
+            $result = new Collection;
+            foreach ($this->userProfiles as $raw) {
+                $exploded = explode('.', $raw);
+                $result->put($raw, app(SchemaManager::class)->find($exploded[0]));
+            }
         }
+        else
+        {
+            $result = null;
+        }
+        
         return $result;
     }
 }

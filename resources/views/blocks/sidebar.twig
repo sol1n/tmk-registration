@@ -6,41 +6,41 @@
         <h3 class="application-title">{{ settings.title }}</h3>
       </li>
       <li {% if selected == 'dashboard' %}class="active"{% endif %}>
-        <a href="/"><span class="nav-label">Dashboard</span></a>
+        <a href="/{{ backend.code }}/"><span class="nav-label">Dashboard</span></a>
       </li>
     </ul>
 
     <ul class="nav metismenu" id="collections-list">
       <li {% if selected == 'schema-new' %}class="active"{% endif %}>
-        <a href="/schemas/new/">
+        <a href="/{{ backend.code }}/schemas/new/">
           <b>New Schema</b>
         </a
       </li>
       <li {% if selected == 'schema-list' %}class="active"{% endif %}>
-        <a href="/schemas/">
+        <a href="/{{ backend.code }}/schemas/">
           <b>All Schemas</b>
         </a
       </li>
 
       {% for schema in schemas %}
         <li {% if selected == schema.id %}class="active"{% endif %}>
-          <a href="/{{ schema.id }}/"><span class="nav-label">{{ schema.id }}</span></a>
+          <a href="/{{ backend.code }}/{{ schema.id }}/"><span class="nav-label">{{ schema.id }}</span></a>
         </li>
       {% endfor %}
     </ul>
     <ul class="nav metismenu">
            
       <li {% if selected == 'users' %}class="active"{% endif %}>
-        <a href="/users/">Users</a>
+        <a href="/{{ backend.code }}/users/">Users</a>
       </li>      
       <li {% if selected == 'roles' %}class="active"{% endif %}>
-        <a href="/roles/">Roles</a>
+        <a href="/{{ backend.code }}/roles/">Roles</a>
       </li>
       <li {% if selected == 'files' %}class="active"{% endif %}>
-        <a href="/files">Files</a>
+        <a href="/{{ backend.code }}/files">Files</a>
       </li>
       <li {% if selected == 'settings' %}class="active"{% endif %}>
-        <a href="/settings/">Settings</a>
+        <a href="/{{ backend.code }}/settings/">Settings</a>
       </li>
     </ul>
   </div>

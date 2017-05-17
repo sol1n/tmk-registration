@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Role;
+use App\Backend;
 use App\Settings;
 use App\Language;
 use Illuminate\Http\Request;
+use App\Services\SchemaManager;
+use App\Services\RoleManager;
 
 class SettingsController extends Controller
 {
-    public function ShowSettingsForm()
+    public function ShowSettingsForm(SchemaManager $schemas, RoleManager $roles)
     {
-        $languages = Language::list();
-        $roles = Role::list(request()->user->token());
-
         $profileFields = [];
-        foreach (app(\App\Services\SchemaManager::Class)->all() as $schema)
+        foreach ($schemas->all() as $schema)
         {
             foreach ($schema->fields as $field)
             {
@@ -27,20 +26,20 @@ class SettingsController extends Controller
         }
 
         return view('settings/form', [
-        'languages' => $languages,
-        'roles' => $roles,
+        'languages' => Language::list(),
+        'roles' => $roles->all(),
         'profileFields' => $profileFields,
         'selected' => 'settings'
       ]);
     }
 
-    public function SaveSettings(Request $request)
+    public function SaveSettings(Settings $settings, Request $request)
     {
         $fields = $request->except(["_token", "action"]);
         $fields['emailSettings']['ssl'] = isset($fields['emailSettings']['ssl']) && $fields['emailSettings']['ssl'] == 'on';
 
-        app(Settings::Class)->save($fields);
+        $settings->save($fields, app(Backend::Class));
 
-        return redirect('/settings/');
+        return back();
     }
 }

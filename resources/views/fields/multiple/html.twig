@@ -1,0 +1,20 @@
+{% if value %}
+  {% for key, string in value %}
+    <textarea 
+      data-html-editor="1" 
+      name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}[{{ key }}]"
+      id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+      type="text" 
+      class="form-control form-control-multiple"
+    >{{ string }}</textarea>
+  {% endfor %}
+{% endif %}
+{% for key in value|length .. value|length + 1 %}
+  <textarea 
+    data-html-editor="1" 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}[{{ key }}]"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="text" 
+    class="form-control form-control-multiple"
+  ></textarea>
+{% endfor %}

@@ -7,7 +7,7 @@
     <h2>Edit {{ schema.title }}</h2>
     <ol class="breadcrumb">
         <li>
-            <a href="/">Dashboard</a>
+            <a href="/{{ backend.code }}/">Dashboard</a>
         </li>
         <li class="active">
             <strong>Settings</strong>
@@ -24,7 +24,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/settings/" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/settings/" method="post">
         {{ csrf_field() }}
         <input type="hidden" name="action" value="save" />
 
@@ -75,7 +75,6 @@
                 </div>
               </div>
 
-
               <div class="form-group">
                 <label class="col-sm-2 control-label">User profiles</label>
                 <div class="col-sm-10">
@@ -91,7 +90,13 @@
                 </div>
               </div>
 
-              
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Users shortview</label>
+                <div class="col-sm-10">
+                  <input name="properties[usersShortView]" id="fcmServerKey" type="text" class="form-control" value="{{ settings.properties.usersShortView }}">
+                </div>
+              </div>
+
             </div>
 
             <div class="tab-pane tab-pane-padding" id="tab-push">
@@ -151,7 +156,7 @@
               </div>          
                   
               <div class="form-group">
-                <label class="col-sm-2 control-label">Sender email</label>
+                <label class="col-sm-2 control-label">Sender name</label>
                 <div class="col-sm-10">
                   <input name="emailSettings[senderName]" id="email-senderName" type="text" class="form-control" value="{{ settings.emailSettings.senderName }}">
                 </div>
@@ -164,9 +169,9 @@
 
         <hr/>
 
-        <button type="submit" value="apply" class="btn btn-primary">Apply changes</button>
+        <button type="submit" value="form" class="btn btn-primary">Apply changes</button>
 
-        <a href=" /" class="btn btn-default pull-right">Back</a>
+        <a href="/" class="btn btn-default pull-right">Back</a>
       </form>
     </div>
   </div>
