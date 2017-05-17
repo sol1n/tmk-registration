@@ -327,6 +327,6 @@ class FileManager
     public function getFile($id)
     {
         $file = app(FileManager::class)->one($id);
-        return ['filepath' => $file->getFile($this->token), 'file' => $file];
+        return ['fileResult' => $file->getFile($this->token), 'file' => $file];
     }
 }

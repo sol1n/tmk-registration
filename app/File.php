@@ -70,12 +70,14 @@ class File
 
         $flatten = function ($data, $users, $baseLink) use (&$flatten){
             $result = [];
-            foreach ($data as $item) {
-                $file = static::build($item, $users, $baseLink);
-                $result[$file->id] = $file;
-                $childBaseLink = $baseLink . $file->id . '/';
-                if ($item['children']) {
-                    $result = array_merge($result, $flatten($item['children'], $users, $childBaseLink));
+            if (is_array($data) and $data) {
+                foreach ($data as $item) {
+                    $file = static::build($item, $users, $baseLink);
+                    $result[$file->id] = $file;
+                    $childBaseLink = $baseLink . $file->id . '/';
+                    if ($item['children']) {
+                        $result = array_merge($result, $flatten($item['children'], $users, $childBaseLink));
+                    }
                 }
             }
             return $result;
@@ -277,15 +279,24 @@ class File
     }
 
     public function getFile($token) {
+        $result = ['result' => true, 'fileName' => '', 'statusCode' => ''];
         $tmpFile = tempnam(sys_get_temp_dir(), '');
         $client = new Client();
         $resource = fopen($tmpFile, 'w');
-        $r = $client->request('GET', env('APPERCODE_SERVER') . 'files/' . $this->id . '/download',
-            [
-                'headers' => ['X-Appercode-Session-Token' => $token],
-                'sink' => $tmpFile
-            ]);
+        try {
+            $r = $client->request('GET', env('APPERCODE_SERVER') . 'files/' . $this->id . '/download',
+                [
+                    'headers' => ['X-Appercode-Session-Token' => $token],
+                    'sink' => $tmpFile
+                ]);
+            $result['statusCode'] = $r->getStatusCode();
+            $result['fileName'] = $tmpFile;
+        }
+        catch (ClientException $exception) {
+            $result['result'] = false;
+            $result['statusCode'] = $exception->getResponse()->getStatusCode();
+        }
         //dd($r->getBody()->getContents());
-        return $tmpFile;
+        return $result;
     }
 }
