@@ -59,7 +59,7 @@ trait FieldsFormats
                     else{
                         if (is_array($v))
                         {
-                            $data[$k] = json_encode($v);
+                            $data[$k] = json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                         }
                     }
                 }
@@ -79,7 +79,7 @@ trait FieldsFormats
             {
                 if (is_array($data))
                 {
-                    $data = json_encode($data);
+                    $data = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 }
             }
         }
