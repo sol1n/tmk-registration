@@ -1,4 +1,4 @@
-{% if value %}
+{% if value or value == 0 %}
   <input 
     name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
     id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"

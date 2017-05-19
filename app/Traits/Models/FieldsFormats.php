@@ -112,7 +112,7 @@ trait FieldsFormats
         }
         else
         {
-            if ($data)
+            if (is_numeric($data))
             {
                 $data = (Integer)$data;
             }

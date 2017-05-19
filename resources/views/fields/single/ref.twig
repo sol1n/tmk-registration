@@ -6,7 +6,7 @@
   <option value="">Not specified</option>
   {% for element in relations[field.type] %}
     {% if element.id == value.id %}
-      <option value="{{ element.id }}">{{ element.shortView() }}</option>
+      <option selected value="{{ element.id }}">{{ element.shortView() }}</option>
     {% else %}
       <option value="{{ element.id }}">{{ element.shortView() }}</option>
     {% endif %}
