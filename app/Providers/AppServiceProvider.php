@@ -10,6 +10,7 @@ use App\Services\RoleManager;
 use App\Services\UserManager;
 use App\Settings;
 use App\Backend;
+use Illuminate\Support\Facades\Validator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,20 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('*', function($view){
             $view->with('backend', app(Backend::Class));
+        });
+
+        Validator::extend('rights_unique', function ($attribute, $value, $parameters, $validator) {
+            $result = true;
+            $ids = [];
+            foreach ($value as $item) {
+                if (in_array($item['id'], $ids)) {
+                    $result = false;
+                    break;
+                }
+                $ids[] = $item['id'];
+            }
+            //dd($ids);
+            return $result;
         });
     }
 
