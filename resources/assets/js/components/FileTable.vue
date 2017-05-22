@@ -78,7 +78,10 @@
             <td>
                 <div v-if="!treeItem.isDeleted">
                     <input v-if="treeItem.isNew" v-focus autocomplete="off" @blur="folderBlur(treeItem)" class="form-control" placeholder="input folder name" type="text" v-model="treeItem.name" @keyup="folderKeyUp($event, treeItem)"/>
-                    <span v-else><a :href="treeItem.link">{{ treeItem.name }}</a></span>
+                    <span v-else>
+                        <a v-if="treeItem.length > 0" :href="treeItem.link">{{ treeItem.name }}</a>
+                        <span v-else>{{ treeItem.name }}</span>
+                    </span>
                 </div>
                 <div v-else>
                     <span>{{ treeItem.name }}</span>

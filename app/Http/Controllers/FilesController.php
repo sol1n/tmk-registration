@@ -40,13 +40,17 @@ class FilesController extends Controller
 
     public function GetFile(Backend $backend, $id) {
         $result = app(FileManager::class)->getFile($id);
-        if ($result['fileResult']['statusCode'] == '404'){
-            return view('files/file-not-found');
+        if ($result['file']->length > 0) {
+            if ($result['fileResult']['statusCode'] == '404') {
+                return view('files/file-not-found');
+            } else {
+                $filePath = $result['fileResult']['fileName'];
+                $file = $result['file'];
+                return response()->download($filePath, $file->name);
+            }
         }
         else {
-            $filePath = $result['fileResult']['fileName'];
-            $file = $result['file'];
-            return response()->download($filePath, $file->name);
+            return view('files/no-file');
         }
     }
 

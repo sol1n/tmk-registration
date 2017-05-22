@@ -359,9 +359,11 @@ class FileManager
             $rights = $result->rights['adds'];
 
             $deletingRights = [];
-            foreach ($oldRights as $oldRightname => $oldRightValue){
-                if (!isset($rights[$oldRightname])){
-                    $deletingRights[] = $oldRightname;
+            if (is_array($oldRights) and $oldRights) {
+                foreach ($oldRights as $oldRightname => $oldRightValue) {
+                    if (!isset($rights[$oldRightname])) {
+                        $deletingRights[] = $oldRightname;
+                    }
                 }
             }
 
@@ -384,6 +386,9 @@ class FileManager
          * @var File $file
          */
         $file = app(FileManager::class)->one($id);
-        return ['fileResult' => $file->getFile($this->backend), 'file' => $file];
+        if ($file->length > 0) {
+            return ['fileResult' => $file->getFile($this->backend), 'file' => $file];
+        }
+        return ['fileResult' => null, 'file' => $file];
     }
 }
