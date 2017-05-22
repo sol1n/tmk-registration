@@ -36,17 +36,22 @@ class File
     CONST BASE_LINK = '/files/';
     CONST ROOT_INDEX = 'root_element';
 
+    public static function getbaseLink()
+    {
+        return '/' . app(Backend::class)->code . static::BASE_LINK;
+    }
+
     /**
      * Retursn files tree
      * @param String $token
      * @return Collection
      */
-    public static function tree(String $token) : Collection
+    public static function tree(Backend $backend) : Collection
     {
         $client = new Client();
         try {
-            $r = $client->get(env('APPERCODE_SERVER') . 'files/tree', ['headers' => [
-                'X-Appercode-Session-Token' => $token
+            $r = $client->get($backend->url . '/files/tree', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
             ]]);
         } catch (RequestException $e) {
             throw new RoleGetListException;
@@ -57,11 +62,7 @@ class File
         $result = new Collection();
 
         $users = app(UserManager::class)->getMappedUsers();
-
-//        foreach ($data['myFiles'] as $item) {
-//            $result->push(static::build($item, $users, static::BASE_LINK));
-//        }
-        $result = self::constructFlatTree($data['myFiles'], $users, static::BASE_LINK);
+        $result = self::constructFlatTree($data['myFiles'], $users, static::getbaseLink());
         return $result;
     }
 
@@ -70,12 +71,14 @@ class File
 
         $flatten = function ($data, $users, $baseLink) use (&$flatten){
             $result = [];
-            foreach ($data as $item) {
-                $file = static::build($item, $users, $baseLink);
-                $result[$file->id] = $file;
-                $childBaseLink = $baseLink . $file->id . '/';
-                if ($item['children']) {
-                    $result = array_merge($result, $flatten($item['children'], $users, $childBaseLink));
+            if (is_array($data) and $data) {
+                foreach ($data as $item) {
+                    $file = static::build($item, $users, $baseLink);
+                    $result[$file->id] = $file;
+                    $childBaseLink = $baseLink . $file->id . '/';
+                    if ($item['children']) {
+                        $result = array_merge($result, $flatten($item['children'], $users, $childBaseLink));
+                    }
                 }
             }
             return $result;
@@ -83,7 +86,7 @@ class File
 
         $result = $flatten($data, $users, $baseLink);
         $rootFile = new File();
-        $rootFile->link = '/files/';
+        $rootFile->link = static::getbaseLink();
         $rootFile->name = 'Main folder';
         $rootFile->fileType = 'directory';
         $result[static::ROOT_PARENT_ID] = $rootFile;
@@ -101,23 +104,6 @@ class File
 
         return collect($result);
     }
-
-//    public static function folder(String $id, String $token)
-//    {
-//        $client = new Client();
-//        try {
-//            $r = $client->get(env('APPERCODE_SERVER') . 'files/' . $id, ['headers' => [
-//                'X-Appercode-Session-Token' => $token
-//            ]]);
-//        } catch (RequestException $e) {
-//            throw new RoleGetListException;
-//        };
-//
-//        $data = json_decode($r->getBody()->getContents(), 1);
-//
-//        return $data;
-//    }
-
 
     /**
      * Creates instance of this class from array
@@ -145,7 +131,7 @@ class File
             $file->link = $baseLink . $file->id;
         }
         else{
-            $file->link = static::BASE_LINK . 'get/' . $file->id;
+            $file->link = static::getbaseLink() . 'get/' . $file->id;
         }
         $file->children = [];
 
@@ -167,16 +153,66 @@ class File
         }
     }
 
-    public function getRights()
+    /**
+     * Returns array with keys
+     * userId - user id (null if it is a role for role)
+     * right - current right
+     * role - role (null if it is a role for user)
+     * @param String $right
+     * @return array
+     */
+    private function parseRight(String $right) {
+        $result = ['userId' => null, 'right' => '', 'role' => null];
+        if ($right) {
+            $chunks = explode('.', $right);
+            if ($chunks[1] == 'user') { //user role
+                $result['userId'] = $chunks[2];
+            }
+            else{
+                $result['role'] = $chunks[1];
+            }
+            $result['right'] = $chunks[0];
+        }
+        return $result;
+    }
+
+    public function getRights($key = 'total')
     {
         $result = '';
         $tmp = [];
-        foreach ($this->rights['total'] as $rightName => $right){
+        foreach ($this->rights[$key] as $rightName => $right){
             if ($right){
-                $tmp[] = explode('.', $rightName)[0];
+                $tmp[] = $this->parseRight($rightName)['right'];
             }
         }
         $result = join('|', $tmp);
+        return $result;
+    }
+
+    /**
+     * @param string $type 'adds'|'total'
+     * @return array
+     */
+    public function getRightsMap($type = 'adds'){
+        $result = [];
+        if (isset($this->rights[$type]) and $this->rights[$type]) {
+            foreach ($this->rights[$type] as $rightName => $right) {
+                if ($right) {
+                    $parsedRight = $this->parseRight($rightName);
+                    if ($parsedRight['userId']) {
+                        if (!isset($result[$parsedRight['userId']])) {
+                            $result[$parsedRight['userId']] = ['id' => 'user.' . $parsedRight['userId'], 'rights' => []];
+                        }
+                        $result[$parsedRight['userId']]['rights'][] = $parsedRight['right'];
+                    } else {
+                        if (!isset($result[$parsedRight['role']])) {
+                            $result[$parsedRight['role']] = ['id' => $parsedRight['role'], 'rights' => []];
+                        }
+                        $result[$parsedRight['role']]['rights'][] = $parsedRight['right'];
+                    }
+                }
+            }
+        }
         return $result;
     }
 
@@ -193,12 +229,12 @@ class File
 //    }
 
 
-    public static function addFolder($token, $fields) : File
+    public static function addFolder($fields, Backend $backend) : File
     {
         $client = new Client;
         $fields['fileType'] = 'directory';
-        $r = $client->post(env('APPERCODE_SERVER') . 'files', ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->post($backend->url . 'files', ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ], 'json' => $fields]);
 
         $json = ['file' => json_decode($r->getBody()->getContents(), 1)];
@@ -210,11 +246,11 @@ class File
         return $folder;// static::build($schema, $json);
     }
 
-    public static function createFile($props, $token){
+    public static function createFile($props, Backend $backend){
         $client = new Client;
         $fields['fileType'] = 'directory';
-        $r = $client->post(env('APPERCODE_SERVER') . 'files', ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->post($backend->url . 'files', ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ], 'json' => $props]);
 
         $createdFile = null;
@@ -231,24 +267,24 @@ class File
         return $createdFile;
     }
 
-    public static function uploadFile($fileId, $multipart, $token)
+    public static function uploadFile($fileId, $multipart, Backend $backend)
     {
         $client = new Client;
         $fields['fileType'] = 'directory';
 
-        $res = $client->request('POST', env('APPERCODE_SERVER') . 'files/' . $fileId . '/upload', [
-            'headers' => ['X-Appercode-Session-Token' => $token],
+        $res = $client->request('POST', $backend->url . 'files/' . $fileId . '/upload', [
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
             'multipart' => $multipart,
         ], ['debug' => true]);
 
         return true;
     }
 
-    public static function delete($fileId, $props, $token) {
+    public static function delete($fileId, $props, Backend $backend) {
         $client = new Client;
         $props['_method'] = 'DELETE';
-        $r = $client->delete(env('APPERCODE_SERVER') . 'files/' . $fileId . '?markupAsDeleted=true', ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->delete($backend->url . 'files/' . $fileId . '?markupAsDeleted=true', ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ]]);
 
         //$response  = $r->getBody()->getContents();
@@ -256,14 +292,15 @@ class File
         return true;
     }
 
-    public static function update($fileId, $props, $token){
+    public static function update($fileId, $props, Backend $backend){
         $client = new Client();
         try {
-            $r = $client->put(env('APPERCODE_SERVER') . 'files/' . $fileId, [
-                'headers' => ['X-Appercode-Session-Token' => $token],
+            $r = $client->put($backend->url . 'files/' . $fileId, [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
                 'json' => $props
             ]);
         } catch (ServerException $e) {
+            dd($e);
             throw new FileUpdateException();
         }
 
@@ -276,16 +313,25 @@ class File
         return $updatedFile;
     }
 
-    public function getFile($token) {
+    public function getFile(Backend $backend) {
+        $result = ['result' => true, 'fileName' => '', 'statusCode' => ''];
         $tmpFile = tempnam(sys_get_temp_dir(), '');
         $client = new Client();
         $resource = fopen($tmpFile, 'w');
-        $r = $client->request('GET', env('APPERCODE_SERVER') . 'files/' . $this->id . '/download',
-            [
-                'headers' => ['X-Appercode-Session-Token' => $token],
-                'sink' => $tmpFile
-            ]);
+        try {
+            $r = $client->request('GET', $backend->url . 'files/' . $this->id . '/download',
+                [
+                    'headers' => ['X-Appercode-Session-Token' => $backend->token],
+                    'sink' => $tmpFile
+                ]);
+            $result['statusCode'] = $r->getStatusCode();
+            $result['fileName'] = $tmpFile;
+        }
+        catch (ClientException $exception) {
+            $result['result'] = false;
+            $result['statusCode'] = $exception->getResponse()->getStatusCode();
+        }
         //dd($r->getBody()->getContents());
-        return $tmpFile;
+        return $result;
     }
 }

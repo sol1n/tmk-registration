@@ -7,6 +7,7 @@ use App\Backend;
 use App\Helpers\AjaxResponse;
 use App\Object;
 use App\Services\FileManager;
+use App\Services\RoleManager;
 use App\Services\UserManager;
 use App\User;
 use Illuminate\Http\Request;
@@ -15,20 +16,6 @@ use Illuminate\Support\Facades\Session;
 
 class FilesController extends Controller
 {
-    public function ShowTree(Backend $backend)
-    {
-        $u = new User();
-        //dd(File::tree($u->token()));
-        $fileTree = app(FileManager::class)->all();
-        $sortField = \session('sortField');
-        $sortOrder = \session('sortOrder');
-        return view('files/list', [
-            'fileTree' => $fileTree,
-            'sortField' => $sortField,
-            'sortOrder' => $sortOrder
-        ]);
-    }
-
 
     public function ShowFolder(Backend $backend, String $id = '')
     {
@@ -40,20 +27,27 @@ class FilesController extends Controller
         $breadcrumbs = $folderResult['breadcrumbs'];
         $sortField = \session('sortField');
         $sortOrder = \session('sortOrder');
+        $backend = app(Backend::class);
         return view('files/folder', [
             'folder' => $folder,
             'children' => $children,
             'breadcrumbs' => $breadcrumbs,
             'sortField' => $sortField,
-            'sortOrder' => $sortOrder
+            'sortOrder' => $sortOrder,
+            'backend' => $backend
         ]);
     }
 
     public function GetFile(Backend $backend, $id) {
         $result = app(FileManager::class)->getFile($id);
-        $filePath = $result['filepath'];
-        $file = $result['file'];
-        return response()->download($filePath, $file->name);
+        if ($result['fileResult']['statusCode'] == '404'){
+            return view('/files/file-not-found');
+        }
+        else {
+            $filePath = $result['fileResult']['fileName'];
+            $file = $result['file'];
+            return response()->download($filePath, $file->name);
+        }
     }
 
     public function SetOrder(Request $request)
@@ -93,10 +87,12 @@ class FilesController extends Controller
         $files = app(FileManager::class)->search($query);
         $sortField = \session('sortField');
         $sortOrder = \session('sortOrder');
+        $backend = app(Backend::class);
         return view('/files/search', [
             'files' => $files,
             'sortField' => $sortField,
-            'sortOrder' => $sortOrder
+            'sortOrder' => $sortOrder,
+            'backend' => $backend
         ]);
     }
 
@@ -155,21 +151,46 @@ class FilesController extends Controller
 
     public function Edit(Backend $backend, $id)
     {
+        $roles = app(RoleManager::class)->all()->pluck('id');
+        $users = app(UserManager::class)->getMappedUsers();
         $file = app(FileManager::class)->one($id);
         $folders = app(FileManager::class)->getFolders();
         $breadcrumbs = app(FileManager::class)->getPath($id);
         $backLink = $breadcrumbs[count($breadcrumbs) - 2]->link;
+        $permissions = $file->getRightsMap();
+        //$backend = app(Backend::class);
+
         return view('/files/edit', [
             'file' => $file,
             'folders' => $folders,
             'breadcrumbs' => $breadcrumbs,
-            'backLink' => $backLink
+            'backLink' => $backLink,
+            'roles' => $roles,
+            'users' => $users,
+            'permissions' => $permissions,
+            'backend' => $backend
         ]);
     }
 
     public function Save(Request $request, Backend $backend, $id) {
-        $fields = $request->except(['_token', 'action']);
+
+        $this->validate($request, [
+            'name' => 'required',
+            'parentId' => 'required',
+            'permissions' => 'rights_unique'
+        ]);
+
+
+        $fields = $request->except(['_token', 'backLink', 'action', 'permissions']);
         $file = $request->file('file');
+        $permissions = $request->input('permissions');
+        $adds = [];
+        foreach ($permissions as $permission) {
+            foreach ($permission['rights'] as $right) {
+                $adds[$right . '.' . $permission['id']] = true;
+            }
+        }
+        $fields['rights'] = $adds ? $adds : null;
 
         app(FileManager::class)->update($id, $fields, $file);
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Backend;
 use App\File;
 use App\Helpers\Breadcrumb;
 use App\User;
@@ -17,17 +18,20 @@ class FileManager
     CONST CACHE_ID = 'files';
     const CACHE_LIFETIME = 60;
 
+    private $backend;
+
     public function __construct()
     {
-        $user = new User();
-        $this->token = $user->token();
+//        $user = new User();
+//        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
     }
 
     public function fetchCollection(){
         $files = $this->getCollectionFromCache();
 //        $files = null;
         if (is_null($files)) {
-            $files = File::tree($this->token);
+            $files = File::tree($this->backend);
             $this->saveCollectionToCache($files);
         }
         return $files;
@@ -58,12 +62,12 @@ class FileManager
         $result = ['breadcrumbs' => [], 'folder' => [], 'baselink' => ''];
         $fileTree = $this->fetchCollection();
         $currentFolder = [];
-        $links = File::BASE_LINK;
+        $links = File::getbaseLink();
         $root = $fileTree->get(File::ROOT_PARENT_ID);
-        $result['breadcrumbs'][] = new Breadcrumb('/files/', $root->name);
+        $result['breadcrumbs'][] = new Breadcrumb($links, $root->name);
         $compile = function() use(&$result, &$links, &$currentFolder) {
             $links .= $currentFolder->id . '/';
-            $result['breadcrumbs'][] = new Breadcrumb($links, $currentFolder->name ?? $currentFolder->id);
+            $result['breadcrumbs'][] = new Breadcrumb($currentFolder->link, $currentFolder->name ?? $currentFolder->id);
         };
         $currentFolder = $fileTree->get(File::ROOT_PARENT_ID);
         foreach ($route as $r){
@@ -76,10 +80,13 @@ class FileManager
             }
         }
         $children = new Collection();
-        foreach ($currentFolder->children as $child) {
-            $children->push($fileTree->get($child));
+        if ($currentFolder->children) {
+            foreach ($currentFolder->children as $child) {
+                $children->push($fileTree->get($child));
+            }
         }
-        $result['baselink'] = $links;
+
+        $result['baselink'] = $currentFolder->link;
         $result['folder'] = $currentFolder;
         $result['children'] = $children;
         return $result;
@@ -98,16 +105,22 @@ class FileManager
         return $result;
     }
 
+    private function getCacheTag(): String
+    {
+        return app(Backend::Class)->code . '-'. static::CACHE_ID;
+    }
+
+
     public function saveCollectionToCache($data)
     {
-        $cacheId = self::CACHE_ID;
+        $cacheId = $this->getCacheTag();
         Cache::forget($cacheId);
         Cache::put($cacheId, $data, self::CACHE_LIFETIME);
     }
 
     private function getCollectionFromCache()
     {
-        $cacheId = self::CACHE_ID;
+        $cacheId = $this->getCacheTag();
 
         if (Cache::has($cacheId)) {
             return Cache::get($cacheId);
@@ -137,7 +150,7 @@ class FileManager
      */
     private function doSearch($data, $query) {
         $result = new Collection();
-        //$files = $this->all();
+//        $files = $this->all();
         foreach ($data as $file) {
             /**
              * @var File $file
@@ -160,13 +173,13 @@ class FileManager
     /**
      * Add folder
      * @param $fields
-     * @return Object
+     * @return File
      */
-    public function addFolder($fields){
+    public function addFolder($fields) : File {
         if (!$fields['parentId']){
             $fields['parentId'] = File::ROOT_PARENT_ID;
         }
-        $folder = File::addFolder($this->token, $fields);
+        $folder = File::addFolder($fields, $this->backend);
 
         $files = $this->all();
 
@@ -186,7 +199,7 @@ class FileManager
             'fileType' =>  'file',
             'length' => $fileProperties['size']
         ];
-        $file = File::createFile($props, $this->token);
+        $file = File::createFile($props, $this->backend);
         if ($file){
             $result['file'] = $file;
 
@@ -210,7 +223,7 @@ class FileManager
                 ]
         ];
 
-        $response = File::uploadFile($fileId, $multipart, $this->token);
+        $response = File::uploadFile($fileId, $multipart, $this->backend);
         return $response;
     }
 
@@ -224,7 +237,7 @@ class FileManager
         $props = [
             'markupAsDeleted' => true
         ];
-        $response = File::delete($fileId, $props, $this->token);
+        $response = File::delete($fileId, $props, $this->backend);
         if ($response) {
             $files = $this->all();
             $file = $files->get($fileId);
@@ -243,7 +256,7 @@ class FileManager
         $props = [
             'isDeleted' => false
         ];
-        $response = File::update($fileId, $props, $this->token);
+        $response = File::update($fileId, $props, $this->backend);
         if ($response) {
             $files = $this->all();
             $file = $files->get($fileId);
@@ -282,6 +295,30 @@ class FileManager
         return $result;
     }
 
+    private function updateRights(&$files, $id, $rights, $deletingRights) {
+        /**
+         * @var File $file
+         */
+        $file = $files->get($id);
+        $fileRights = $file->rights['total'];
+        //dd($rights);
+        foreach ($rights as $rightName => $rightValue){
+            if (!isset($fileRights[$rightName])) {
+                $fileRights[$rightName] = $rightValue;
+            }
+        }
+        foreach ($fileRights as $fileRightName => $fileRightValue){
+            if (in_array($fileRightName, $deletingRights)){
+                unset($fileRights[$fileRightName]);
+            }
+        }
+        $file->rights['total'] = $fileRights;
+        $files->put($id, $file);
+        foreach ($file->children as $child){
+            $this->updateRights($files, $child, $rights);
+        }
+    }
+
     public function update($fileId, $fields, UploadedFile $uploadFile = null) {
         $files = $this->all();
         $file = $files->get($fileId);
@@ -289,7 +326,7 @@ class FileManager
         if ($uploadFile) {
             $fields['length'] = $uploadFile->getSize();
         }
-        $result = File::update($fileId, $fields, $this->token);
+        $result = File::update($fileId, $fields, $this->backend);
         if ($result) {
             if ($uploadFile) {
                 $isSuccess = $this->uploadFile($fileId, $uploadFile);
@@ -315,7 +352,24 @@ class FileManager
                 $files->put($oldParent->id, $oldParent);
                 $files->put($newParent->id, $newParent);
             }
+            $result->children = $file->children;
+            $oldRights = $file->rights['adds'];
             $files->put($result->id, $result);
+
+            $rights = $result->rights['adds'];
+
+            $deletingRights = [];
+            foreach ($oldRights as $oldRightname => $oldRightValue){
+                if (!isset($rights[$oldRightname])){
+                    $deletingRights[] = $oldRightname;
+                }
+            }
+
+            foreach ($result->children as $child) {
+                $this->updateRights($files, $child, $rights, $deletingRights);
+            }
+
+
             $this->saveCollectionToCache($files);
 
             return true;
@@ -326,7 +380,10 @@ class FileManager
 
     public function getFile($id)
     {
+        /**
+         * @var File $file
+         */
         $file = app(FileManager::class)->one($id);
-        return ['filepath' => $file->getFile($this->token), 'file' => $file];
+        return ['fileResult' => $file->getFile($this->backend), 'file' => $file];
     }
 }

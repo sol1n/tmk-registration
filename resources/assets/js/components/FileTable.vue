@@ -95,9 +95,9 @@
             <td class="files-action-td">
                 <div class="input-group" v-if="!treeItem.isDeleted">
                     <!--<button v-if="treeItem.fileType == 'directory'" class="btn btn-default form-control">List elements</button>-->
-                    <a v-if="treeItem.fileType == 'directory'" :href="'/files/edit/' + treeItem.id" class="btn btn-default form-control">List elements</a>
+                    <a v-if="treeItem.fileType == 'directory'" :href="'/' + backend + '/files/edit/' + treeItem.id" class="btn btn-default form-control">List elements</a>
                     <!--<button v-else class="btn btn-default form-control">Edit</button>-->
-                    <a v-else class="btn btn-default form-control" :href="'/files/edit/' + treeItem.id">Edit</a>
+                    <a v-else class="btn btn-default form-control" :href="'/' + backend + '/files/edit/' + treeItem.id">Edit</a>
                     <div class="input-group-btn">
                         <button data-toggle="dropdown" class="btn btn-default dropdown-toggle file-more-actions" type="button"><i class="fa fa-ellipsis-h"></i></button>
                         <!--<span class="input-group-addon" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-ellipsis-h"></i></span>-->
@@ -132,7 +132,7 @@
 
     export default {
         name: 'file-table',
-        props: ['fileList', 'initSortField', 'initSortOrder', 'parentId', 'baseLink'],
+        props: ['fileList', 'initSortField', 'initSortOrder', 'parentId', 'baseLink', 'backend'],
         data() {
             return {
                 search: '',
@@ -221,7 +221,8 @@
                     var vueInstance = this;
                     var parentId = this.parentId;
                     var baseLink = this.baseLink;
-                    axios.post('/files/add-folder', {
+                    var backend = this.backend;
+                    axios.post( '/' + backend + '/files/add-folder', {
                         name: folder.name,
                         parentId: parentId,
                         path: baseLink
@@ -269,7 +270,8 @@
             },
             uploadFile(formData){
                 var vueInstance = this;
-                axios.post('/files/upload-file/', formData)
+                var backend = this.backend;
+                axios.post('/' + backend + '/files/upload-file/', formData)
                 .then(function (response) {
                     console.log(response);
                     if (response) {
@@ -306,7 +308,8 @@
             deleteItem(item) {
                 if (confirm('The file would be unavailable for users and mobile apps. Are you sure?')) {
                     var vueInstance = this;
-                    axios.post('/files/delete', {
+                    var backend = this.backend;
+                    axios.post('/' + backend + '/files/delete', {
                         fileId: item.id
                     })
                     .then(function (response) {
@@ -331,7 +334,8 @@
             restoreItem(item) {
                 if (confirm('Are you sure you want to restore it?')) {
                     var vueInstance = this;
-                    axios.post('/files/restore', {
+                    var backend = this.backend;
+                    axios.post('/' + backend + '/files/restore', {
                         fileId: item.id
                     })
                         .then(function (response) {

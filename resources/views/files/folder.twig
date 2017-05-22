@@ -51,7 +51,7 @@
                 {#</div>#}
             {#</form>#}
             <div id="file-content">
-                <file-table :base-link="'{{ folder.link }}'" :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :parent-id="'{{ folder.id }}'" :file-list="{{ children|json_encode() }}"></file-table>
+                <file-table :backend="'{{ backend.code }}'" :base-link="'{{ folder.link }}'" :init-sort-field="'{{ sortField }}'" :init-sort-order="'{{ sortOrder }}'" :parent-id="'{{ folder.id }}'" :file-list="{{ children|json_encode() }}"></file-table>
             </div>
 
             {#<div class="row">#}
