@@ -41,7 +41,7 @@ class FilesController extends Controller
     public function GetFile(Backend $backend, $id) {
         $result = app(FileManager::class)->getFile($id);
         if ($result['fileResult']['statusCode'] == '404'){
-            return view('/files/file-not-found');
+            return view('files/file-not-found');
         }
         else {
             $filePath = $result['fileResult']['fileName'];
@@ -88,7 +88,7 @@ class FilesController extends Controller
         $sortField = \session('sortField');
         $sortOrder = \session('sortOrder');
         $backend = app(Backend::class);
-        return view('/files/search', [
+        return view('files/search', [
             'files' => $files,
             'sortField' => $sortField,
             'sortOrder' => $sortOrder,
@@ -160,7 +160,7 @@ class FilesController extends Controller
         $permissions = $file->getRightsMap();
         //$backend = app(Backend::class);
 
-        return view('/files/edit', [
+        return view('files/edit', [
             'file' => $file,
             'folders' => $folders,
             'breadcrumbs' => $breadcrumbs,
