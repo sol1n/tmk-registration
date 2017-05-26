@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\File;
 use App\User;
 use App\Backend;
 use Illuminate\Support\Collection;
@@ -16,10 +17,12 @@ class UserManager
     protected $model = User::class;
     protected $cacheLifetime = 10;
 
+    CONST USERS_PER_PAGE = 100;
+
     public function __construct()
     {
         $this->backend = app(Backend::Class);
-        $this->initList();
+        //$this->initList();
     }
 
     public function findWithProfiles(String $id): User
@@ -27,18 +30,46 @@ class UserManager
         return $this->find($id)->getProfiles($this->backend);
     }
 
-    public function allWithProfiles(): Collection
+    public function getTotalAmount() {
+        return User::getUsersAmount($this->backend);
+    }
+
+
+    public function all($page = -1) {
+        $params = [];
+        if ($page != -1) {
+            $params['take'] = static::USERS_PER_PAGE;
+            $params['skip'] = ($page - 1) * static::USERS_PER_PAGE;
+        }
+        $this->list = User::list($this->backend, $params);
+        return $this->list;
+    }
+
+    /**
+     * Redefine  CacheableList find, don't use cache
+     * @param String $id
+     * @return mixed
+     */
+    public function find(String $id)
+    {
+        $element = $this->model::get($id, $this->backend);
+        return $element;
+    }
+
+    public function allWithProfiles($page = 1): Collection
     {
         $elements = new Collection;
+        $users = $this->all($page);
         $profileSchemas = app(\App\Settings::class)->getProfileSchemas();
         if ($profileSchemas)
         {
+            $query = ['where' => json_encode(['user' => ['$in' => $users->pluck('id')]])];
             foreach ($profileSchemas as $key => $schema)
             {
-                $elements->put($key, app(ObjectManager::class)->all($schema));
+                $elements->put($key, app(ObjectManager::class)->all($schema, $query));
             }
 
-            $this->list = $this->list->each(function($user) use ($elements){
+            $users = $users->each(function($user) use ($elements){
                 $user->profiles = new Collection;
                 foreach ($elements as $key => $profiles)
                 {
@@ -57,7 +88,7 @@ class UserManager
             });
         }
         
-        return $this->list;
+        return $users;
     }
 
     public function saveProfiles(String $id, array $profiles)

@@ -7,6 +7,7 @@ use App\Settings;
 use App\Language;
 use App\Services\ObjectManager;
 use App\Services\SchemaManager;
+use function GuzzleHttp\Psr7\build_query;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -190,11 +191,15 @@ class User
         return $this;
     }
 
-    public static function list(Backend $backend): Collection
+    public static function list(Backend $backend, $params = []): Collection
     {
         $client = new Client;
+        if (!$params) {
+            $params['take'] = -1;
+        }
+        $getParams = http_build_query($params);
         try {
-            $r = $client->get($backend->url  . 'users/?take=-1', ['headers' => [
+            $r = $client->get($backend->url  . 'users/?' . $getParams, ['headers' => [
                 'X-Appercode-Session-Token' => $backend->token
             ]]);
         }
@@ -208,6 +213,24 @@ class User
         foreach ($json as $raw)
         {
             $result->push(self::build($raw));
+        }
+
+        return $result;
+    }
+
+    public static function getUsersAmount($backend) {
+        $result = 0;
+        $client = new Client;
+        try {
+            $r = $client->get($backend->url  . 'users/?take=1&count=true', ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
+            ]]);
+        }
+        catch (RequestException $e) {
+            throw new UsersListGetException;
+        };
+        if ($r->getHeader('x-appercode-totalitems')){
+            $result = $r->getHeader('x-appercode-totalitems')[0];
         }
 
         return $result;

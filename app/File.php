@@ -249,6 +249,7 @@ class File
     public static function createFile($props, Backend $backend){
         $client = new Client;
         $fields['fileType'] = 'directory';
+
         $r = $client->post($backend->url . 'files', ['headers' => [
             'X-Appercode-Session-Token' => $backend->token
         ], 'json' => $props]);
@@ -269,15 +270,21 @@ class File
 
     public static function uploadFile($fileId, $multipart, Backend $backend)
     {
+        $result = true;
         $client = new Client;
         $fields['fileType'] = 'directory';
 
-        $res = $client->request('POST', $backend->url . 'files/' . $fileId . '/upload', [
-            'headers' => ['X-Appercode-Session-Token' => $backend->token],
-            'multipart' => $multipart,
-        ], ['debug' => true]);
+        try {
+            $res = $client->request('POST', $backend->url . 'files/' . $fileId . '/upload', [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
+                'multipart' => $multipart,
+            ], ['debug' => true]);
+        }
+        catch (ServerException $e) {
+            $result = false;
+        }
 
-        return true;
+        return $result;
     }
 
     public static function delete($fileId, $props, Backend $backend) {

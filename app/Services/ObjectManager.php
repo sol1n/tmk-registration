@@ -22,13 +22,13 @@ class ObjectManager
         $this->lists = new Collection;
     }
 
-    private function initList(Schema $schema)
+    private function initList(Schema $schema, $query = [])
     {
         if (! $this->lists->has($schema->id))
         {
             if (! $objects = $this->getFromCache($schema)) 
             {
-                $objects = $this->model::list($schema, $this->backend);
+                $objects = $this->model::list($schema, $this->backend, $query);
                 $this->saveToCache($schema, $objects);
             }
 

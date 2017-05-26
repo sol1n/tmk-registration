@@ -42,9 +42,9 @@ Route::group(['prefix' => '{backend}','middleware' => ['appercodeAuth']], functi
   Route::post('/roles/{code}/', 'RolesController@SaveRole');
   Route::get('/roles/{code}/delete', 'RolesController@DeleteRole');
 
+  Route::post('/files/upload-file/', 'FilesController@UploadFile');
   Route::get('/files/set-order/', 'FilesController@SetOrder');
   Route::post('/files/add-folder/', 'FilesController@AddFolder');
-  Route::post('/files/upload-file/', 'FilesController@UploadFile');
   Route::get('/files/search', 'FilesController@Search');
   Route::post('/files/delete/', 'FilesController@Delete');
   Route::post('/files/restore/', 'FilesController@Restore');

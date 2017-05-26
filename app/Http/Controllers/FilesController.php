@@ -104,7 +104,7 @@ class FilesController extends Controller
     {
         $response = new AjaxResponse();
         $file = $request->file('fileUpload');
-        $parentId = $request->input('parentId');
+        $parentId = $request->input('parentId') ?? File::ROOT_PARENT_ID;
         if ($file->isValid()) {
             $fileProperties = [
                 'name' => $file->getClientOriginalName(),

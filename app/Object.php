@@ -88,12 +88,17 @@ class Object
         return $this;
     }
 
-    public static function list(Schema $schema, Backend $backend): Collection
+    public static function list(Schema $schema, Backend $backend, $query = null): Collection
     {
         $list = new Collection;
 
+        if ($query) {
+            $query = http_build_query($query);
+        }
+
         $client = new Client;
-        $r = $client->get($backend->url . 'objects/' . $schema->id, ['headers' => [
+        $url = $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : '');
+        $r = $client->get($url, ['headers' => [
             'X-Appercode-Session-Token' => $backend->token
         ]]);
 
