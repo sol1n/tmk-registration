@@ -82,21 +82,24 @@ class User
 
         $profileSchemas = app(Settings::class)->getProfileSchemas();
 
-        foreach ($profileSchemas as $key => $schema)
-        {
-            $id = $schema->id;
-            $index = $profiles->search(function ($item, $key) use ($id) {
-                return isset($item['object']) && $item['object']->schema->id == $id;
-            });
+        if ($profileSchemas) {
+            foreach ($profileSchemas as $key => $schema) {
+                $id = $schema->id;
+                $index = $profiles->search(function ($item, $key) use ($id) {
+                    return isset($item['object']) && $item['object']->schema->id == $id;
+                });
 
-            if ($index === false)
-            {
-                $schema->link = explode('.', $key)[1];
-                $profiles->put($schema->id, ['schema' => $schema, 'code' => $schema->id]);
+                if ($index === false) {
+                    $schema->link = explode('.', $key)[1];
+                    $profiles->put($schema->id, ['schema' => $schema, 'code' => $schema->id]);
+                }
             }
-        }
 
-        $this->profiles = $profiles->sortBy('code');
+            $this->profiles = $profiles->sortBy('code');
+        }
+        else{
+            $this->profiles = $profiles;
+        }
 
         return $this;
     }
@@ -216,6 +219,11 @@ class User
         }
 
         return $result;
+    }
+
+    public static function findMultiple(Backend $backend, $params) : Collection
+    {
+
     }
 
     public static function getUsersAmount($backend) {

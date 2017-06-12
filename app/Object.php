@@ -3,6 +3,8 @@
 namespace App;
 
 use App\Backend;
+use App\Services\ObjectManager;
+use App\Services\UserManager;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use GuzzleHttp\Client;
@@ -15,6 +17,7 @@ use App\Exceptions\Object\ObjectCreateException;
 use App\Exceptions\Object\ObjectNotFoundException;
 use App\Traits\Controllers\ModelActions;
 use App\Traits\Models\FieldsFormats;
+use Monolog\Handler\SyslogHandler;
 
 class Object
 {
@@ -111,6 +114,20 @@ class Object
         return $list;
     }
 
+    public static function count(Schema $schema, Backend $backend) {
+        $result = 0;
+        $client = new Client;
+        $url = $backend->url . 'objects/' . $schema->id . '?take=1&count=true';
+        $r = $client->get($url, ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
+        ]]);
+        if ($r->getHeader('x-appercode-totalitems')){
+            $result = $r->getHeader('x-appercode-totalitems')[0];
+        }
+
+        return $result;
+    }
+
     public static function build(Schema $schema, $data): Object
     {
         $object = new static();
@@ -128,8 +145,23 @@ class Object
     {
         if (! isset($this->relations['ref Users']))
         {
-            $users = app(\App\Services\UserManager::Class)->allWithProfiles();
-            $this->relations['ref Users'] = $users;    
+            $count = $this->getRelationUserCount($field);
+            $users = [];
+            if ($count > config('objects.ref_count_for_select')) {
+                $userIds = [];
+                if (isset($this->fields[$field['name']])) {
+                    if (is_array($this->fields[$field['name']])) {
+                        $userIds = $this->fields[$field['name']];
+                    } else {
+                        $userIds = [$this->fields[$field['name']]];
+                    }
+                }
+                $users = $userIds ? app(\App\Services\UserManager::Class)->findMultipleWithProfiles($userIds) : [];
+            }
+            else {
+                $users = app(\App\Services\UserManager::Class)->allWithProfiles();
+            }
+            $this->relations['ref Users'] = $users;
         }
         
         if (isset($this->fields[$field['name']]))
@@ -157,7 +189,19 @@ class Object
         $index = 'ref ' . $schema->id;
         if (! isset($this->relations[$index]))
         {
-            $elements = app(\App\Services\ObjectManager::Class)->all($schema);
+            $count = $this->getRelationObjectCount($field, $schema);
+            if ($count > config('objects.ref_count_for_select')) {
+                $objectIds = [];
+                if (is_array($this->fields[$field['name']])) {
+                    $objectIds = $this->fields[$field['name']];
+                } else {
+                    $objectIds = [$this->fields[$field['name']]];
+                }
+                $elements = $objectIds ? app(\App\Services\ObjectManager::Class)->search($schema, ['where' => json_encode(['id' => ['$in' => $objectIds]])]) : [];
+            }
+            else {
+                $elements = app(\App\Services\ObjectManager::Class)->all($schema);
+            }
             $this->relations[$index] = $elements;    
         }
         
@@ -195,6 +239,27 @@ class Object
         }
     }
 
+    private function getRelationUserCount($field) {
+        return app(UserManager::class)->count();
+    }
+
+    private function getRelationObjectCount($field, Schema $schema) {
+        return app(ObjectManager::class)->count($schema);
+    }
+
+    public function getRelationCount($field) {
+        if (mb_strpos($field['type'], 'ref') !== false) {
+            $code = str_replace('ref ', '', $field['type']);
+            if ($code == 'Users') {
+                return $this->getRelationUserCount($field);
+            } else {
+                $schema = app(\App\Services\SchemaManager::Class)->find($code);
+                return $this->getRelationObjectCount($field, $schema);
+            }
+        }
+        return 0;
+    }
+
     public function withRelations(): Object
     {
         $this->relations = [];
@@ -227,6 +292,26 @@ class Object
         {
             return $this->id;
         }
+    }
+
+    public static function getShortViewFields(Schema $schema) {
+        $viewFields = [];
+        if (isset($schema->viewData->shortView))
+        {
+            $template = $schema->viewData->shortView;
+
+            foreach ($schema->fields as $field) {
+                if ((is_string($field['name']) || is_numeric($field['name'])) && mb_strpos($template, ":".$field['name'].":") !== false)
+                {
+                    $viewFields[] = $field['name'];
+                }
+            }
+        }
+        else
+        {
+            $viewFields = ['id'];
+        }
+        return $viewFields;
     }
 
 }

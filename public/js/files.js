@@ -17680,7 +17680,7 @@ Vue.directive('focus', {
             var vueInstance = this;
             var backend = this.backend;
             axios.post('/' + backend + '/files/upload-file/', formData).then(function (response) {
-                console.log(response);
+                console.log(response.data);
                 if (response) {
                     if (response.data.type == 'success') {
                         //                            vueInstance.removeItem(folder);
@@ -17693,7 +17693,8 @@ Vue.directive('focus', {
                     toastr.error('System Error');
                 }
             }).catch(function (error) {
-                console.log(error);
+                console.log(error.data);
+                toastr.error('System Error');
             });
         },
         fileChange: function fileChange(name, files) {
@@ -17793,10 +17794,11 @@ Vue.directive('focus', {
         });
 
         axios.interceptors.response.use(function (response) {
-            //console.log('Response:', response)
+            //                console.log('Response:', response)
             vueIntance.hideSpinner();
             return response;
         }, function (error) {
+            console.log('error: ', error);
             vueIntance.hideSpinner();
         });
         //this.files = _.orderBy(this.fileList, ['fileType'], ['asc']);

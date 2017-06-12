@@ -200,6 +200,7 @@ class FileManager
             'length' => $fileProperties['size']
         ];
         $file = File::createFile($props, $this->backend);
+        $file->length = $fileProperties['size'];
         if ($file){
             $result['file'] = $file;
 

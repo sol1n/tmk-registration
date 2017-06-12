@@ -30,7 +30,7 @@ class UserManager
         return $this->find($id)->getProfiles($this->backend);
     }
 
-    public function getTotalAmount() {
+    public function count() {
         return User::getUsersAmount($this->backend);
     }
 
@@ -56,10 +56,8 @@ class UserManager
         return $element;
     }
 
-    public function allWithProfiles($page = 1): Collection
-    {
+    private function setProfiles($users) {
         $elements = new Collection;
-        $users = $this->all($page);
         $profileSchemas = app(\App\Settings::class)->getProfileSchemas();
         if ($profileSchemas)
         {
@@ -76,7 +74,7 @@ class UserManager
                     $fieldName = explode('.', $key)[1];
                     $schemaName = explode('.', $key)[0];
                     $index = $profiles->search(function($profile, $i) use ($fieldName, $user) {
-                       return $profile->fields[$fieldName] == $user->id;
+                        return $profile->fields[$fieldName] == $user->id;
                     });
 
                     if ($index !== false)
@@ -84,11 +82,35 @@ class UserManager
                         $user->profiles->put($schemaName, ['object' => $profiles->get($index)]);
                     }
                 }
-                
+
             });
         }
+        return $users;
+    }
+
+    public function allWithProfiles($page = -1): Collection
+    {
+        $users = $this->all($page);
+        $users = $this->setProfiles($users);
         
         return $users;
+    }
+
+    public function findMultipleWithProfiles($userIds = []) : Collection {
+        $users = new Collection();
+        $users = User::list($this->backend, ['where' => json_encode(['id' => ['$in' => $userIds]])]);
+        if ($users) {
+            $users = $this->setProfiles($users);
+        }
+        return $users;
+    }
+
+    public function search($query = []) {
+        $result = new Collection();
+        if ($query){
+            $result = User::list($this->backend, $query);
+        }
+        return $result;
     }
 
     public function saveProfiles(String $id, array $profiles)
@@ -126,4 +148,5 @@ class UserManager
         });
         return $result;
     }
+
 }

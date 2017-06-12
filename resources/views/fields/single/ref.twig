@@ -1,7 +1,8 @@
-<select 
+{% if count <= config('objects.ref_count_for_select') %}
+<select
   name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
   id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}" 
-  class="form-control"
+  class="form-control chosen-select"
 >
   <option value="">Not specified</option>
   {% for element in relations[field.type] %}
@@ -12,3 +13,14 @@
     {% endif %}
   {% endfor %}
 </select>
+{% else %}
+    <select class="select-data-ajax"
+            data-ref="{{ field.type }}"
+            data-schema-id="{{ schema.id }}"
+            name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+            id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}">
+        {% for item in  relations[field.type]%}
+            <option value="{{ item.id }}" selected="selected">{{ item.shortView() }}</option>
+        {% endfor %}
+    </select>
+{% endif %}

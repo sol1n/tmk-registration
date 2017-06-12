@@ -276,7 +276,7 @@
                 var backend = this.backend;
                 axios.post('/' + backend + '/files/upload-file/', formData)
                 .then(function (response) {
-                    console.log(response);
+                    console.log(response.data);
                     if (response) {
                         if (response.data.type == 'success') {
 //                            vueInstance.removeItem(folder);
@@ -292,7 +292,8 @@
                     }
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    console.log(error.data);
+                    toastr.error('System Error');
                 });
             },
             fileChange(name, files){
@@ -402,11 +403,12 @@
             })
 
             axios.interceptors.response.use(response => {
-                //console.log('Response:', response)
+//                console.log('Response:', response)
                 vueIntance.hideSpinner();
                 return response;
             },
             error =>{
+                console.log('error: ', error);
                 vueIntance.hideSpinner();
             })
             //this.files = _.orderBy(this.fileList, ['fileType'], ['asc']);

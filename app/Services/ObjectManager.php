@@ -69,9 +69,9 @@ class ObjectManager
         }
     }
 
-    public function all(Schema $schema): Collection
+    public function all(Schema $schema, $query = []): Collection
     {
-        $this->initList($schema);
+        $this->initList($schema, $query);
         return $this->lists->get($schema->id);
     }
 
@@ -118,5 +118,17 @@ class ObjectManager
         $this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
+    }
+
+    public function count(Schema $schema) {
+        return Object::count($schema, $this->backend);
+    }
+
+    public function search(Schema $schema, $query = []) {
+        $result = new Collection();
+        if ($query) {
+            $result = Object::list($schema, $this->backend, $query);
+        }
+        return $result;
     }
 }

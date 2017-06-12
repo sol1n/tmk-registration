@@ -56,6 +56,7 @@ Route::group(['prefix' => '{backend}','middleware' => ['appercodeAuth']], functi
 
   //Route::get('/files/folder/{id}', 'FilesController@ShowFolder');
 
+  Route::get('/objects/search-ref', 'SearchController@SearchRef');
   Route::get('/{schema}/', 'ObjectsController@ShowCollection');
   Route::get('/{schema}/new/', 'ObjectsController@ShowCreateForm');
   Route::post('/{schema}/create/', 'ObjectsController@CreateObject');
@@ -63,8 +64,9 @@ Route::group(['prefix' => '{backend}','middleware' => ['appercodeAuth']], functi
   Route::post('/{schema}/{object}/', 'ObjectsController@SaveObject');
   Route::get('/{schema}/{object}/delete', 'ObjectsController@DeleteObject');
 
+
 });
-  
+
 
 
 

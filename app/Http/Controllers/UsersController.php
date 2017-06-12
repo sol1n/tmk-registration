@@ -20,7 +20,7 @@ class UsersController extends Controller
             $page = 1;
         }
         $backend = app(Backend::class);
-        $total = $manager->getTotalAmount();
+        $total = $manager->count();
         $users = $manager->allWithProfiles($page);
         $users = new LengthAwarePaginator($users, $total, UserManager::USERS_PER_PAGE, $page, ['path' => '']);
         return view('users/list', [

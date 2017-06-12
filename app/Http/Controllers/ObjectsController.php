@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\AjaxResponse;
+use App\Object;
 use App\Schema;
 use App\Backend;
+use App\Services\SchemaManager;
+use App\Services\UserManager;
 use Illuminate\Http\Request;
 use App\Services\ObjectManager;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 
 class ObjectsController extends Controller
 {
@@ -23,7 +29,8 @@ class ObjectsController extends Controller
         return view('object/form', [
         'selected' => $schema->id,
         'schema' => $schema,
-        'object' => $manager->find($schema, $id)->withRelations()
+        'object' => $manager->find($schema, $id)->withRelations(),
+        'backend' => $backend
       ]);
     }
 
@@ -51,4 +58,5 @@ class ObjectsController extends Controller
     {
         return $manager->delete($schema, $id)->httpResponse('list');
     }
+
 }
