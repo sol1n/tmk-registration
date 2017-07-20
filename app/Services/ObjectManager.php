@@ -22,13 +22,13 @@ class ObjectManager
         $this->lists = new Collection;
     }
 
-    private function initList(Schema $schema)
+    private function initList(Schema $schema, $query = [])
     {
         if (! $this->lists->has($schema->id))
         {
             if (! $objects = $this->getFromCache($schema)) 
             {
-                $objects = $this->model::list($schema, $this->backend);
+                $objects = $this->model::list($schema, $this->backend, $query);
                 $this->saveToCache($schema, $objects);
             }
 
@@ -69,9 +69,9 @@ class ObjectManager
         }
     }
 
-    public function all(Schema $schema): Collection
+    public function all(Schema $schema, $query = []): Collection
     {
-        $this->initList($schema);
+        $this->initList($schema, $query);
         return $this->lists->get($schema->id);
     }
 
@@ -118,5 +118,17 @@ class ObjectManager
         $this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
+    }
+
+    public function count(Schema $schema) {
+        return Object::count($schema, $this->backend);
+    }
+
+    public function search(Schema $schema, $query = []) {
+        $result = new Collection();
+        if ($query) {
+            $result = Object::list($schema, $this->backend, $query);
+        }
+        return $result;
     }
 }

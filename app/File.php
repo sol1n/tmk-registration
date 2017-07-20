@@ -61,9 +61,35 @@ class File
 
         $result = new Collection();
 
-        $users = app(UserManager::class)->getMappedUsers();
+//        $users = app(UserManager::class)->getMappedUsers();
+        $users = static::getTreeUsers($data['myFiles']);
+        $users = User::list($backend, ['where' => json_encode(['id' => ['$in' => $users]])]);
+        $users = $users->mapWithKeys(function ($item) {
+            return [$item->id => $item->username];
+        });
         $result = self::constructFlatTree($data['myFiles'], $users, static::getbaseLink());
         return $result;
+    }
+
+    private static function getTreeUsers($tree) {
+        $result = [];
+
+        $walk = function ($data) use (&$walk){
+            $result = [];
+            if (is_array($data) and $data) {
+                foreach ($data as $item) {
+                    $result[] = $item['file']['ownerId'];
+                    if ($item['children']) {
+                        $result = array_merge($result, $walk($item['children']));
+                    }
+                }
+            }
+            return $result;
+        };
+
+        $result = $walk($tree);
+
+        return array_unique($result);
     }
 
     private static function constructFlatTree($data, $users, $baseLink){
@@ -103,6 +129,11 @@ class File
         }
 
         return collect($result);
+    }
+
+    private static function getUser($id, $backend) {
+        $user = User::get($id, $backend);
+        return [$user->id => $user->username];
     }
 
     /**
@@ -239,9 +270,9 @@ class File
 
         $json = ['file' => json_decode($r->getBody()->getContents(), 1)];
 
-        $users = app(UserManager::class)->getMappedUsers();
+        $users = static::getUser($json['file']['ownerId'], $backend);
 
-        $folder = self::build($json, $users, $fields['path'].'/');
+        $folder = self::build($json, $users, $fields['path']);
 
         return $folder;// static::build($schema, $json);
     }
@@ -249,6 +280,7 @@ class File
     public static function createFile($props, Backend $backend){
         $client = new Client;
         $fields['fileType'] = 'directory';
+
         $r = $client->post($backend->url . 'files', ['headers' => [
             'X-Appercode-Session-Token' => $backend->token
         ], 'json' => $props]);
@@ -259,7 +291,7 @@ class File
 
             $json = ['file' => json_decode($response, 1)];
 
-            $users = app(UserManager::class)->getMappedUsers();
+            $users = static::getUser($json['file']['ownerId'],$backend);
 
             $createdFile = self::build($json, $users, '');
         }
@@ -269,15 +301,21 @@ class File
 
     public static function uploadFile($fileId, $multipart, Backend $backend)
     {
+        $result = true;
         $client = new Client;
         $fields['fileType'] = 'directory';
 
-        $res = $client->request('POST', $backend->url . 'files/' . $fileId . '/upload', [
-            'headers' => ['X-Appercode-Session-Token' => $backend->token],
-            'multipart' => $multipart,
-        ], ['debug' => true]);
+        try {
+            $res = $client->request('POST', $backend->url . 'files/' . $fileId . '/upload', [
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
+                'multipart' => $multipart,
+            ], ['debug' => true]);
+        }
+        catch (ServerException $e) {
+            $result = false;
+        }
 
-        return true;
+        return $result;
     }
 
     public static function delete($fileId, $props, Backend $backend) {
@@ -300,13 +338,13 @@ class File
                 'json' => $props
             ]);
         } catch (ServerException $e) {
-            dd($e);
+            //dd($e);
             throw new FileUpdateException();
         }
 
-        $users = app(UserManager::class)->getMappedUsers();
-
         $json = ['file' => json_decode($r->getBody()->getContents(), 1)];
+
+        $users = static::getUser($json['file']['ownerId'], $backend);
 
         $updatedFile = static::build($json, $users, '');
 

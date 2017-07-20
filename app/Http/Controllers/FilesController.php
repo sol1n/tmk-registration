@@ -40,13 +40,17 @@ class FilesController extends Controller
 
     public function GetFile(Backend $backend, $id) {
         $result = app(FileManager::class)->getFile($id);
-        if ($result['fileResult']['statusCode'] == '404'){
-            return view('files/file-not-found');
+        if ($result['file']->length > 0) {
+            if ($result['fileResult']['statusCode'] == '404') {
+                return view('files/file-not-found');
+            } else {
+                $filePath = $result['fileResult']['fileName'];
+                $file = $result['file'];
+                return response()->download($filePath, $file->name);
+            }
         }
         else {
-            $filePath = $result['fileResult']['fileName'];
-            $file = $result['file'];
-            return response()->download($filePath, $file->name);
+            return view('files/no-file');
         }
     }
 
@@ -100,7 +104,7 @@ class FilesController extends Controller
     {
         $response = new AjaxResponse();
         $file = $request->file('fileUpload');
-        $parentId = $request->input('parentId');
+        $parentId = $request->input('parentId') ?? File::ROOT_PARENT_ID;
         if ($file->isValid()) {
             $fileProperties = [
                 'name' => $file->getClientOriginalName(),

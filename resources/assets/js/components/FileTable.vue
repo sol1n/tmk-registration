@@ -78,7 +78,10 @@
             <td>
                 <div v-if="!treeItem.isDeleted">
                     <input v-if="treeItem.isNew" v-focus autocomplete="off" @blur="folderBlur(treeItem)" class="form-control" placeholder="input folder name" type="text" v-model="treeItem.name" @keyup="folderKeyUp($event, treeItem)"/>
-                    <span v-else><a :href="treeItem.link">{{ treeItem.name }}</a></span>
+                    <span v-else>
+                        <a v-if="treeItem.length > 0 || treeItem.fileType == 'directory'" :href="treeItem.link">{{ treeItem.name }}</a>
+                        <span v-else>{{ treeItem.name }}</span>
+                    </span>
                 </div>
                 <div v-else>
                     <span>{{ treeItem.name }}</span>
@@ -273,7 +276,7 @@
                 var backend = this.backend;
                 axios.post('/' + backend + '/files/upload-file/', formData)
                 .then(function (response) {
-                    console.log(response);
+                    console.log(response.data);
                     if (response) {
                         if (response.data.type == 'success') {
 //                            vueInstance.removeItem(folder);
@@ -289,7 +292,8 @@
                     }
                 })
                 .catch(function (error) {
-                    console.log(error);
+                    console.log(error.data);
+                    toastr.error('System Error');
                 });
             },
             fileChange(name, files){
@@ -399,11 +403,12 @@
             })
 
             axios.interceptors.response.use(response => {
-                //console.log('Response:', response)
+//                console.log('Response:', response)
                 vueIntance.hideSpinner();
                 return response;
             },
             error =>{
+                console.log('error: ', error);
                 vueIntance.hideSpinner();
             })
             //this.files = _.orderBy(this.fileList, ['fileType'], ['asc']);

@@ -6,16 +6,27 @@ use App\Backend;
 use App\Language;
 use App\Services\UserManager;
 use App\Services\RoleManager;
+use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Session;
 
 class UsersController extends Controller
 {
-    public function ShowList(UserManager $manager)
+    public function ShowList(Request $request, UserManager $manager)
     {
+        $page = $request->get('page');
+        if (!$page) {
+            $page = 1;
+        }
+        $backend = app(Backend::class);
+        $total = $manager->count();
+        $users = $manager->allWithProfiles($page);
+        $users = new LengthAwarePaginator($users, $total, UserManager::USERS_PER_PAGE, $page, ['path' => '']);
         return view('users/list', [
-        'users' => $manager->allWithProfiles(),
-        'languages' => Language::list(),
-        'selected' => 'users'
+            'users' => $users,//$manager->allWithProfiles(),
+            'languages' => Language::list(),
+            'selected' => 'users'
       ]);
     }
 
