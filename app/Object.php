@@ -2,60 +2,40 @@
 
 namespace App;
 
+use App\Backend;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\ClientException;
 use App\Exceptions\Object\ObjectSaveException;
+use App\Exceptions\Object\ObjectCreateException;
+use App\Exceptions\Object\ObjectNotFoundException;
+use App\Traits\Controllers\ModelActions;
+use App\Traits\Models\FieldsFormats;
 
 class Object
 {
+    use ModelActions, FieldsFormats;
+
     public $fields;
     public $schema;
-    public $urls;
 
-    private static function prepareRawData(array $data, Schema $schema): array
+    protected function baseUrl(): String
     {
-        $systemFields = ['id', 'createdAt', 'updatedAt', 'ownerId'];
-        foreach ($systemFields as $field) {
-            if (array_key_exists($field, $data)) {
-                unset($data[$field]);
-            }
-        }
-
-        foreach ($schema->fields as $field) {
-            switch ($field['type']) {
-              case 'String':
-                  $data[$field['name']] = (String)$data[$field['name']];
-                  break;
-              case 'Text':
-                  $data[$field['name']] = (String)$data[$field['name']];
-                  break;
-              case 'Integer':
-                  $data[$field['name']] = (Integer)$data[$field['name']];
-                  break;
-              case 'Double':
-                  $data[$field['name']] = (Float)$data[$field['name']];
-                  break;
-              
-              default:
-
-                  break;
-          }
-        }
-
-        return $data;
+        return $this->schema->id;
     }
 
-    public function save(array $fields, $token): Object
+    public function save($data, Backend $backend): Object
     {
-        $this->fields = static::prepareRawData($fields, $this->schema);
+        $this->fields = static::prepareRawData($data, $this->schema);
+
         $client = new Client;
         try {
-            $r = $client->put(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
-              'X-Appercode-Session-Token' => $token
+            $r = $client->put($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+              'X-Appercode-Session-Token' => $backend->token
           ], 'json' => $this->fields]);
         } catch (ServerException $e) {
             throw new ObjectSaveException;
@@ -64,50 +44,57 @@ class Object
         return $this;
     }
 
-    public static function get(Schema $schema, $id, $token): Object
+    public static function get(Schema $schema, $id, Backend $backend): Object
     {
         $client = new Client;
-        $r = $client->get(env('APPERCODE_SERVER') . 'objects/' . $schema->id . '/' . $id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
-        ]]);
+        try {
+            $r = $client->get($backend->url . 'objects/' . $schema->id . '/' . $id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
+            ]]);
+        } catch (ClientException $e) {
+            throw new ObjectNotFoundException;
+        }
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
         return static::build($schema, $json);
     }
 
-    public static function create(Schema $schema, $fields, $token): Object
+    public static function create(Schema $schema, $fields, Backend $backend): Object
     {
         $fields = self::prepareRawData($fields, $schema);
 
         $client = new Client;
-        $r = $client->post(env('APPERCODE_SERVER') . 'objects/' . $schema->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
-        ], 'json' => $fields]);
+        try {
+            $r = $client->post($backend->url . 'objects/' . $schema->id, ['headers' => [
+                'X-Appercode-Session-Token' => $backend->token
+            ], 'json' => $fields]);
+        } catch (ServerException $e) {
+            throw new ObjectCreateException;
+        }
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
         return static::build($schema, $json);
     }
 
-    public function delete($token)
+    public function delete(Backend $backend): Object
     {
         $client = new Client;
-        $r = $client->delete(env('APPERCODE_SERVER') . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->delete($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ]]);
 
-        return true;
+        return $this;
     }
 
-    public static function list(Schema $schema, $token): Collection
+    public static function list(Schema $schema, Backend $backend): Collection
     {
         $list = new Collection;
 
-        $url = env('APPERCODE_SERVER');
         $client = new Client;
-        $r = $client->get($url . 'objects/' . $schema->id, ['headers' => [
-            'X-Appercode-Session-Token' => $token
+        $r = $client->get($backend->url . 'objects/' . $schema->id, ['headers' => [
+            'X-Appercode-Session-Token' => $backend->token
         ]]);
 
         $json = json_decode($r->getBody()->getContents(), 1);
@@ -131,4 +118,110 @@ class Object
 
         return $object;
     }
+
+    private function getUserRelation($field)
+    {
+        if (! isset($this->relations['ref Users']))
+        {
+            $users = app(\App\Services\UserManager::Class)->allWithProfiles();
+            $this->relations['ref Users'] = $users;    
+        }
+        
+        if (isset($this->fields[$field['name']]))
+        {
+            if (is_array($this->fields[$field['name']]))
+            {
+                foreach ($this->fields[$field['name']] as $k => $v)
+                {
+                    $this->fields[$field['name']][$k] =  app(\App\Services\UserManager::Class)->find($v);
+                }
+            }
+            else
+            {
+                $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
+            }
+        }
+        else
+        {
+            $this->fields[$field['name']] = null;
+        }
+    }
+
+    private function getObjectRelation($field, Schema $schema)
+    {
+        $index = 'ref ' . $schema->id;
+        if (! isset($this->relations[$index]))
+        {
+            $elements = app(\App\Services\ObjectManager::Class)->all($schema);
+            $this->relations[$index] = $elements;    
+        }
+        
+        if (isset($this->fields[$field['name']]))
+        {
+            if (is_array($this->fields[$field['name']]))
+            {
+                foreach ($this->fields[$field['name']] as $k => $v)
+                {
+                    $this->fields[$field['name']][$k] =  app(\App\Services\ObjectManager::Class)->find($schema, $v);
+                }
+            }
+            else
+            {
+                $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+            }
+        }
+        else
+        {
+            $this->fields[$field['name']] = null;
+        }
+    }
+
+    private function getRelation($field)
+    {
+        $code = str_replace('ref ', '', $field['type']);
+        if ($code == 'Users')
+        {
+            $this->getUserRelation($field);
+        }
+        else
+        {
+            $schema = app(\App\Services\SchemaManager::Class)->find($code);
+            $this->getObjectRelation($field, $schema);
+        }
+    }
+
+    public function withRelations(): Object
+    {
+        $this->relations = [];
+
+        foreach ($this->schema->fields as $field)
+        {
+            if (mb_strpos($field['type'], 'ref ') !== false)
+            {
+                $this->getRelation($field);
+            }
+        }
+        return $this;
+    }
+
+    public function shortView(): String
+    {
+        if (isset($this->schema->viewData->shortView))
+        {
+            $template = $this->schema->viewData->shortView;
+            foreach ($this->fields as $key => $field){
+                if ((is_string($field) || is_numeric($field)) && mb_strpos($template, ":$key:") !== false)
+                {
+                    $template = str_replace(":$key:", $field, $template);
+                }
+            }
+            $template = str_replace(":id:", $this->id, $template);
+            return $template;
+        }
+        else
+        {
+            return $this->id;
+        }
+    }
+
 }

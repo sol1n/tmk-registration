@@ -2,116 +2,121 @@
 
 namespace App\Services;
 
-use App\User;
+use App\Backend;
 use App\Object;
 use App\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
-use App\Exceptions\Object\ObjectNotFoundException;
 
 class ObjectManager
 {
-    private $token;
+    private $backend;
+    private $lists;
 
-    const CACHE_ID = 'objects';
-    const CACHE_LIFETIME = 60;
+    protected $model = Object::class;
+    protected $cacheLifetime = 10;
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
+        $this->backend = app(Backend::Class);
+        $this->lists = new Collection;
     }
 
-    private function saveCollectionToCache(Schema $schema, $data)
+    private function initList(Schema $schema)
     {
-        $cacheId = self::CACHE_ID . '-' . $schema->id;
-        Cache::put($cacheId, $data, self::CACHE_LIFETIME);
+        if (! $this->lists->has($schema->id))
+        {
+            if (! $objects = $this->getFromCache($schema)) 
+            {
+                $objects = $this->model::list($schema, $this->backend);
+                $this->saveToCache($schema, $objects);
+            }
+
+            $this->lists->put($schema->id, $objects);
+        }
     }
 
-    private function getCollectionFromCache(Schema $schema)
+    private function getCacheTag(Schema $schema): String
     {
-        $cacheId = self::CACHE_ID . '-' . $schema->id;
+        return app(Backend::Class)->code . '-'. $this->model . '-' . $schema->id;
+    }
 
-        if (Cache::has($cacheId)) {
-            return Cache::get($cacheId);
+    private function saveToCache(Schema $schema, Collection $data)
+    {
+        if (env('APPERCODE_ENABLE_CACHING') == 1)
+        {
+            Cache::put($this->getCacheTag($schema), $data, $this->cacheLifetime);
+        }
+    }
+
+    private function getFromCache(Schema $schema)
+    {
+        if (Cache::has($this->getCacheTag($schema)) && (env('APPERCODE_ENABLE_CACHING') == 1)) {
+            return Cache::get($this->getCacheTag($schema));
         } else {
             return null;
         }
     }
 
-    private function fetchCollection(Schema $schema): Collection
-    {
-        $objects = $this->getCollectionFromCache($schema);
-        if (is_null($objects)) {
-            $objects = Object::list($schema, $this->token);
-            $this->saveCollectionToCache($schema, $objects);
-        }
-        return $objects;
-    }
-
     public function find(Schema $schema, $id): Object
     {
-        $objects = $this->fetchCollection($schema);
-        $object = $objects->where('id', $id)->first();
-        if (! is_null($object))
-        {
+        $this->initList($schema);
+        $object = $this->lists->get($schema->id)->where('id', $id)->first();
+        if (! is_null($object)) {
             return $object;
-        }
-        else
-        {
-            throw new ObjectNotFoundException;
+        } else {
+            return $this->model::get($schema, $id, $this->backend);
         }
     }
 
     public function all(Schema $schema): Collection
     {
-        $objects = $this->fetchCollection($schema);
-        return $objects;
+        $this->initList($schema);
+        return $this->lists->get($schema->id);
     }
 
     public function save(Schema $schema, $id, array $fields): Object
     {
-        $objects = $this->fetchCollection($schema);
+        $this->initList($schema);
+        $list = $this->lists->get($schema->id);
 
-        $index = $objects->search(function ($item, $key) use ($id) {
+        $index = $list->search(function ($item, $key) use ($id) {
             return $item->id == $id;
         });
 
-        $object = $objects->get($index);
-        $object->save($fields, $this->token);
-        $objects->put($index, $object);
+        $object = $list->get($index);
+        $object->save($fields, $this->backend);
+        $list->put($index, $object);
 
-        $this->saveCollectionToCache($schema, $objects);
+        $this->saveToCache($schema, $list);
+        $this->lists->put($schema->id, $list);
 
         return $object;
     }
 
     public function create(Schema $schema, array $fields): Object
     {
-        $object = Object::create($schema, $fields, $this->token);
-        $objects = $this->fetchCollection($schema);
-        $objects->push($object);
+        $object = $this->model::create($schema, $fields, $this->backend);
+        $this->initList($schema);
+        $this->lists->get($schema->id)->push($object);
 
-        $this->saveCollectionToCache($schema, $objects);
+        $this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
     }
 
-    public function delete(Schema $schema, $id)
+    public function delete(Schema $schema, $id): Object
     {
-        $object = $this->find($schema, $id);
-        $object->delete($this->token);
+        $this->initList($schema);
+        $object = $this->find($schema, $id)->delete($this->backend);
 
-        $objects = $this->fetchCollection($schema);
-
-        $index = $objects->search(function ($item, $key) use ($id) {
+        $index = $this->lists->get($schema->id)->search(function ($item, $key) use ($id) {
             return $item->id == $id;
         });
 
-        $objects->forget($index);
-        $this->saveCollectionToCache($schema, $objects);
+        $this->lists->get($schema->id)->forget($index);
+        $this->saveToCache($schema, $this->lists->get($schema->id));
 
-        return true;
+        return $object;
     }
 }

@@ -1,0 +1,25 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}Error{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>Users list</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/">Dashboard</a>
+        </li>        
+        <li class="active">
+            <strong>All users</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <h2 class="error-message">User is not found</h2>
+  </div>
+
+{% endblock %}

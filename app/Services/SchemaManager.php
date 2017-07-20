@@ -4,71 +4,36 @@ namespace App\Services;
 
 use App\User;
 use App\Schema;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Collection;
+use App\Backend;
+use App\Traits\Services\CacheableList;
 
 class SchemaManager
 {
-    private $list;
+    use CacheableList;
+
     private $token;
 
-    const CACHE_ID = 'schemas';
-    const CACHE_LIFETIME = 20;
+    protected $model = Schema::class;
+    protected $cacheLifetime = 5;
 
     public function __construct()
     {
-        $user = new User;
-        $this->token = $user->token();
-
-        if (! $this->list = $this->getFromCache()) {
-            $this->list = Schema::list($this->token);
-            $this->saveToCache($this->list);
-        }
+        $this->backend = app(Backend::Class);
+        $this->initList();
     }
 
-    private function getFromCache()
+    public function fieldTypes(): array
     {
-        if (Cache::has(self::CACHE_ID)) {
-            return Cache::get(self::CACHE_ID);
-        } else {
-            return null;
-        }
-    }
+        $result = [
+            'basic' => ['Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json'],
+            'refs' => ['ref Users']
+        ];
 
-    private function saveToCache(Collection $data)
-    {
-        Cache::put(self::CACHE_ID, $data, self::CACHE_LIFETIME);
-    }
-
-
-    public function find($id): Schema
-    {
-        foreach ($this->list as $schema) {
-            if ($schema->id == $id) {
-                return $schema;
-            }
+        foreach ($this->list as $schema)
+        {
+            $result['refs'][] = 'ref ' . $schema->id;
         }
 
-        return Schema::get($id, $this->token);
-    }
-
-    public function save(String $id, Array $fields): Schema
-    {
-        $schema = $this->find($id);
-        $schema = $schema->save($fields, $this->token);
-
-        $index = $this->list->search(function ($item, $key) use ($id) {
-            return $item->id == $id;
-        });
-
-        $this->list->put($index, $schema);
-        $this->saveToCache($this->list);
-
-        return $schema;
-    }
-
-    public function all()
-    {
-        return $this->list;
+        return $result;
     }
 }

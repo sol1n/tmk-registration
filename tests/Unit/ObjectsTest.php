@@ -23,11 +23,11 @@ class ObjectsTest extends TestCase
         ], false);
 
         $this->withSession(['session-token' => $user->token()]);
-        $this->objectManager = new ObjectManager;
-        $this->schemaManager = new SchemaManager;
+        $this->objectManager = app(ObjectManager::class);
+        $this->schemaManager = app(SchemaManager::class);
     }
 
-    public function testCanFindObject()
+    public function test_can_find_object()
     {
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
@@ -44,7 +44,7 @@ class ObjectsTest extends TestCase
         $this->objectManager->delete($schema, $id);
     }
 
-    public function testCanCreateObject()
+    public function test_can_create_object()
     {
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];
@@ -52,12 +52,12 @@ class ObjectsTest extends TestCase
         $schema = $this->schemaManager->find($schemaName);
         $object = $this->objectManager->create($schema, $fields);
 
-        $this->assertTrue(! empty($object->id));
+        $this->assertFalse(empty($object->id));
 
         $this->objectManager->delete($schema, $object->id);
     }
 
-    public function testCanDeleteObject()
+    public function test_can_delete_object()
     {
 
         $this->expectException(ObjectNotFoundException::class);
@@ -74,7 +74,7 @@ class ObjectsTest extends TestCase
         $this->objectManager->find($schema, $id);
     }
 
-    public function testCanSaveObject()
+    public function test_can_save_object()
     {
         $schemaName = 'meeting1';
         $fields = ['userId' => 0, 't' => '', 't2' => '', 't3' => '', 'test' => null];

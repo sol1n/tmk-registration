@@ -1,5 +1,24 @@
 {% extends "page.twig" %}
 
+{% block pageTitle %}{{ schema.title }} elements{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ schema.title }} elements</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/{{ backend.code }}/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/{{ backend.code }}/schemas/">All schemas</a>
+        </li>
+        <li class="active">
+            <strong>{{ schema.title }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
@@ -9,7 +28,8 @@
 
     <div class="ibox-content">
       <div class="buttons-group">
-        <a class="btn btn-primary" href="/{{ schema.id }}/new/">New element</a>
+        <a class="btn btn-primary" href="/{{ backend.code }}/{{ schema.id }}/new/">New element</a>
+        <a class="btn btn-default pull-right" href="{{ schema.getSingleUrl() }}">Edit schema</a>
       </div>
 
       <table class="table">
@@ -17,7 +37,13 @@
           <tr>
             <th>#</th>
             {% for field in schema.fields %}
-              <th>{{ field.name }}</th>
+              <th>
+                {% if field.title %}
+                  {{ field.title }}
+                {% else %}
+                  {{ field.name }}
+                {% endif %}
+              </th>
             {% endfor %}
             <th class="text-right">Actions</th>
           </tr>
@@ -26,24 +52,66 @@
           {% for object in objects %}
             <tr>
               <td>
-                <a href="/{{ schema.id }}/{{ object.id }}/">
+                <a href="{{ object.getSingleUrl() }}">
                   {{ object.id }}
                 </a>
               </td>
               {% for field in schema.fields %}
                 {% if object.fields[field.name] is iterable %}
-                  <td>Array of {{ object.fields[field.name]|length }} values</td>
+                  {% if field.type == "ref Users" %}
+                    <td>
+                      {% for key, related in object.fields[field.name] %}
+                        {% set user = schema.relations[field.type].where('id',related).first() %}
+                        {% if key == object.fields[field.name]|length - 1 %}
+                          <a href="{{ user.getSingleUrl() }}">{{ user.shortView() }}</a>
+                        {% else %}
+                          <a href="{{ user.getSingleUrl() }}">{{ user.shortView() }}</a>,
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% elseif 'ref ' in field.type %}
+                    <td>
+                      {% for key, related in object.fields[field.name] %}
+                        {% set element = schema.relations[field.type].where('id',related).first() %}
+                        {% if key == object.fields[field.name]|length - 1 %}
+                          <a href="{{ element.getSingleUrl() }}">{{ element.shortView() }}</a>
+                        {% else %}
+                          <a href="{{ element.getSingleUrl() }}">{{ element.shortView() }}</a>,
+                        {% endif %}
+                      {% endfor %}
+                    </td>
+                  {% else %}
+                    <td>Array of {{ object.fields[field.name]|length }} values</td>
+                  {% endif %}
+                {% elseif 'ref Users' == field.type %}
+                   <td>
+                    {% set user = schema.relations[field.type].where('id', object.fields[field.name]).first() %}
+                    {% if element %}
+                      <a href="{{ user.getSingleUrl() }}">
+                        {{ element.shortView() }}
+                      </a>
+                    {% endif %}
+                  </td>
+                {% elseif 'ref ' in field.type %}
+                  <td>
+                    {% set element = schema.relations[field.type].where('id', object.fields[field.name]).first() %}
+                    {% if element %}
+                      <a href="{{ element.getSingleUrl() }}">
+                        {{ element.shortView() }}
+                      </a>
+                    {% endif %}
+                  </td>
                 {% else %}
                   <td>{{ object.fields[field.name] | striptags('<br><b><i><p>') | str_limit(380)  }}</td>
                 {% endif %}
               {% endfor %}
               <td class="action-cell">
                 <div class="input-group-btn text-right">
-                    <a href="/{{ schema.id }}/{{ object.id }}/" tabindex="-1" class="btn btn-white" type="button">Edit</a>
+                    <a href="{{ object.getSingleUrl() }}" tabindex="-1" class="btn btn-white" type="button">Edit</a>
                      <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span class="caret"></span></button>
                       <ul class="dropdown-menu pull-right">
-                          <li><a href="/{{ schema.id }}/{{ object.id }}/">Edit</a></li>
-                          <li><a href="/{{ schema.id }}/{{ object.id }}/delete">Delete</a></li>
+                          <li><a href="{{ object.getSingleUrl() }}">Edit</a></li>
+                          <li><a href="{{ object.getSingleUrl() }}delete">Delete</a></li>
                       </ul>
                 </div>
               </td>

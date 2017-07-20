@@ -4,8 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use App\User;
+use App\Backend;
 
-class appercodeAuth
+class AppercodeAuth
 {
     /**
      * Handle an incoming request.
@@ -16,10 +17,8 @@ class appercodeAuth
      */
     public function handle($request, Closure $next)
     {
-        if (! $request->session()->has('session-token')) {
-            return redirect('/login');
-        } else {
-            $request->user = new User;
+        if (! isset(app(Backend::Class)->token)) {
+            return redirect('/' . app(Backend::Class)->code . '/login');
         }
 
         return $next($request);

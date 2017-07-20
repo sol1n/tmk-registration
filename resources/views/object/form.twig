@@ -1,5 +1,27 @@
 {% extends "page.twig" %}
 
+{% block pageTitle %}{{ schema.title }} element{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>{{ schema.title }} elements</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="{{ backend.code }}">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/{{ backend.code }}/schemas/">All schemas</a>
+        </li>        
+        <li>
+            <a href="/{{ backend.code }}/{{ schema.id }}">{{ schema.title }}</a>
+        </li>
+        <li class="active">
+            <strong>{{ object.id }}</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
 {% block content %}
 
   <div class="ibox float-e-margins">
@@ -12,7 +34,7 @@
     </div>
 
     <div class="ibox-content">
-      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ schema.id }}/{{ object.id }}" method="post">
+      <form enctype="multipart/form-data" class="form-horizontal" action="{{ object.getSingleUrl() }}" method="post">
         {{ csrf_field() }}
 
         {% for field in schema.fields %}
@@ -23,23 +45,20 @@
               <label class="col-sm-2 control-label">{{ field.name }}</label>
             {% endif %}
               <div class="col-sm-10">
-                {% if field.type == "String" %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% elseif field.type == "Json" %}
-                  <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control">{{ object.fields[field.name]|json_encode() }}</textarea>
-                {% elseif field.type == "Integer" %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% else %}
-                  <input name="{{ field.name }}" id="{{ field.name }}" type="text" class="form-control" value="{{ object.fields[field.name] }}">
-                {% endif %}
+                {%  
+                    include 'fields/renderer' 
+                    with {'name': field.name, 'id': field.name, 'field': field, 'relations': object.relations, 'value': object.fields[field.name]} only 
+                %}
               </div>
           </div>  
         {% endfor %}
 
-        <button type="submit" class="btn btn-success">Save</button>
-        <button type="submit" class="btn btn-success">Apply</button>
+        <hr/>
 
-        <a href="/{{ schema.id }}/" class="btn btn-default pull-right">Back</a>
+        <button type="submit" name="action" value="list" class="btn btn-primary">Save object</button>
+        <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
+        <a href="{{ object.getSingleUrl() }}delete" class="btn btn-default pull-right">Delete element</a>
+
       </form>
     </div>
   </div>

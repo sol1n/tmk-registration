@@ -1,14 +1,20 @@
 #collections-list>li>a {
-  font-weight: normal;
+  font-weight: 500;
   color: #a7b1c2;
 }
 
 #collections-list>li>a>b{
   color: #fefefe;
+  font-weight: 600;
 }
 
-.nav>li>a{
+.navbar-static-side .nav>li>a{
   color: #fefefe;
+  padding: 6px 20px 6px 25px;
+}
+
+.nav-header {
+  margin-bottom: 15px;
 }
 
 @media (min-width: 768px){
@@ -40,4 +46,242 @@
 .error-message {
   text-align: center;
   margin-top: 40vh;
+}
+
+.tab-pane-padding {
+  padding: 30px 0 0;
+}
+
+.table > tbody > tr > td {
+  vertical-align: middle;
+}
+
+.table {
+  font-size: 13px;
+}
+
+.schema-fields-table {
+  margin-top: 10px;
+}
+
+.table .form-control {
+  padding: 5px;
+  height: 30px;
+  font-size: 13px;
+}
+
+.btn-primary {
+  background-color: #2994ea;
+  border-color: #2994ea;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: #2082d0;
+  border-color: #2082d0;
+}
+
+.btn-default {
+  background-color: #fff;
+  border-color: #c2c2c2;
+  color: #333;
+}
+
+.btn-default:hover, .btn-default:active, .btn-default:focus {
+  border-color: #a0a0a0;
+  background-color: #fff;
+  color: #333;
+}
+
+.form-control:focus, .single-line:focus {
+  border-color: #2994ea!important;
+}
+
+.application-title {
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.navbar-static-side .nav>li.active {
+  border-left: 4px solid #2994ea;
+}
+
+
+.files-breadcrumb>li a{
+  color: #3592cd;
+}
+
+.files-breadcrumb>li.active{
+  color: #999;
+}
+
+.files-breadcrumb>li+li:before{
+  padding: 0;
+  color: #989898;
+}
+
+.files-content{
+  padding: 0;
+}
+
+.files-tools{
+  padding: 10px 20px;
+}
+
+.files-table .space-td{
+  width: 20px;
+  border-top: 0;
+}
+
+.files-table tbody tr{
+  cursor: default;
+}
+
+.files-table tbody tr:hover td{
+  background: #edf6fb;
+}
+
+.files-table tbody .disabled {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.space-td {
+  background: #fff;
+}
+
+.files-table tbody tr:hover .space-td{
+  background: #fff;
+}
+
+.files-action-td {
+  overflow-x: visible !important;
+}
+
+.files-action-td .btn {
+  margin-bottom: 0 !important;
+}
+
+.files-action-td .file-more-actions{
+  border-color: #c2c2c2;
+  border-radius: 0;
+  border-left-width: 0;
+  padding: 5px 12px;
+  font-size: 13px;
+}
+
+.file-more-actions:hover {
+  border-left-width: 1px;
+}
+
+.files-action-td:hover .btn, .files-action-td:hover .input-group-addon {
+  color: #3592cd !important;
+  border-color: #3592cd !important;
+}
+
+.files-td-icon{
+  width: 32px;
+  color: #3592cd;
+  font-size: 20px;
+}
+
+.files-table tbody .disabled .files-td-icon{
+  color: #666 !important;
+}
+
+.sortable-header .active {
+  color: #3592cd;
+}
+
+.sortable-header .fa-sort-asc{
+  vertical-align: bottom;
+}
+
+.sortable-header .fa-sort-desc{
+  vertical-align: top;
+}
+
+.create-folder-btn .fa {
+  margin-right: 5px;
+  font-size: 16px;
+}
+
+.dropdown-toggle.btn-default {
+  background-color: #fff !important;
+}
+
+.spinner-container{
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  width: 100%;
+  height: 100%;
+  z-index: 10000000;
+}
+/*.ibox-content > .sk-spinner {*/
+  /*display: none;*/
+/*}*/
+/*.ibox-content.sk-loading {*/
+  /*position: relative;*/
+/*}*/
+/*.ibox-content.sk-loading:after {*/
+  /*content: '';*/
+  /*background-color: rgba(255, 255, 255, 0.7);*/
+  /*position: absolute;*/
+  /*top: 0;*/
+  /*left: 0;*/
+  /*right: 0;*/
+  /*bottom: 0;*/
+/*}*/
+.spinner-container > .sk-spinner {
+  display: block;
+  position: absolute;
+  top: 40%;
+  left: 0;
+  right: 0;
+  z-index: 2000;
+}
+
+.sk-spinner .sk-double-bounce1{
+  background-color: #337ab7;
+}
+
+.sk-spinner .sk-double-bounce2{
+  background-color: #337ab7;
+}
+
+.inline-block{
+  display: inline-block;
+}
+
+/* enable absolute positioning */
+.inner-addon {
+  position: relative;
+}
+
+/* style icon */
+.inner-addon .glyphicon {
+  position: absolute;
+  padding: 10px;
+  pointer-events: none;
+  z-index: 1000;
+  color: #999;
+}
+
+/* align icon */
+.left-addon .glyphicon  { left:  0px;}
+.right-addon .glyphicon { right: 0px;}
+
+/* add padding  */
+.left-addon input  { padding-left:  30px; }
+.right-addon input { padding-right: 30px; }
+
+.create-folder-btn{
+  cursor: pointer;
+  color: #1c84c6;
+  margin-right: 1em;
+}
+
+.form-control-multiple {
+  margin-bottom: 10px;
 }

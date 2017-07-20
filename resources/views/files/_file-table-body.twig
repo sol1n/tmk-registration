@@ -1,0 +1,29 @@
+<tr>
+    <td>
+        {% if treeItem.fileType == 'directory' %}
+            <a href="{{ baseLink }}{{ treeItem.id }}">{{ treeItem.id }}</a>
+        {% else %}
+            <a href="/files/get/{{ treeItem.id }}">{{ treeItem.id }}</a>
+        {% endif %}
+    </td>
+    <td class="text-center">
+        {% if treeItem.fileType == 'directory' %}
+            <i class="fa fa-folder-o" title="directory" aria-hidden="true"></i>
+        {% else %}
+            <i class="fa fa-file-o" title="file" aria-hidden="true"></i>
+        {% endif %}
+    </td>
+    <td>{{ treeItem.name ? treeItem.name : treeItem.id }}</td>
+    <td>{{ treeItem.getSize() }}</td>
+    <td>{{ treeItem.createdAt|date('d.m.Y h:i') }}</td>
+    <td>{{ users[treeItem.ownerId] }}</td>
+    <td class="text-center">{{ treeItem.getRights() }}</td>
+    <td class="text-center">
+        {% if (treeItem.shareStatus == 'shared') %}
+            <i class="fa fa-check" title="shared" aria-hidden="true"></i>
+        {% else %}
+            <i class="fa fa-minus" title="not shared" aria-hidden="true"></i>
+        {% endif %}
+    </td>
+    <td class="text-right">Actions</td>
+</tr>

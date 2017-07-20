@@ -1,0 +1,191 @@
+{% extends "page.twig" %}
+
+{% block pageTitle %}New role{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="col-lg-10">
+    <h2>New role</h2>
+    <ol class="breadcrumb">
+        <li>
+            <a href="/{{ backend.code }}/">Dashboard</a>
+        </li>        
+        <li>
+            <a href="/{{ backend.code }}/roles/">All roles</a>
+        </li>        
+        <li class="active">
+            <strong>New role</strong>
+        </li>
+    </ol>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+  <div class="ibox float-e-margins">
+    <div class="ibox-title">
+      <h5>New role</h5>
+    </div>
+
+    <div class="ibox-content">
+      <form enctype="multipart/form-data" class="form-horizontal" action="/{{ backend.code }}/roles/new/" method="post">
+        {{ csrf_field()}}
+
+        <input type="hidden" name="action" value="list" />
+
+        <div class="tabs-container">
+          <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#tab-settings">General</a></li>
+              <li><a data-toggle="tab" href="#tab-adds">Role rights</a></li>
+          </ul>
+
+          <div class="tab-content">
+            <div class="tab-pane tab-pane-padding active" id="tab-settings">
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Role ID</label>
+                <div class="col-sm-10">
+                  <input name="id" id="id" type="text" class="form-control" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-2 control-label">Parent role</label>
+                <div class="col-sm-10">
+                  <select name="baseRoleId" class="form-control">
+                    <option value="">Not specified</option>
+                    {% for role in roles %}
+                      <option value="{{ role.id }}">{{ role.id }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane tab-pane-padding" id="tab-adds">
+              <div class="button-group">
+                <button class="btn btn-primary btn-sm" data-add-row>Add new right</button>
+              </div>
+
+              <table class="table schema-fields-table">
+                <thead>
+                  <th>Right</th>
+                  <th class="text-center">Enabled</th>
+                  <th class="text-center">Delete</th>
+                </thead>
+                <tbody>
+                  <tr data-id="new">
+                    <td contenteditable>NewRight</td>
+                    <td class="text-center">
+                      <input class="tableCheckbox" type="checkbox" checked />
+                    </td>
+                    <td class="text-center">
+                      <a href="#delete-row" data-delete-row>
+                        delete field
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <hr/>
+
+        <button type="submit" name="action" value="list" class="btn btn-primary">Create role</button>
+        <button type="submit" name="action" value="form" class="btn btn-primary">Apply changes</button>
+      </form>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block additionalJs %}
+  <script type="text/javascript">
+    $(function(){
+      window.deletedRow = $('[data-id]').detach();
+
+      $('[data-add-row]').on('click', function(){
+        var table = $('table tbody');
+        var canAddRow = true;
+        table.find('tr').each(function(){
+          var tr = $(this);
+          if (tr.find('td').eq(0).text() == 'NewRight'){
+            canAddRow = false;
+          }
+        });
+        if (canAddRow){
+          if (table.find('tr:last').length){
+            var tr = table.find('tr:last').clone();
+          }
+          else{
+            var tr = window.deletedRow;
+          }
+          tr.find('td').eq(0).text('NewRight');
+          tr.find('td').eq(1).find('input').prop('checked', true);
+          tr.attr('data-id', 'new');
+          tr.appendTo(table);
+        }
+        return false;
+      });
+
+      $('form').on('submit', function(){
+        var data = {};
+        data.rights = {};
+        var form = $(this);
+        form.find('input, select').each(function(){
+          if (!$(this).hasClass('tableCheckbox')){
+            data[$(this).attr('name')] = $(this).val();
+            if (! $(this).val() && $(this).attr('required')){
+              $(this).focus();
+              return data = false;
+            }
+          }
+        });
+
+        var table = $('table tbody');
+        if (data === false){
+          return false;
+        }
+
+        table.find('tr').each(function(){
+          var key = $(this).find('td').eq(0).text();
+          var enabled = $(this).find('td').eq(1).find('input:checked').length > 0;
+          data.rights[key] = enabled;
+        });
+
+        $.ajax({
+          type: "POST",
+          url: "/{{ backend.code }}/roles/new/",
+          data: data,
+          dataType: 'json',
+          success: function(msg){
+            if (msg.status == 'success'){
+              if (msg.action == 'redirect'){
+                document.location.href = msg.url;
+              }
+              else{
+                document.location.reload();
+              }
+            }
+            else{
+              alert('Saving error');
+            }
+          }
+        });     
+
+        return false;
+      });
+
+      $('button[type=submit]').on('click', function(){
+        var action = $(this).val();
+        $('input[name=action]').val(action);
+      });
+
+      $(document).on('click', '[data-delete-row]', function(){
+        var row = $(this).parents('tr');
+        window.deletedRow = row.detach();
+        return false;
+      });
+    });
+  </script>
+{% endblock %}

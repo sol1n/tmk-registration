@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Schema;
+use App\Backend;
 use Illuminate\Http\Request;
 use App\Services\SchemaManager;
 
@@ -12,7 +14,7 @@ class SchemasController extends Controller
         return view('dashboard', [
         'selected' => 'dashboard'
       ]);
-    }    
+    }
 
     public function ShowSchemaList()
     {
@@ -21,31 +23,44 @@ class SchemasController extends Controller
       ]);
     }
 
-    public function ShowSchemaCreateForm()
+    public function ShowSchemaCreateForm(SchemaManager $manager)
     {
         return view('schema/create', [
         'selected' => 'schema-new',
+        'fieldTypes' => $manager->fieldTypes()
       ]);
     }
 
-    public function ShowSchemaEditForm($schemaCode)
+    public function NewSchema(SchemaManager $manager, Request $request)
     {
-        $manager = new SchemaManager;
-        $schema = $manager->find($schemaCode);
+        $data = $request->except(['_token', 'action']);
+        $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
+        $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
 
+        return $manager->create($data)->jsonResponse();
+    }
+
+    public function ShowSchemaEditForm(SchemaManager $manager, Backend $backend, Schema $schema)
+    {
         return view('schema/form', [
         'selected' => $schema->id,
-        'schema' => $schema
+        'schema' => $schema,
+        'fieldTypes' => $manager->fieldTypes()
       ]);
     }
 
-    public function EditSchema(Request $request, $schemaCode)
+    public function EditSchema(SchemaManager $manager, Backend $backend, Request $request, String $id)
     {
-        $manager = new SchemaManager;
+        $action = $request->input('action');
+        $data = $request->except(['_token', 'action']);
+        $data['isLogged'] = $data['isLogged'] == 'true' ? true : false;
+        $data['isDeferredDeletion'] = $data['isDeferredDeletion'] == 'true' ? true : false;
 
-        $data = $request->except('_token');
-        $schema = $manager->save($schemaCode, $data);
+        return $manager->save($id, $data)->jsonResponse();
+    }
 
-        return response()->json(['status' => 'saved']);        
+    public function DeleteSchema(SchemaManager $manager, Backend $backend, String $id)
+    {
+        return $manager->delete($id)->httpResponse('list');
     }
 }

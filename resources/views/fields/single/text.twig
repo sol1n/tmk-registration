@@ -1,0 +1,15 @@
+{% if value %}
+  <textarea 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="text" 
+    class="form-control"
+  >{{ value }}</textarea>
+{% else %}
+  <textarea 
+    name="{% if name is defined %}{{ name }}{% else %}{{ field.name }}{% endif %}"
+    id="{% if id is defined %}{{ id }}{% else %}{{ field.name }}{% endif %}"
+    type="text" 
+    class="form-control"
+  ></textarea>
+{% endif %}

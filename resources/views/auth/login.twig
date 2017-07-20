@@ -10,6 +10,7 @@
 
     <link href="{{ asset('/assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/assets/css/style.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/assets/css/custom.css') }}" rel="stylesheet">
 
 </head>
 
@@ -24,12 +25,12 @@
             </div>
 
             {% if message %}
-              <p class="text-danger">
-               {{ message }}
-              </p>
-             {% endif %}
+                <p class="text-danger">
+                    {{ message }}
+                </p>
+            {% endif %}
 
-            <form method="POST" action="/login">
+            <form method="POST" action="/{{ backend.code }}/login">
                 {{ csrf_field() }}
                 <div class="form-group">
                     <input autofocus type="text" class="form-control" name="login" placeholder="Username" required=>
