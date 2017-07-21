@@ -11,7 +11,7 @@ class SiteController extends Controller
 {
     public function ShowAuthForm(Backend $backend)
     {
-        if ($backend->token)
+        if (isset($backend->token))
         {
             return redirect('/form/');
         }
@@ -26,7 +26,7 @@ class SiteController extends Controller
     public function ShowEditForm(Backend $backend)
     {
         
-        if (!$backend->token)
+        if (!isset($backend->token))
         {
             return redirect('/');
         }
