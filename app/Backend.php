@@ -39,15 +39,28 @@ class Backend
 
     public function __construct()
     {
-        $request = request();
-        if ($request->path() == '/')
+        $defaultBackend = env('APPERCODE_DEFAULT_BACKEND', false);
+        if ($defaultBackend)
         {
-          throw new BackendNotSelected;
+          $this->code = $defaultBackend;
         }
-        $segments = explode('/', $request->path());
-        $this->code = $segments[0];
+        else
+        {
+          $request = request();
+          if ($request->path() == '/')
+          {
+            throw new BackendNotSelected;
+          }
+          else
+          {
+            $segments = explode('/', $request->path());
+            $this->code = $segments[0];
+          }
+        }
+      
+        
         $this->base = env('APPERCODE_SERVER', false);
-        if ($this->base === false)
+        if (!$this->base)
         {
           throw new BackendNoServerProvided;
         }

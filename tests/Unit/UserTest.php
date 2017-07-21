@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\User;
+use App\Backend;
 use App\Services\UserManager;
 use App\Exceptions\User\WrongCredentialsException;
 use App\Exceptions\User\UnAuthorizedException;
@@ -15,7 +16,9 @@ class UserTest extends TestCase
     {
         parent::setUp();
 
-        $user = User::Login([
+        $backend = new Backend;
+
+        $user = User::Login($backend, [
             'login' => env('TEST_LOGIN'),
             'password' => env('TEST_PASSWORD')
         ], false);

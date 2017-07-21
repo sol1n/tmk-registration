@@ -11,6 +11,9 @@
 |
 */
 
+Route::get('/', 'SiteController@ShowAuthForm');
+Route::get('/form/', 'SiteController@ShowEditForm');
+
 Route::get('/{backend}/login', 'AuthController@ShowAuthForm');
 Route::post('/{backend}/login', 'AuthController@ProcessLogin');
 

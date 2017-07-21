@@ -1,0 +1,691 @@
+{% extends "site/page.twig" %}
+
+{% block pageTitle %}Редактирование{% endblock %}
+
+{% block content %}
+
+    <div class="block-title">Компания</div>
+
+        <div class="form-block m-b-lg">
+            <div class="form-block-padding">
+                <label class="form-label" for="form-company-name">Название компании</label>
+
+                <div class="form-select form-select-bold">
+                    <select name="company" id="form-company-name">
+                        <option value="index.php?company=1">ПАО «Син-ТЗ»</option>
+                        <option value="index.php?company=2">ЗАО «1С»</option>
+                        <option value="index.php?company=3">ОАО «Гуси-лебеди»</option>
+                        <option value="index.php?company=4">ООО «Рога и копыта»</option>
+                        <option value="index.php?company=5">ИП «Константин Константинович Константинопольский»</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="block-title m-b-xs">Команды</div>
+        <div class="block-subtitle m-b-md">Добавьте название команды, если команды нет, поле можно оставить пустым</div>
+        <form action="#" method="POST" class="form-block m-b-lg" enctype="multipart/form-data">
+            <div class="form-block-padding">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label" for="form-football-team-name">Название футбольной команды</label>
+                            <input id="form-football-team-name" type="text" name="football_team" class="form-input">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-4">
+                        <div class="form-group">
+                            <label class="form-label" for="form-kvn-team-name">Название команды КВН</label>
+                            <input id="form-kvn-team-name" type="text" name="kvn_team" class="form-input">
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-4">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="button button-orange-hollow button-block">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <div class="block-title">Участники</div>
+        <div class="form-block m-b-lg">
+            <table class="members-table">
+                <tr class="members-table-heading">
+                    <th class="members-table-cell">&nbsp;</th>
+                    <th class="members-table-cell">Фото</th>
+                    <th class="members-table-cell">ФИО</th>
+                    <th class="members-table-cell">Должность</th>
+                    <th class="members-table-cell"><span class="no-wrap">Статус участника</span></th>
+                    <th class="members-table-cell">Телефон</th>
+                    <th class="members-table-cell">Презентация</th>
+                    <th class="members-table-cell">&nbsp;</th>
+                </tr>
+                <tr class="members-table-row">
+                    <td class="members-table-cell members-table-cell-arrow members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            <?php include "images/icons/icon-list-arrow-right.svg"; ?>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            <div class="members-table-photo">
+                                <img src="images/tmp/photo-1.jpg" class="" alt="">
+                            </div>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            Иванов Иван Иванович
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            Коммерческий директор
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            Участник МНПК ТМК, Футбол
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-1-edit">
+                            <span class="no-wrap">
+                                +7 (999) 999-99-99
+                            </span>
+                        </a>
+                    </td>
+                    <td class="members-table-cell text-center">
+                        <a href="#" title="Скачать презентацию" class="members-table-presentation-link">
+                            <?php include "images/icons/icon-file.svg"; ?>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-del">
+                        <a href="#" class="members-table-del-link" data-action-confirm="Вы действительно хотите удалить этого участника?">
+                            <?php include "images/icons/icon-trash.svg"; ?>
+                        </a>
+                    </td>
+                </tr>
+                <tr id="member-1-edit" class="members-table-row members-table-row-edit js-members-table-row-edit">
+                    <td colspan="8">
+                        <div class="form-block">
+                            <a href="#" class="form-block-close" title="Скрыть форму" data-member-edit="#member-2-edit">
+                                <?php include "images/icons/icon-mutiselect-close.svg"; ?>
+                            </a>
+
+                            <div class="form-block-padding">
+                                <form action="#" method="POST" enctype="multipart/form-data">
+                                    <div class="block-title">
+                                        Редактирование участника
+                                    </div>
+
+                                    <div class="form-group m-t-lg">
+                                        <label class="form-label" for="form-edit-1-status">Статус участника</label>
+                                        <select name="status" id="form-edit-1-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+                                            <option value="1">Статус 1</option>
+                                            <option value="2">Статус 2</option>
+                                            <option value="3">Статус 3</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-lastname">Фамилия</label>
+                                                <input id="form-edit-1-lastname" type="text" name="lastname" class="form-input" value="Иванов">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-name">Имя</label>
+                                                <input id="form-edit-1-name" type="text" name="name" class="form-input" value="Иван">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-middlename">Отчество</label>
+                                                <input id="form-edit-1-middlename" type="text" name="middlename" class="form-input" value="Иванович">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-lastname-eng">Фамилия <span class="c-gray">(англ)</span></label>
+                                                <input id="form-edit-1-lastname-eng" type="text" name="lastname-eng" class="form-input" value="Иванов">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-name-eng">Имя <span class="c-gray">(англ)</span></label>
+                                                <input id="form-edit-1-name-eng" type="text" name="name-eng" class="form-input" value="Иван">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-middlename-eng">Отчество <span class="c-gray">(англ)</span></label>
+                                                <input id="form-edit-1-middlename-eng" type="text" name="middlename" class="form-input" value="Иванович">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-position">Должность</label>
+                                                <input id="form-edit-1-position" type="text" name="position" class="form-input" value="Коммерчесий директор">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-phone">Телефон</label>
+                                                <input id="form-edit-1-phone" type="text" name="phone" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__" value="+7 (999) 999-99-99">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label">&nbsp;</label>
+                                                <div class="js-file-input form-file-input">
+                                                    <span class="icon no-td js-file-input-link form-file-input-link">
+                                                        <?php include "images/icons/icon-photo.svg"; ?>
+                                                        <span class="dotted">Загрузить фотографию</span>
+                                                    </span>
+
+                                                    <input type="file" name="photo" class="js-file-input-field form-file-input-field" accept="image/*">
+
+                                                    <div class="js-file-input-photo form-file-input-photo"></div>
+                                                    <div class="js-file-input-name form-file-input-name"></div>
+
+                                                    <a href="#" class="js-file-input-del form-file-input-del">
+                                                        <?php include "images/icons/icon-list-del.svg"; ?>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-edit-1-position-eng">Должность <span class="c-gray">(англ)</span></label>
+                                                <input id="form-edit-1-position-eng" type="text" name="position_eng" class="form-input" value="SEO">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="form-edit-1-bio">Биография</label>
+                                        <textarea class="form-textarea" name="form_bio" id="form-edit-1-bio" cols="30" rows="10" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-bio-counter">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad aliquam, at deserunt dolorum, ex id iusto laborum nam quaerat quam quibusdam, quo soluta unde! A aut ex omnis recusandae ullam.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad aliquam, at deserunt dolorum, ex id iusto laborum nam quaerat quam quibusdam, quo soluta unde! A aut ex omnis recusandae ullam.</textarea>
+                                        <div class="form-textarea-counter">
+                                            Максимальное количество символов: <span id="form-edit-1-bio-counter">3000</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="member-additional-form js-member-status js-member-status-2">
+                                        <hr class="form-block-hr m-b-lg">
+
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-8">
+                                                <div class="form-group">
+                                                    <label for="form-edit-1-subject" class="form-label">Тема доклада</label>
+                                                    <input id="form-edit-1-subject" name="subject" class="form-input" type="text" placeholder="Введите тему доклада">
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="form-edit-1-section" class="form-label">Секция</label>
+                                                    <div class="form-select">
+                                                        <select name="section" id="form-edit-1-section">
+                                                            <option value="1">test</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-8">
+                                                <div class="form-group">
+                                                    <label for="form-edit-1-subject-eng" class="form-label">Тема доклада <span class="c-gray">(англ)</span></label>
+                                                    <input id="form-edit-1-subject-eng" name="subject-eng" class="form-input" type="text" placeholder="Введите тему доклада">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="form-edit-1-theses" class="form-label">Тезисы доклада</label>
+                                            <textarea name="theses" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-counter"></textarea>
+                                            <div class="form-textarea-counter">
+                                                Максимальное количество символов: <span id="form-edit-1-theses-counter">3000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="form-edit-1-theses" class="form-label">Тезисы доклада <span class="c-gray">(англ)</span></label>
+                                            <textarea name="theses-eng" id="form-edit-1-theses-eng" cols="30" rows="10" class="form-textarea" placeholder="The main points will help to supplement the topic of your report" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-eng-counter"></textarea>
+                                            <div class="form-textarea-counter">
+                                                Max symbols: <span id="form-edit-1-theses-eng-counter">3000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="js-file-input form-file-input">
+                                                    <span class="icon no-td js-file-input-link form-file-input-link">
+                                                        <?php include "images/icons/icon-presentation.svg"; ?>
+                                                        <span class="dotted">Загрузить презентацию</span>
+                                                    </span>
+
+                                                <input type="file" name="presentation" class="js-file-input-field form-file-input-field">
+
+                                                <div class="js-file-input-photo form-file-input-photo"></div>
+                                                <div class="js-file-input-name form-file-input-name"></div>
+
+                                                <a href="#" class="js-file-input-del form-file-input-del">
+                                                    <?php include "images/icons/icon-list-del.svg"; ?>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-right">
+                                        <button type="submit" class="button button-orange-hollow">Сохранить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="members-table-row">
+                    <td class="members-table-cell members-table-cell-arrow members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            <?php include "images/icons/icon-list-arrow-right.svg"; ?>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            <div class="members-table-photo">
+                                <img src="images/tmp/photo-2.jpg" class="" alt="">
+                            </div>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            Иванов Иван Иванович
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            Коммерческий директор
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            Участник МНПК ТМК, Футбол
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-cell-link">
+                        <a href="#" title="Редактировать участника" data-member-edit="#member-2-edit">
+                            <span class="no-wrap">
+                                +7 (999) 999-99-99
+                            </span>
+                        </a>
+                    </td>
+                    <td class="members-table-cell text-center">
+                        <a href="#" title="Скачать презентацию" class="members-table-presentation-link">
+                            <?php include "images/icons/icon-file.svg"; ?>
+                        </a>
+                    </td>
+                    <td class="members-table-cell members-table-del">
+                        <a href="#" class="members-table-del-link" data-action-confirm="Вы действительно хотите удалить этого участника?">
+                            <?php include "images/icons/icon-trash.svg"; ?>
+                        </a>
+                    </td>
+                </tr>
+                <tr id="member-2-edit" class="members-table-row members-table-row-edit js-members-table-row-edit">
+                    <td colspan="8">
+                        <div class="form-block">
+                            <a href="#" class="form-block-close" title="Скрыть форму" data-member-edit="#member-2-edit">
+                                <?php include "images/icons/icon-mutiselect-close.svg"; ?>
+                            </a>
+
+                            <div class="form-block-padding">
+                                <form action="#" method="POST" enctype="multipart/form-data">
+                                    <div class="block-title">
+                                        Редактирование участника
+                                    </div>
+
+                                    <div class="form-group m-t-lg">
+                                        <label class="form-label" for="form-edit-2-status">Статус участника</label>
+                                        <select name="status" id="form-edit-2-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+                                            <option value=""></option>
+                                            <option value="1">Статус 1</option>
+                                            <option value="2">Статус 2</option>
+                                            <option value="3">Статус 3</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-lastname">Фамилия</label>
+                                                <input id="form-lastname" type="text" name="lastname" class="form-input" value="Иванов">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-name">Имя</label>
+                                                <input id="form-name" type="text" name="name" class="form-input" value="Иван">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-middlename">Отчество</label>
+                                                <input id="form-middlename" type="text" name="middlename" class="form-input" value="Иванович">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-lastname-eng">Фамилия <span class="c-gray">(англ)</span></label>
+                                                <input id="form-lastname-eng" type="text" name="lastname-eng" class="form-input" value="Иванов">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-name-eng">Имя <span class="c-gray">(англ)</span></label>
+                                                <input id="form-name-eng" type="text" name="name-eng" class="form-input" value="Иван">
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-middlename-eng">Отчество <span class="c-gray">(англ)</span></label>
+                                                <input id="form-middlename-eng" type="text" name="middlename" class="form-input" value="Иванович">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-position">Должность</label>
+                                                <input id="form-position" type="text" name="position" class="form-input" value="Коммерчесий директор">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-phone">Телефон</label>
+                                                <input id="form-phone" type="text" name="phone" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__" value="+7 (999) 999-99-99">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label">&nbsp;</label>
+                                                <a href="#" class="icon no-td m-t-sm">
+                                                    <?php include "images/icons/icon-photo.svg"; ?>
+                                                    <span class="dotted">Загрузить фотографию</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-4">
+                                            <div class="form-group">
+                                                <label class="form-label" for="form-position-eng">Должность <span class="c-gray">(англ)</span></label>
+                                                <input id="form-position-eng" type="text" name="position_eng" class="form-input" value="SEO">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="form-bio">Биография</label>
+                                        <textarea class="form-textarea" name="form_bio" id="form-bio" cols="30" rows="10" maxlength="3000" data-text-count data-text-count-block="#form-bio-counter">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad aliquam, at deserunt dolorum, ex id iusto laborum nam quaerat quam quibusdam, quo soluta unde! A aut ex omnis recusandae ullam.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad aliquam, at deserunt dolorum, ex id iusto laborum nam quaerat quam quibusdam, quo soluta unde! A aut ex omnis recusandae ullam.</textarea>
+                                        <div class="form-textarea-counter">
+                                            Максимальное количество символов: <span id="form-bio-counter">3000</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="member-additional-form js-member-status js-member-status-2">
+                                        <hr class="form-block-hr m-b-lg">
+
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-8">
+                                                <div class="form-group">
+                                                    <label for="form-subject" class="form-label">Тема доклада</label>
+                                                    <input id="form-subject" name="subject" class="form-input" type="text" placeholder="Введите тему доклада">
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-4">
+                                                <div class="form-group">
+                                                    <label for="form-section" class="form-label">Секция</label>
+                                                    <div class="form-select">
+                                                        <select name="section" id="form-section">
+                                                            <option value="1">test</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-xs-12 col-sm-8">
+                                                <div class="form-group">
+                                                    <label for="form-subject-eng" class="form-label">Тема доклада <span class="c-gray">(англ)</span></label>
+                                                    <input id="form-subject-eng" name="subject-eng" class="form-input" type="text" placeholder="Введите тему доклада">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="form-theses" class="form-label">Тезисы доклада</label>
+                                            <textarea name="theses" id="form-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-theses-counter"></textarea>
+                                            <div class="form-textarea-counter">
+                                                Максимальное количество символов: <span id="form-theses-counter">3000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="form-theses" class="form-label">Тезисы доклада <span class="c-gray">(англ)</span></label>
+                                            <textarea name="theses-eng" id="form-theses-eng" cols="30" rows="10" class="form-textarea" placeholder="The main points will help to supplement the topic of your report" maxlength="3000" data-text-count data-text-count-block="#form-theses-eng-counter"></textarea>
+                                            <div class="form-textarea-counter">
+                                                Max symbols: <span id="form-theses-eng-counter">3000</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <a href="#" class="icon no-td m-t-sm">
+                                                <?php include "images/icons/icon-presentation.svg"; ?>
+                                                <span class="dotted">Загрузить презентацию</span>
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-right">
+                                        <button type="submit" class="button button-orange-hollow">Сохранить</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="text-center">
+            <a href="#" class="icon icon-memeber-add no-td" onclick="$('#new-member-form').slideToggle(); return false;">
+                <?php include "images/icons/icon-add.svg"; ?>
+                <span class="dotted">Добавить участника</span>
+            </a>
+        </div>
+
+        <div id="new-member-form" style="display: none" class="form-block m-t-lg m-b-lg">
+            <a href="#" class="form-block-close" title="Скрыть форму" onclick="$('#new-member-form').slideUp(); return false;">
+                <?php include "images/icons/icon-mutiselect-close.svg"; ?>
+            </a>
+            <div class="form-block-padding">
+                <form action="#" method="POST" enctype="multipart/form-data">
+                    <div class="block-title">
+                        Новый участник
+                    </div>
+
+                    <div class="form-group m-t-lg">
+                        <label class="form-label" for="form-status">Статус участника</label>
+                        <select name="status" id="form-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+                            <option value=""></option>
+                            <option value="1">Статус 1</option>
+                            <option value="2">Статус 2</option>
+                            <option value="3">Статус 3</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-lastname">Фамилия</label>
+                                <input id="form-lastname" type="text" name="lastname" class="form-input">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-name">Имя</label>
+                                <input id="form-name" type="text" name="name" class="form-input">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-middlename">Отчество</label>
+                                <input id="form-middlename" type="text" name="middlename" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-lastname-eng">Фамилия <span class="c-gray">(англ)</span></label>
+                                <input id="form-lastname-eng" type="text" name="lastname-eng" class="form-input">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-name-eng">Имя <span class="c-gray">(англ)</span></label>
+                                <input id="form-name-eng" type="text" name="name-eng" class="form-input">
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-middlename-eng">Отчество <span class="c-gray">(англ)</span></label>
+                                <input id="form-middlename-eng" type="text" name="middlename" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-position">Должность</label>
+                                <input id="form-position" type="text" name="position" class="form-input">
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-phone">Телефон</label>
+                                <input id="form-phone" type="text" name="phone" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__">
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label">&nbsp;</label>
+                                <a href="#" class="icon no-td m-t-sm">
+                                    <?php include "images/icons/icon-photo.svg"; ?>
+                                    <span class="dotted">Загрузить фотографию</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-4">
+                            <div class="form-group">
+                                <label class="form-label" for="form-position-eng">Должность <span class="c-gray">(англ)</span></label>
+                                <input id="form-position-eng" type="text" name="position_eng" class="form-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="form-bio">Биография</label>
+                        <textarea class="form-textarea" name="form_bio" id="form-bio" cols="30" rows="10" maxlength="3000" data-text-count data-text-count-block="#form-bio-counter"></textarea>
+                        <div class="form-textarea-counter">
+                            Максимальное количество символов: <span id="form-bio-counter">3000</span>
+                        </div>
+                    </div>
+
+                    <div class="member-additional-form js-member-status js-member-status-2">
+                        <hr class="form-block-hr m-b-lg">
+
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-8">
+                                <div class="form-group">
+                                    <label for="form-subject" class="form-label">Тема доклада</label>
+                                    <input id="form-subject" name="subject" class="form-input" type="text" placeholder="Введите тему доклада">
+                                </div>
+                            </div>
+                            <div class="col-xs-12 col-sm-4">
+                                <div class="form-group">
+                                    <label for="form-section" class="form-label">Секция</label>
+                                    <div class="form-select">
+                                        <select name="section" id="form-section">
+                                            <option value="1">test</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 col-sm-8">
+                                <div class="form-group">
+                                    <label for="form-subject-eng" class="form-label">Тема доклада <span class="c-gray">(англ)</span></label>
+                                    <input id="form-subject-eng" name="subject-eng" class="form-input" type="text" placeholder="Введите тему доклада">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="form-theses" class="form-label">Тезисы доклада</label>
+                            <textarea name="theses" id="form-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-theses-counter"></textarea>
+                            <div class="form-textarea-counter">
+                                Максимальное количество символов: <span id="form-theses-counter">3000</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="form-theses" class="form-label">Тезисы доклада <span class="c-gray">(англ)</span></label>
+                            <textarea name="theses-eng" id="form-theses-eng" cols="30" rows="10" class="form-textarea" placeholder="The main points will help to supplement the topic of your report" maxlength="3000" data-text-count data-text-count-block="#form-theses-eng-counter"></textarea>
+                            <div class="form-textarea-counter">
+                                Max symbols: <span id="form-theses-eng-counter">3000</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <a href="#" class="icon no-td m-t-sm">
+                                <?php include "images/icons/icon-presentation.svg"; ?>
+                                <span class="dotted">Загрузить презентацию</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="button button-orange-hollow">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!--<button class="button button-orange-hollow button-block members-add-button m-b-lg">
+            <?php /*include "images/icons/icon-person-plus.svg"; */?>
+            Добавить участника
+        </button>-->
+
+{% endblock %}

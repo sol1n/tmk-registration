@@ -1,0 +1,30 @@
+{% extends "site/page.twig" %}
+
+{% block pageTitle %}Авторизация{% endblock %}
+
+{% block content %}
+
+    <div class="form-block m-b-lg">
+        <div class="form-block-padding" style="padding-top: 60px; padding-bottom: 60px;">
+            <div class="row">
+                <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+                    <div class="form-group">
+                        <label class="form-label" for="form-football-team-name">Логин</label>
+                        <input id="form-football-team-name" type="text" name="football_team" class="form-input">
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+                    <div class="form-group">
+                        <label class="form-label" for="form-kvn-team-name">Пароль</label>
+                        <input id="form-kvn-team-name" type="text" name="kvn_team" class="form-input">
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="button button-orange-hollow button-block">Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

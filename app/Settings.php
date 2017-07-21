@@ -118,6 +118,7 @@ class Settings
                 'X-Appercode-Session-Token' => $backend->token
             ], 'json' => $json]);
         } catch (RequestException $e) {
+
             throw new SettingsSaveException;
         };
 
