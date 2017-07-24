@@ -64,6 +64,7 @@ class SiteController extends Controller
             if (! isset($company))
             {
                 $company = null;
+                $team = null;
             }
             else
             {
