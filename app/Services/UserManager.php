@@ -61,7 +61,7 @@ class UserManager
         $profileSchemas = app(\App\Settings::class)->getProfileSchemas();
         if ($profileSchemas)
         {
-            $query = ['where' => json_encode(['user' => ['$in' => $users->pluck('id')]])];
+            $query = ['where' => json_encode(['userId' => ['$in' => $users->pluck('id')]])];
             foreach ($profileSchemas as $key => $schema)
             {
                 $elements->put($key, app(ObjectManager::class)->all($schema, $query));
@@ -73,8 +73,9 @@ class UserManager
                 {
                     $fieldName = explode('.', $key)[1];
                     $schemaName = explode('.', $key)[0];
+
                     $index = $profiles->search(function($profile, $i) use ($fieldName, $user) {
-                        return $profile->fields[$fieldName] == $user->id;
+                        return isset($profile->fields[$fieldName]) && $profile->fields[$fieldName] === $user->id;
                     });
 
                     if ($index !== false)

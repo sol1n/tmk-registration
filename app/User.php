@@ -74,9 +74,9 @@ class User
         {
             foreach($json as $profile)
             {
-                $schema = app(SchemaManager::Class)->find($profile['schemaId']);
+                $schema = app(SchemaManager::Class)->find($profile['schemaId'])->withRelations();
                 $object = app(ObjectManager::Class)->find($schema, $profile['itemId']);
-                $profiles->put($schema->id, ['object' => $object, 'code' => $schema->id]);
+                $profiles->put($schema->id, ['object' => $object->withRelations(), 'code' => $schema->id]);
             }
         }
 
@@ -91,7 +91,7 @@ class User
 
                 if ($index === false) {
                     $schema->link = explode('.', $key)[1];
-                    $profiles->put($schema->id, ['schema' => $schema, 'code' => $schema->id]);
+                    $profiles->put($schema->id, ['schema' => $schema->withRelations(), 'code' => $schema->id]);
                 }
             }
 
@@ -165,6 +165,7 @@ class User
     {
         request()->session()->put($backend->code . '-session-token', $this->token);
         request()->session()->put($backend->code . '-refresh-token', $this->refreshToken);
+        request()->session()->put($backend->code . '-id', $this->id);
         return $this;
     }
 
@@ -185,6 +186,7 @@ class User
 
         $this->token = $json['sessionId'];
         $this->refreshToken = $json['refreshToken'];
+        $this->id = $json['userId'];
 
         if ($storeSession)
         {

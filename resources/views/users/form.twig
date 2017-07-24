@@ -72,6 +72,11 @@
                         <option value="{{ role.id }}">{{ role.id }}</option>
                       {% endif %}
                     {% endfor %}
+                    {% if user.roleId == "Administrator" %}
+                      <option selected value="Administrator">Administrator</option>
+                    {% else %}
+                      <option value="Administrator">Administrator</option>
+                    {% endif %}
                   </select>
                 </div>
               </div>

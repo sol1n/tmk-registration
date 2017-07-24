@@ -63,10 +63,18 @@ class File
 
 //        $users = app(UserManager::class)->getMappedUsers();
         $users = static::getTreeUsers($data['myFiles']);
-        $users = User::list($backend, ['where' => json_encode(['id' => ['$in' => $users]])]);
-        $users = $users->mapWithKeys(function ($item) {
-            return [$item->id => $item->username];
-        });
+        if ($users)
+        {
+            $users = User::list($backend, ['where' => json_encode(['id' => ['$in' => $users]])]);
+            $users = $users->mapWithKeys(function ($item) {
+                return [$item->id => $item->username];
+            });
+        }
+        else
+        {
+            $users = [];
+        }
+        
         $result = self::constructFlatTree($data['myFiles'], $users, static::getbaseLink());
         return $result;
     }

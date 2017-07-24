@@ -57,8 +57,11 @@ trait CacheableList
     public function create(array $data)
     {
         $element = $this->model::create($data, $this->backend);
-        $this->list->push($element);
-        $this->saveToCache($this->list);
+        if ($this->list)
+        {
+            $this->list->push($element);
+            $this->saveToCache($this->list);
+        }
 
         return $element;
     }
@@ -67,12 +70,15 @@ trait CacheableList
     {
         $element = $this->find($id)->save($fields, $this->backend);
 
-        $index = $this->list->search(function ($item, $key) use ($element) {
-            return $item->id == $element->id;
-        });
+        if (isset($this->list))
+        {
+            $index = $this->list->search(function ($item, $key) use ($element) {
+                return $item->id == $element->id;
+            });
 
-        $this->list->put($index, $element);
-        $this->saveToCache($this->list);
+            $this->list->put($index, $element);
+            $this->saveToCache($this->list);
+        }
 
         return $element;
     }
@@ -81,15 +87,20 @@ trait CacheableList
     {
         $element = $this->find($id);
 
-        $index = $this->list->search(function ($item, $key) use ($element) {
-            return $item->id == $element->id;
-        });
-
-        $element = $this->list->get($index)->delete($this->backend);
-
-        $this->list->forget($index);
-        $this->saveToCache($this->list);
-        
+        if (isset($this->list))
+        {
+            $index = $this->list->search(function ($item, $key) use ($element) {
+                return $item->id == $element->id;
+            });
+            $element = $this->list->get($index)->delete($this->backend);
+            $this->list->forget($index);
+            $this->saveToCache($this->list);
+        }
+        else
+        {
+            $element = $this->find($id);
+            $element->delete($this->backend);
+        }
         return $element;
     }
 
