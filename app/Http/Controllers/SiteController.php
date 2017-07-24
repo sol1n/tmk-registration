@@ -167,7 +167,7 @@ class SiteController extends Controller
         $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
 
         $fields = $member->fields;
-        $fields['team'] = null;
+        
 
         foreach ($schema->fields as $field)
         {
@@ -181,6 +181,8 @@ class SiteController extends Controller
                 $fields[$index] = isset($fields[$index]) ? $fields[$index] : null;
             }
         }
+
+        $fields['team'] = "00000000-0000-0000-0000-000000000000";
 
         app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $fields);
 
@@ -199,11 +201,19 @@ class SiteController extends Controller
             $path = $request->presentation->store('presentations');
             $fields['presentation'] = $path;
         }
+        else
+        {
+            $fields['presentation'] = null;
+        }
 
         if ($request->file('photo'))
         {
             $path = $request->photo->store('images');
             $fields['photo'] = $path;
+        }
+        else
+        {
+            $fields['photo'] = null;
         }
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');

@@ -216,7 +216,10 @@ class Object
             }
             else
             {
-                $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+                if ($this->fields[$field['name']] != "00000000-0000-0000-0000-000000000000")
+                {
+                    $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
+                }
             }
         }
         else
