@@ -13,6 +13,7 @@ use App\Exceptions\Role\RoleGetListException;
 use App\Exceptions\Schema\SchemaNotFoundException;
 use App\Exceptions\Schema\SchemaListGetException;
 use App\Exceptions\User\UserNotFoundException;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 class Handler extends ExceptionHandler
 {
@@ -63,6 +64,9 @@ class Handler extends ExceptionHandler
         }        
         if ($exception instanceof UserNotFoundException) {
             return response()->view('errors.user.notfound');
+        }        
+        if ($exception instanceof PostTooLargeException) {
+            return response()->view('errors.posttoolarge');
         }
         if ($exception instanceof SchemaListGetException || $exception instanceof RoleGetListException) {
             $request->user = isset($request->user) ? $request->user : new User;
