@@ -43,6 +43,7 @@ sudo apt-get install php7.0-curl -y
 sudo apt-get install php7.0-memcached -y
 sudo apt-get install php7.0-mbstring
 sudo apt-get install php7.0-ext-dom
+sudo apt-get install php7.0-xml
 
 # Additional extensions.
 sudo pecl channel-update pecl.php.net
