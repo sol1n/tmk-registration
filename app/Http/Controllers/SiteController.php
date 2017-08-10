@@ -60,6 +60,12 @@ class SiteController extends Controller
 
             $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
             $sections = app(\App\Services\ObjectManager::Class)->all($schema);
+
+            $schema = app(\App\Services\SchemaManager::Class)->find('KVNTeams');
+            $kvnTeams = app(\App\Services\ObjectManager::Class)->all($schema);
+
+            $schema = app(\App\Services\SchemaManager::Class)->find('footballTeam');
+            $footballTeams = app(\App\Services\ObjectManager::Class)->all($schema);
             
             if (! isset($company))
             {
@@ -104,7 +110,9 @@ class SiteController extends Controller
                 'companies' => $userCompanies,
                 'team' => $team,
                 'statuses' => $statuses,
-                'sections' => $sections
+                'sections' => $sections,
+                'kvnTeams' => $kvnTeams,
+                'footballTeams' => $footballTeams
             ]);
         }
     }
@@ -262,7 +270,7 @@ class SiteController extends Controller
             throw new Exception('No company provided');
         }
 
-        $fields = $request->only(['Football', 'KVN']);
+        $fields = $request->only(['DefaultFootballTeam', 'DefaultKVNTeam']);
         $fields['Title'] = $company->fields['Title'];
 
         app(\App\Services\ObjectManager::Class)->save($company->schema, $company->id, $fields);
