@@ -244,37 +244,40 @@ trait FieldsFormats
         }
 
         foreach ($schema->fields as $field) {
-            switch ($field['type']) {
-                case 'String':
-                case 'Uuid':
-                case 'Text':
-                    $data[$field['name']] = self::formatStringField($data[$field['name']], $field);
-                    break;
-                case 'Json':
-                    $data[$field['name']] = self::formatJsonField($data[$field['name']], $field);
-                    break;                   
-                case 'DateTime':
-                    $data[$field['name']] = self::formatDateTimeField($data[$field['name']], $field);
-                    break;              
-                case 'Integer':
-                    $data[$field['name']] = self::formatIntegerField($data[$field['name']], $field);
-                    break;                
-                case 'Boolean':
-                    if (isset($data[$field['name']]))
-                    {
-                        $data[$field['name']] = self::formatBooleanField($data[$field['name']], $field);
-                    }
-                    else{
-                        $data[$field['name']] = false;
-                    }
-                    break;
-                case 'Double':
-                case 'Money':
-                  $data[$field['name']] = self::formatFloatField($data[$field['name']], $field);
-                    break;
-                default:
-                    break;
-          }
+            if (isset($data[$field['name']]))
+            {
+                switch ($field['type']) {
+                    case 'String':
+                    case 'Uuid':
+                    case 'Text':
+                        $data[$field['name']] = self::formatStringField($data[$field['name']], $field);
+                        break;
+                    case 'Json':
+                        $data[$field['name']] = self::formatJsonField($data[$field['name']], $field);
+                        break;                   
+                    case 'DateTime':
+                        $data[$field['name']] = self::formatDateTimeField($data[$field['name']], $field);
+                        break;              
+                    case 'Integer':
+                        $data[$field['name']] = self::formatIntegerField($data[$field['name']], $field);
+                        break;                
+                    case 'Boolean':
+                        if (isset($data[$field['name']]))
+                        {
+                            $data[$field['name']] = self::formatBooleanField($data[$field['name']], $field);
+                        }
+                        else{
+                            $data[$field['name']] = false;
+                        }
+                        break;
+                    case 'Double':
+                    case 'Money':
+                      $data[$field['name']] = self::formatFloatField($data[$field['name']], $field);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         foreach ($data as $key => $value)

@@ -76,7 +76,7 @@ class SiteController extends Controller
             {
 
                 $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-                $members = app(\App\Services\ObjectManager::Class)->all($schema, ['where' => json_encode(['team' => $company->id])]);
+                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['where' => json_encode(['team' => $company->id])], 'en');
 
                 $team = [];
                 foreach ($members as $member)
@@ -147,6 +147,9 @@ class SiteController extends Controller
         $fields['team'] = $company;
         unset($fields['_token']);
 
+        $enFields = $fields['en'];
+        unset($fields['en']);
+
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
         $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
 
@@ -173,6 +176,7 @@ class SiteController extends Controller
         $fields['userId'] = $member->fields['userId'];
 
         app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $fields);
+        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
 
         return redirect('/form/' . $company . '/');
     }
@@ -213,6 +217,9 @@ class SiteController extends Controller
         $fields['team'] = $company;
         unset($fields['_token']);
 
+        $enFields = $fields['en'];
+        unset($fields['en']);
+
         if ($request->file('presentation'))
         {
             $path = $request->presentation->store('presentations');
@@ -245,7 +252,9 @@ class SiteController extends Controller
 
         $fields['userId'] = $user->id;
 
-        app(\App\Services\ObjectManager::Class)->create($schema, $fields);
+        $member = app(\App\Services\ObjectManager::Class)->create($schema, $fields);
+
+        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
 
         return redirect('/form/' . $company . '/');
     }

@@ -75,7 +75,12 @@ class ObjectManager
         return $this->lists->get($schema->id);
     }
 
-    public function save(Schema $schema, $id, array $fields): Object
+    public function allWithLang(Schema $schema, $query = [], $language): Collection
+    {
+        return $this->model::listWithLangs($schema, $this->backend, $query, $language);
+    }
+
+    public function save(Schema $schema, $id, array $fields, string $language = null): Object
     {
         $this->initList($schema);
         $list = $this->lists->get($schema->id);
@@ -85,7 +90,7 @@ class ObjectManager
         });
 
         $object = $list->get($index);
-        $object->save($fields, $this->backend);
+        $object->save($fields, $this->backend, $language);
         $list->put($index, $object);
 
         $this->saveToCache($schema, $list);
