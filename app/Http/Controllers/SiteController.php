@@ -96,6 +96,15 @@ class SiteController extends Controller
                         {
                             $member->report = 1;
                         }
+                        if (isset($member->fields['status']) &&  in_array('c40c992e-430d-4545-95b1-d63645f8a6fa', $member->fields['status']))
+                        {
+                            $member->football = 1;
+                        }
+                        if (isset($member->fields['status']) &&  in_array('0567ede5-b573-4dda-8866-d988d1456f33', $member->fields['status']))
+                        {
+                            $member->kvn = 1;
+                        }
+
                         $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
                         $team[] = $member;
                     }
