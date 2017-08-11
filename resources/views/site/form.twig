@@ -163,10 +163,12 @@
                     {%
                         include 'site/form/row' 
                         with {
+                                'company': company,
                                 'member': member,
                                 'statuses': statuses,
                                 'footballTeams': footballTeams,
                                 'kvnTeams': kvnTeams,
+                                'sections': sections
                         } only
                     %}
 
@@ -191,6 +193,7 @@
                     'statuses': statuses,
                     'footballTeams': footballTeams,
                     'kvnTeams': kvnTeams,
+                    'sections': sections
             } only
         %}
 
