@@ -98,6 +98,9 @@ class Object
         if ($query) {
             $query = http_build_query($query);
         }
+        else {
+            $query = http_build_query(['take' => 200]);
+        }
 
         $client = new Client;
         $url = $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : '');
