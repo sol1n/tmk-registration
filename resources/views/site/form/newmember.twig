@@ -136,40 +136,45 @@
             </div>
           </div>
 
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-6">
-                  <div class="form-group">
-                      <label for="form-edit-1-subject" class="form-label">Футбольная команда</label>
-                      <div class="form-select">
-                          <select name="footballTeam">
-                              <option value="">Выберите команду</option>
-                              {% for one in footballTeams %}
-                                  {% if one.id == company.fields.DefaultFootballTeam %}
-                                      <option selected value="{{ one.id }}">{{ one.fields.teamName }}</option>
-                                  {% else %}
-                                      <option value="{{ one.id }}">{{ one.fields.teamName }}</option>
-                                  {% endif %}
-                              {% endfor %}
-                          </select>
+          <div class="member-additional-form js-member-status js-member-status-c40c992e-430d-4545-95b1-d63645f8a6fa">
+              <div class="row">
+                  <div class="col-xs-12 col-sm-12">
+                      <div class="form-group">
+                          <label for="form-edit-1-subject" class="form-label">Футбольная команда</label>
+                          <div class="form-select form-select-bold">
+                              <select name="footballTeam">
+                                <option value="">Выберите команду</option>
+                                {% for one in footballTeams %}
+                                    {% if one.id == company.fields.DefaultFootballTeam %}
+                                        <option selected value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                                    {% else %}
+                                        <option value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                              </select>
+                          </div>
                       </div>
                   </div>
               </div>
+          </div>
 
-              <div class="col-xs-12 col-sm-6">
-                  <div class="form-group">
-                      <label for="form-edit-1-subject" class="form-label">Команда КВН</label>
-                      <div class="form-select">
-                          <select name="KVNTeam">
-                              <option value="">Выберите команду</option>
-                              {% for one in kvnTeams %}
-                                  {% if one.id == company.fields.DefaultKVNTeam %}
-                                      <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
-                                  {% else %}
-                                      <option value="{{ one.id }}">{{ one.fields.Title }}</option>
-                                  {% endif %}
-                              {% endfor %}
-                          </select>
+          <div class="member-additional-form js-member-status js-member-status-0567ede5-b573-4dda-8866-d988d1456f33">
+              <div class="row">
+                  <div class="col-xs-12 col-sm-12">
+                      <div class="form-group">
+                          <label for="form-edit-1-subject" class="form-label">Команда КВН</label>
+                          <div class="form-select form-select-bold">
+                              <select name="KVNTeam">
+                                <option value="">Выберите команду</option>
+                                {% for one in kvnTeams %}
+                                    {% if one.id == company.fields.DefaultKVNTeam %}
+                                        <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
+                                    {% else %}
+                                        <option value="{{ one.id }}">{{ one.fields.Title }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                              </select>
+                          </div>
                       </div>
                   </div>
               </div>
