@@ -160,14 +160,12 @@ class Object
 
         $json = json_decode($r->getBody()->getContents(), 1);
 
-        foreach ($json as $rawData) {
-            foreach ($json as $localizedRawData) {
-                $id = $localizedRawData['id'];
-                $localizedData = [
-                    $language => $localizedRawData
-                ];
-                $list->push(Object::build($schema, $tempData[$id], $localizedData));
-            }
+        foreach ($json as $localizedRawData) {
+            $id = $localizedRawData['id'];
+            $localizedData = [
+                $language => $localizedRawData
+            ];
+            $list->push(Object::build($schema, $tempData[$id], $localizedData));
         }
 
         return $list;
