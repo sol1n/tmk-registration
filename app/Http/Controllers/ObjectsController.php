@@ -17,10 +17,11 @@ class ObjectsController extends Controller
 {
     public function ShowCollection(Backend $backend, Schema $schema, ObjectManager $manager)
     {
+        $objects = $manager->all($schema);
         return view('object/list', [
         'selected' => $schema->id,
         'schema' => $schema->withRelations(),
-        'objects' => $manager->all($schema)
+        'objects' => $objects,
       ]);
     }
 
