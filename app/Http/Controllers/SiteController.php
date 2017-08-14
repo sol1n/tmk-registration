@@ -66,6 +66,9 @@ class SiteController extends Controller
 
             $schema = app(\App\Services\SchemaManager::Class)->find('footballTeam');
             $footballTeams = app(\App\Services\ObjectManager::Class)->all($schema);
+
+            $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
+            $lectures = app(\App\Services\ObjectManager::Class)->all($schema);
             
             if (! isset($company))
             {
@@ -81,6 +84,20 @@ class SiteController extends Controller
                 $team = [];
                 foreach ($members as $member)
                 {
+                    if (isset($member->fields['lectures']) && count($member->fields['lectures']))
+                    {
+                        foreach ($member->fields['lectures'] as $k => $lectureID)
+                        {
+                            foreach ($lectures as $lecture)
+                            {
+                                if ($lectureID == $lecture->id)
+                                {
+                                    $member->fields['lectures'][$k] = $lecture;
+                                }
+                            }
+                        }
+                    }
+
                     if (isset($member->fields['team']) && $member->fields['team'] == $company->id)
                     {
                         $tmp = [];
@@ -227,6 +244,36 @@ class SiteController extends Controller
         $fields['team'] = $company;
         unset($fields['_token']);
 
+        if ($fields['subject'] && $fields['subject'][0])
+        {
+            $lectures = [];
+            $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
+
+            foreach ($fields['subject'] as $k => $subject)
+            {
+                $lecture = [];
+                if (isset($fields['presentation'][$k]))
+                {
+                    $lecture['Presentation'] = $fields['presentation'][$k]->store('presentations');
+                }
+                $lecture['Title'] = $fields['subject'][$k];
+                $lecture['Description'] = $fields['theses'][$k];
+                $lecture['Section'] = $fields['section'][$k];
+
+                $lecture = app(\App\Services\ObjectManager::Class)->create($schema, $lecture);
+
+                $lectures[] = $lecture->id;
+
+            }
+
+            unset($fields['subject']);
+            unset($fields['theses']);
+            unset($fields['section']);
+            unset($fields['presentations']);
+
+            $fields['lectures'] = $lectures;
+        }
+
         $enFields = $fields['en'];
         unset($fields['en']);
 
@@ -236,16 +283,6 @@ class SiteController extends Controller
             {
                 unset($enFields[$k]);
             }
-        }
-
-        if ($request->file('presentation'))
-        {
-            $path = $request->presentation->store('presentations');
-            $fields['presentation'] = $path;
-        }
-        else
-        {
-            $fields['presentation'] = null;
         }
 
         if ($request->file('photo'))

@@ -1,0 +1,40 @@
+.form-hint {
+	color: #888;
+	font-size: .85rem;
+	margin-top: 15px;
+	margin-bottom: 15px;
+}
+
+.icon-memeber-add {
+	background-color: #E66F35;
+	padding: 10px 20px;
+	color: #fff;
+}
+
+.icon-memeber-add img {
+	height: 24px;
+	width: 24px;
+	display: inline-block;
+	position: relative;
+	top: 2px;
+}
+
+.icon-memeber-add span {
+	display: inline-block;
+	position: relative;
+	top: -6px;
+}
+
+.icon-memeber-add:hover {
+	background-color: #ec6a2a;
+	color: #fff;
+}
+.icon-memeber-add:focus {
+	background-color: #ec6a2a;
+	color: #fff;
+}
+
+.more-lecture {
+	border-bottom: 1px dotted;
+	cursor: pointer;
+}

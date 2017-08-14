@@ -196,14 +196,14 @@
                   <div class="col-xs-12 col-sm-8">
                       <div class="form-group">
                           <label for="form-subject" class="form-label">Тема доклада</label>
-                          <input id="form-subject" name="subject" class="form-input" type="text" placeholder="Введите тему доклада">
+                          <input id="form-subject" name="subject[]" class="form-input" type="text" placeholder="Введите тему доклада">
                       </div>
                   </div>
                   <div class="col-xs-12 col-sm-4">
                       <div class="form-group">
                           <label for="form-section" class="form-label">Секция</label>
                           <div class="form-select">
-                              <select name="section" id="form-section">
+                              <select name="section[]" id="form-section">
                                 <option value="">Выберите секцию</option>
                                 {% for section in sections %}
                                   <option value="{{ section.id }}">{{ section.fields.Title }}</option>
@@ -216,7 +216,7 @@
 
               <div class="form-group">
                   <label for="form-theses" class="form-label">Тезисы доклада</label>
-                  <textarea name="theses" id="form-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-theses-counter"></textarea>
+                  <textarea name="theses[]" id="form-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-theses-counter"></textarea>
                   <div class="form-textarea-counter">
                       Максимальное количество символов: <span id="form-theses-counter">3000</span>
                   </div>
@@ -238,9 +238,12 @@
                             </g>
                         </svg>
                             <span class="dotted">Загрузить презентацию</span>
+                            <div class="form-hint">
+                              Суммарный объем загружаемых файлов не более 30 мб
+                            </div>
                         </span>
 
-                    <input type="file" name="presentation" class="js-file-input-field form-file-input-field">
+                    <input type="file" name="presentation[]" class="js-file-input-field form-file-input-field">
 
                     <div class="js-file-input-photo form-file-input-photo"></div>
                     <div class="js-file-input-name form-file-input-name"></div>
@@ -264,6 +267,12 @@
                         </svg>
                     </a>
                 </div>
+
+                <p>
+                  <a class="more-lecture">
+                    Добавить еще один доклад
+                  </a>
+                </p>
             </div>
           </div>
 
