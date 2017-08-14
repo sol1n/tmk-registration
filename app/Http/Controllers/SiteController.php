@@ -149,6 +149,13 @@ class SiteController extends Controller
 
         $enFields = $fields['en'];
         unset($fields['en']);
+        foreach ($enFields as $k => $value)
+        {
+            if (! $value)
+            {
+                unset($enFields[$k]);
+            }
+        }
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
         $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
@@ -176,7 +183,10 @@ class SiteController extends Controller
         $fields['userId'] = $member->fields['userId'];
 
         app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $fields);
-        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+        if (count($enFields))
+        {
+            app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+        }
 
         return redirect('/form/' . $company . '/');
     }
@@ -220,6 +230,14 @@ class SiteController extends Controller
         $enFields = $fields['en'];
         unset($fields['en']);
 
+        foreach ($enFields as $k => $value)
+        {
+            if (! $value)
+            {
+                unset($enFields[$k]);
+            }
+        }
+
         if ($request->file('presentation'))
         {
             $path = $request->presentation->store('presentations');
@@ -254,7 +272,10 @@ class SiteController extends Controller
 
         $member = app(\App\Services\ObjectManager::Class)->create($schema, $fields);
 
-        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+        if (count($enFields))
+        {
+            app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+        }
 
         return redirect('/form/' . $company . '/');
     }
