@@ -40,20 +40,20 @@
           <div class="row">
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
-                <label class="form-label" for="form-edit-1-lastname">Фамилия</label>
-                <input id="form-edit-1-lastname" type="text" name="lastName" class="form-input" value="{{ member.fields.lastName }}">
+                <label class="form-label" for="form-edit-{{ member.id }}-lastname">Фамилия</label>
+                <input data-translate-for="#form-lastname-en-{{ member.id }}" id="form-edit-{{ member.id }}-lastname" type="text" name="lastName" class="form-input" value="{{ member.fields.lastName }}">
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
-                <label class="form-label" for="form-edit-1-name">Имя</label>
-                <input id="form-edit-1-name" type="text" name="firstName" class="form-input" value="{{ member.fields.firstName }}">
+                <label class="form-label" for="form-edit-{{ member.id }}-name">Имя</label>
+                <input data-translate-for="#form-name-en-{{ member.id }}" id="form-edit-{{ member.id }}-name" type="text" name="firstName" class="form-input" value="{{ member.fields.firstName }}">
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
-                <label class="form-label" for="form-edit-1-middlename">Отчество</label>
-                <input id="form-edit-1-middlename" type="text" name="middleName" class="form-input" value="{{ member.fields.middleName }}">
+                <label class="form-label" for="form-edit-{{ member.id }}-middlename">Отчество</label>
+                <input data-translate-for="#form-middlename-en-{{ member.id }}" id="form-edit-{{ member.id }}-middlename" type="text" name="middleName" class="form-input" value="{{ member.fields.middleName }}">
               </div>
             </div>
           </div>
@@ -61,26 +61,26 @@
           <div class="row">
               <div class="col-xs-12 col-sm-4">
                 <div class="form-group">
-                  <label class="form-label" for="form-lastname">
+                  <label class="form-label" for="form-lastname-en-{{ member.id }}">
                     Фамилия <span class="c-gray">(англ)</span>
                   </label>
-                  <input id="form-lastname" type="text" name="en[lastName]" class="form-input" value="{{ member.languages.en.lastName }}">
+                  <input id="form-lastname-en-{{ member.id }}" type="text" name="en[lastName]" class="form-input" value="{{ member.languages.en.lastName }}">
                 </div>
               </div>
               <div class="col-xs-12 col-sm-4">
                 <div class="form-group">
-                  <label class="form-label" for="form-name">
+                  <label class="form-label" for="form-name-en-{{ member.id }}">
                     Имя <span class="c-gray">(англ)</span>
                   </label>
-                  <input id="form-name" type="text" name="en[firstName]" class="form-input" value="{{ member.languages.en.firstName }}">
+                  <input id="form-name-en-{{ member.id }}" type="text" name="en[firstName]" class="form-input" value="{{ member.languages.en.firstName }}">
                 </div>
               </div>
               <div class="col-xs-12 col-sm-4">
                 <div class="form-group">
-                  <label class="form-label" for="form-middlename">
+                  <label class="form-label" for="form-middlename-en-{{ member.id }}">
                     Отчество <span class="c-gray">(англ)</span>
                   </label>
-                  <input id="form-middlename" type="text" name="en[middleName]" class="form-input" value="{{ member.languages.en.middleName }}">
+                  <input id="form-middlename-en-{{ member.id }}" type="text" name="en[middleName]" class="form-input" value="{{ member.languages.en.middleName }}">
                 </div>
               </div>
           </div>
