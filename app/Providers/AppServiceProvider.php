@@ -26,6 +26,11 @@ class AppServiceProvider extends ServiceProvider
             $view->with('settings', app(Settings::class));
         });
 
+        View::composer(['site.form'], function($view){
+            $backend = app(Backend::Class);
+            $view->with('autorized', session($backend->code . '-session-token'));
+        });
+
         View::composer('*', function($view){
             $view->with('backend', app(Backend::Class));
         });
@@ -40,7 +45,6 @@ class AppServiceProvider extends ServiceProvider
                 }
                 $ids[] = $item['id'];
             }
-            //dd($ids);
             return $result;
         });
     }

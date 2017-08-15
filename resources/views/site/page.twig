@@ -13,6 +13,13 @@
 <body>
 
 <header class="main-header">
+    {% if autorized %}
+    <div class="wrapper">
+        <p class="main-header-logout">
+            <a href="/logout/">Выйти</a>
+        </p>
+    </div>
+    {% endif %}
     <a href="/" class="main-header-logo">
         <img src="/site/images/logo.png" alt="Горизонты">
     </a>

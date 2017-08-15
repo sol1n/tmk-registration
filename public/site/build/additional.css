@@ -38,3 +38,9 @@
 	border-bottom: 1px dotted;
 	cursor: pointer;
 }
+
+.main-header-logout {
+	margin-top: 10px;
+	margin-bottom: 0;
+	text-align: right;
+}

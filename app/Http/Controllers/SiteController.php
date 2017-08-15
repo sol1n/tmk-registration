@@ -9,6 +9,11 @@ use App\Exceptions\User\WrongCredentialsException;
 
 class SiteController extends Controller
 {
+    public function ProcessLogout(Backend $backend)
+    {
+        $backend->logout();
+        return redirect('/');
+    }
 
     public function ShowAuthForm(Backend $backend, Request $request)
     {

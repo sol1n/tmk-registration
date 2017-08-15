@@ -19,6 +19,8 @@ Route::post('/form/{company}/user/new/', 'SiteController@NewMember');
 Route::post('/form/{company}/user/{profile}/', 'SiteController@ProcessMember');
 Route::post('/form/{company}/', 'SiteController@ProcessForm');
 Route::post('/login', 'SiteController@ProcessLogin');
+Route::get('/logout', 'SiteController@ProcessLogout');
+
 
 Route::get('/{backend}/login', 'AuthController@ShowAuthForm');
 Route::post('/{backend}/login', 'AuthController@ProcessLogin');
