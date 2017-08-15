@@ -26,6 +26,13 @@
 </div>
 
 <div class="form-group">
+  <label for="form-edit-1-subject" class="form-label">
+    Тема доклада <span class="c-gray">(англ)</span>
+  </label>
+  <input id="form-edit-1-subject" name="subject[en][{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
+</div>
+
+<div class="form-group">
   <label for="form-edit-1-theses" class="form-label">Тезисы доклада</label>
   <textarea name="theses[{{ lecture.id }}]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.fields.Description }}</textarea>
   <div class="form-textarea-counter">
@@ -33,6 +40,15 @@
   </div>
 </div>
 
+<div class="form-group">
+  <label for="form-edit-1-theses" class="form-label">
+    Тезисы доклада <span class="c-gray">(англ)</span>
+  </label>
+  <textarea name="theses[en][{{ lecture.id }}]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.languages.en.Description }}</textarea>
+  <div class="form-textarea-counter">
+      Максимальное количество символов: <span id="form-edit-1-theses-counter">3000</span>
+  </div>
+</div>
 
 <div class="form-group">
   <div class="js-file-input form-file-input">

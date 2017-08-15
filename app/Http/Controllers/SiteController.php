@@ -73,7 +73,7 @@ class SiteController extends Controller
             $footballTeams = app(\App\Services\ObjectManager::Class)->all($schema);
 
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-            $lectures = app(\App\Services\ObjectManager::Class)->all($schema);
+            $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, [], 'en');
             
             if (! isset($company))
             {
@@ -132,8 +132,6 @@ class SiteController extends Controller
                     }
                 } 
             }
-
-            
 
             return view('site/form', [
                 'user' => $user,
@@ -235,6 +233,15 @@ class SiteController extends Controller
 
     private function prepareLectures(array &$fields)
     {
+        if (isset($fields['theses']['en']) || isset($fields['subject']['en']))
+        {
+            $enData = [
+                'theses' => isset($fields['theses']['en']) ? $fields['theses']['en'] : null,
+                'subject' => isset($fields['subject']['en']) ? $fields['subject']['en'] : null
+            ];
+            unset($fields['theses']['en']);
+            unset($fields['subject']['en']);
+        }
         if ($fields['subject'] && count($fields['subject']))
         {
             $lectures = [];
@@ -266,6 +273,16 @@ class SiteController extends Controller
                 {
                     $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $k, $lecture);
                 }
+
+                if ($enData['theses'][$k] || $enData['subject'][$k])
+                {
+                    $enFields = [
+                        'Title' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null,
+                        'Description' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null
+                    ];
+                    $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $lecture->id, $enFields, 'en');
+                }
+
                 $lectures[] = $lecture->id;
             }
 
