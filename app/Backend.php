@@ -11,6 +11,7 @@ use GuzzleHttp\Exception\ServerException;
 use App\Exceptions\Backend\BackendNotExists;
 use App\Exceptions\Backend\BackendNotSelected;
 use App\Exceptions\Backend\BackendNoServerProvided;
+use App\Exceptions\Backend\LogoutException;
 
 class Backend
 {
@@ -19,6 +20,7 @@ class Backend
     public $url;
 
     const TEST_METHOD = 'app/appropriateConfiguration';
+    const LOGOUT_METHOD = 'logout';
 
     private function check()
     {
@@ -72,5 +74,27 @@ class Backend
         if (session($this->code . '-session-token')) {
           $this->token = session($this->code . '-session-token');
         }
+    }
+
+    public function logout()
+    {
+      if (isset($this->token))
+      {
+        $client = new Client;
+        try {
+            $r = $client->get(
+              $this->url  . self::LOGOUT_METHOD, 
+              ['headers' => ['X-Appercode-Session-Token' => $this->token]]
+            );
+        }
+        catch (RequestException $e) {
+            throw new LogoutException;
+        };
+
+        session()->flush();
+        $this->token = null;
+      }
+    
+      return $this;
     }
 }
