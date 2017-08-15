@@ -133,8 +133,8 @@
                 </a>
               </td>
               <td class="members-table-cell text-center">
-                {% if member.fields.presentation %}
-                  <a target="_blank" href="/{{ member.fields.presentation }}" title="Скачать презентацию" class="members-table-presentation-link">
+                {% if member.fields.lectures[0] %}
+                  <a target="_blank" href="/{{ member.fields.lectures[0].fields.Presentation }}" title="Скачать презентацию" class="members-table-presentation-link">
                     {{ source('/site/svg/icon-presentation') }}
                   </a>
                 {% endif %}
