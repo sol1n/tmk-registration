@@ -10,6 +10,8 @@ $(function(){
 		newform.find('.js-file-input').removeClass('is-filled').removeClass('is-image');
 		$(this).hide();
 		newform.find('input').first().focus();
+		newform.find('.uploaded-file-link').remove();
+		newform.find('.js-file-input').fileInput();
 		return false;
 	})
 })

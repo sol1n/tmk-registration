@@ -4,35 +4,37 @@
 
 {% block content %}
 
-    <div class="form-block m-b-lg">
-        <div class="form-block-padding" style="padding-top: 60px; padding-bottom: 60px;">
-            <form method="POST" action="/login/">
-                {{ csrf_field() }}
-                <div class="row">
-                    <div class="col-xs-12 col-sm-8 col-sm-offset-2">
-                        {% if message %}
-                            <p class="text-danger" style="margin-bottom: 15px;">
-                                {{ message }}
-                            </p>
-                        {% endif %}
-                        <div class="form-group">
-                            <label class="form-label" for="form-football-team-name">Логин</label>
-                            <input autofocus id="form-football-team-name" type="text" name="login" class="form-input">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-8 col-sm-offset-2">
-                        <div class="form-group">
-                            <label class="form-label" for="form-kvn-team-name">Пароль</label>
-                            <input id="form-kvn-team-name" type="password" name="password" class="form-input">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-8 col-sm-offset-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="button button-orange-hollow button-block">Войти</button>
-                    </div>
-                </div>
-            </form>
+  <div class="form-block m-b-lg">
+    <div class="form-block-padding" style="padding-top: 60px; padding-bottom: 60px;">
+      <form method="POST" action="/login/">
+        {{ csrf_field() }}
+        <div class="row">
+          <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+            {% if message %}
+              <p class="text-danger" style="margin-bottom: 15px;">
+                {{ message }}
+              </p>
+            {% endif %}
+            <div class="form-group">
+              <label class="form-label" for="form-football-team-name">Логин</label>
+              <input autofocus id="form-football-team-name" type="text" name="login" class="form-input">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+            <div class="form-group">
+              <label class="form-label" for="form-kvn-team-name">Пароль</label>
+              <input id="form-kvn-team-name" type="password" name="password" class="form-input">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="button button-orange-hollow button-block">
+              Войти
+            </button>
+          </div>
         </div>
+      </form>
     </div>
+  </div>
 
 {% endblock %}

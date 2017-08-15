@@ -1,284 +1,173 @@
 <div id="new-member-form" style="display: none" class="form-block m-t-lg m-b-lg">
   <a href="#" class="form-block-close" title="Скрыть форму" onclick="$('#new-member-form').slideUp(); return false;">
-      <svg width="10px" height="11px" viewBox="0 0 10 11" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-          <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-              <g transform="translate(-616.000000, -949.000000)" fill="#E66F35">
-                  <g transform="translate(616.000000, 949.000000)">
-                      <rect transform="translate(5.000000, 5.500000) rotate(-315.000000) translate(-5.000000, -5.500000) " x="-1" y="5" width="12" height="1"></rect>
-                      <rect transform="translate(5.000000, 5.500000) scale(-1, 1) rotate(-315.000000) translate(-5.000000, -5.500000) " x="-1" y="5" width="12" height="1"></rect>
-                  </g>
-              </g>
-          </g>
-      </svg>
+    {{ source('/site/svg/icon-mutiselect-close') }}
   </a>
   <div class="form-block-padding">
-      <form action="/form/{{ company.id }}/user/new/" method="POST" enctype="multipart/form-data">
-        {{ csrf_field() }}
-          <div class="block-title">
-              Новый участник
+    <form action="/form/{{ company.id }}/user/new/" method="POST" enctype="multipart/form-data">
+      {{ csrf_field() }}
+        <div class="block-title">
+          Новый участник
+        </div>
+
+        <div class="form-group m-t-lg">
+          <label class="form-label" for="form-status">Статус участника</label>
+          <select name="status[]" id="form-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+            {% for status in statuses %}
+              <option value="{{ status.id }}">{{ status.fields.Title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-lastname">Фамилия</label>
+              <input id="form-lastname" type="text" name="lastName" class="form-input" value="">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-name">Имя</label>
+              <input id="form-name" type="text" name="firstName" class="form-input" value="">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-middlename">Отчество</label>
+              <input id="form-middlename" type="text" name="middleName" class="form-input" value="">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-lastname">Фамилия (англ)</label>
+              <input id="form-lastname" type="text" name="en[lastName]" class="form-input" value="">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-name">Имя (англ)</label>
+              <input id="form-name" type="text" name="en[firstName]" class="form-input" value="">
+            </div>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-middlename">Отчество (англ)</label>
+              <input id="form-middlename" type="text" name="en[middleName]" class="form-input" value="">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-xs-12 col-sm-4">
+            <div class="form-group">
+              <label class="form-label" for="form-position">Должность</label>
+              <input id="form-position" type="text" name="position" class="form-input" value="">
+            </div>
           </div>
 
-          <div class="form-group m-t-lg">
-              <label class="form-label" for="form-status">Статус участника</label>
-              <select name="status[]" id="form-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
-                {% for status in statuses %}
-                  <option value="{{ status.id }}">{{ status.fields.Title }}</option>
-                {% endfor %}
-              </select>
-          </div>
+            <div class="col-xs-12 col-sm-4">
+              <div class="form-group">
+                <label class="form-label" for="form-phone">Телефон</label>
+                <input id="form-phone" type="text" name="phoneNumber" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__" value="">
+              </div>
+            </div>
 
-          <div class="row">
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-lastname">Фамилия</label>
-                      <input id="form-lastname" type="text" name="lastName" class="form-input" value="">
-                  </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-name">Имя</label>
-                      <input id="form-name" type="text" name="firstName" class="form-input" value="">
-                  </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-middlename">Отчество</label>
-                      <input id="form-middlename" type="text" name="middleName" class="form-input" value="">
-                  </div>
+            <div class="col-xs-12 col-sm-4">
+              <div class="form-group">
+                <label class="form-label">&nbsp;</label>
+                <div class="js-file-input form-file-input">
+                  <span class="icon no-td js-file-input-link form-file-input-link">
+                    {{ source('/site/svg/icon-photo') }}
+                    <span class="dotted">Загрузить фотографию</span>
+                  </span>
+
+                  <input type="file" name="photo" class="js-file-input-field form-file-input-field" accept="image/*">
+
+                  <div class="js-file-input-photo form-file-input-photo"></div>
+                  <div class="js-file-input-name form-file-input-name"></div>
+
+                  <a href="#" class="js-file-input-del form-file-input-del">
+                    {{ source('/site/svg/icon-list-del') }}
+                  </a>
+                </div>
               </div>
           </div>
+        </div>
 
-          <div class="row">
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-lastname">Фамилия (англ)</label>
-                      <input id="form-lastname" type="text" name="en[lastName]" class="form-input" value="">
-                  </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-name">Имя (англ)</label>
-                      <input id="form-name" type="text" name="en[firstName]" class="form-input" value="">
-                  </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-middlename">Отчество (англ)</label>
-                      <input id="form-middlename" type="text" name="en[middleName]" class="form-input" value="">
-                  </div>
-              </div>
-          </div>
-
-          <div class="row">
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-position">Должность</label>
-                      <input id="form-position" type="text" name="position" class="form-input" value="">
-                  </div>
-              </div>
-
-              <div class="col-xs-12 col-sm-4">
-                  <div class="form-group">
-                      <label class="form-label" for="form-phone">Телефон</label>
-                      <input id="form-phone" type="text" name="phoneNumber" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__" value="">
-                  </div>
-              </div>
-
-              <div class="col-xs-12 col-sm-4">
-                <div class="form-group">
-                    <label class="form-label">&nbsp;</label>
-                    <div class="js-file-input form-file-input">
-                        <span class="icon no-td js-file-input-link form-file-input-link">
-                            <svg width="24px" height="19px" viewBox="0 0 24 19" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g fill="#E66F35" fill-rule="nonzero">
-                                    <path d="M11.9999531,15.7938281 C9.14207813,15.7938281 6.81703125,13.4687812 6.81703125,10.6109062 C6.81703125,7.75298437 9.14207813,5.42789062 11.9999531,5.42789062 C14.857875,5.42789062 17.1829219,7.75298437 17.1829219,10.6109062 C17.1829219,13.4687812 14.857875,15.7938281 11.9999531,15.7938281 Z M11.9999531,4.446375 C8.60090625,4.446375 5.83551562,7.21176562 5.83551562,10.6109062 C5.83551562,14.01 8.60090625,16.7753437 11.9999531,16.7753437 C15.3990469,16.7753437 18.1643906,14.01 18.1643906,10.6109062 C18.1643906,7.21176562 15.3990937,4.446375 11.9999531,4.446375 L11.9999531,4.446375 Z"></path>
-                                    <g>
-                                        <g transform="translate(8.000000, 6.000000)">
-                                            <path d="M3.9999531,7.5273281 C2.3918125,7.5273281 1.08348437,6.2190469 1.08348437,4.6109062 C1.08348437,3.00271875 2.3918125,1.69439062 3.9999531,1.69439062 C5.6081406,1.69439062 6.9164687,3.00271875 6.9164687,4.6109062 C6.9164687,6.2190469 5.6081406,7.5273281 3.9999531,7.5273281 Z M3.9999531,0.76457812 C1.87914062,0.76457812 0.15367187,2.49 0.15367187,4.6109062 C0.15367187,6.7317187 1.87914062,8.4571406 3.9999531,8.4571406 C6.1208125,8.4571406 7.8462812,6.7317187 7.8462812,4.6109062 C7.8462812,2.49004687 6.1208125,0.76457812 3.9999531,0.76457812 L3.9999531,0.76457812 Z"></path>
-                                        </g>
-                                        <g>
-                                            <path d="M22.4502656,17.529375 L1.54973438,17.529375 C1.264875,17.529375 1.03317188,17.297625 1.03317188,17.0128125 L1.03317188,15.6862969 L3.079875,15.6862969 C3.36515625,15.6862969 3.5964375,15.4549687 3.5964375,15.1696875 L3.5964375,6.05203125 C3.5964375,5.76675 3.36515625,5.53542187 3.079875,5.53542187 L1.03317188,5.53542187 L1.03317188,4.20890625 C1.03317188,3.92409375 1.264875,3.69234375 1.54973438,3.69234375 L15.7667344,3.69234375 C15.7680938,3.69234375 15.7693594,3.69248437 15.7706719,3.69248437 C15.7717969,3.69248437 15.7729688,3.69234375 15.7741406,3.69234375 L22.4502188,3.69234375 C22.7350781,3.69234375 22.9667813,3.92409375 22.9667813,4.20890625 L22.9667813,5.53542187 L20.9200781,5.53542187 C20.6347969,5.53542187 20.4035156,5.76675 20.4035156,6.05203125 L20.4035156,15.1696875 C20.4035156,15.4549687 20.6347969,15.6862969 20.9200781,15.6862969 L22.9667813,15.6862969 L22.9667813,17.0128125 C22.966875,17.297625 22.735125,17.529375 22.4502656,17.529375 Z M1.03317188,14.653125 L2.5633125,14.653125 L2.5633125,6.56859375 L1.03317188,6.56859375 L1.03317188,14.653125 Z M3.2015625,1.97034375 C3.2015625,1.95614063 3.21314063,1.94451563 3.22739063,1.94451563 L4.71426563,1.94451563 C4.72851563,1.94451563 4.74009375,1.95614063 4.74009375,1.97034375 L4.74009375,2.65926563 L3.2015625,2.65926563 L3.2015625,1.97034375 Z M9.4839375,1.25751562 C9.52504688,1.14553125 9.6328125,1.07029687 9.75210938,1.07029687 L14.2477969,1.07029687 C14.3670938,1.07029687 14.4748594,1.14553125 14.5159688,1.25751562 L15.0306094,2.65926562 L8.96929688,2.65926562 L9.4839375,1.25751562 Z M21.4366875,14.653125 L22.966875,14.653125 L22.966875,6.56859375 L21.4366875,6.56859375 L21.4366875,14.653125 Z M22.4502656,2.65926563 L16.1312344,2.65926563 L15.4858594,0.901453125 C15.2960625,0.38446875 14.7985781,0.037171875 14.2478438,0.037171875 L9.75215625,0.037171875 C9.20142187,0.037171875 8.7039375,0.384515625 8.51414062,0.901453125 L7.86871875,2.65921875 L5.7215625,2.65921875 L5.7215625,1.97034375 C5.7215625,1.41492188 5.26973438,0.963046875 4.71426562,0.963046875 L3.22739062,0.963046875 C2.67196875,0.963046875 2.22009375,1.41492188 2.22009375,1.97034375 L2.22009375,2.65926563 L1.54973437,2.65926563 C0.695203125,2.65926563 0,3.35446875 0,4.20895313 L0,17.0128125 C0,17.8672969 0.695203125,18.5625 1.54973437,18.5625 L22.4502656,18.5625 C23.3047969,18.5625 24,17.8672969 24,17.0128125 L24,4.20895313 C24,3.35446875 23.3047969,2.65926563 22.4502656,2.65926563 L22.4502656,2.65926563 Z"></path>
-                                        </g>
-                                    </g>
-                                    <path d="M11.9999531,8.71040625 C10.9520625,8.71040625 10.0995,9.56296875 10.0995,10.6109063 C10.0995,10.8676875 10.307625,11.0758125 10.5644063,11.0758125 C10.8211875,11.0758125 11.0293125,10.8676875 11.0293125,10.6109063 C11.0293125,10.0756406 11.4647344,9.64021875 11.9999531,9.64021875 C12.2567813,9.64021875 12.4649063,9.43209375 12.4649063,9.1753125 C12.4649063,8.91853125 12.2567813,8.71040625 11.9999531,8.71040625"></path>
-                                </g>
-                            </g>
-                        </svg>
-                            <span class="dotted">Загрузить фотографию</span>
-                        </span>
-
-                        <input type="file" name="photo" class="js-file-input-field form-file-input-field" accept="image/*">
-
-                        <div class="js-file-input-photo form-file-input-photo"></div>
-                        <div class="js-file-input-name form-file-input-name"></div>
-
-                        <a href="#" class="js-file-input-del form-file-input-del">
-                            <svg width="10px" height="9px" viewBox="0 0 10 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1024.000000, -765.000000)" fill="#999999">
-                                    <g transform="translate(1024.000000, 764.000000)">
-                                        <g>
-                                            <polygon transform="translate(3.500000, 4.000000) rotate(-315.000000) translate(-3.500000, -4.000000) " points="0.560660172 3.35355339 6.43933983 2.64644661 6.43933983 4.64644661 0.560660172 5.35355339"></polygon>
-                                            <polygon transform="translate(6.500000, 4.000000) scale(-1, 1) rotate(-315.000000) translate(-6.500000, -4.000000) " points="3.56066017 3.35355339 9.43933983 2.64644661 9.43933983 4.64644661 3.56066017 5.35355339"></polygon>
-                                        </g>
-                                        <g transform="translate(5.000000, 7.000000) scale(-1, -1) translate(-5.000000, -7.000000) translate(0.000000, 3.000000)">
-                                            <polygon transform="translate(3.500000, 4.000000) rotate(-315.000000) translate(-3.500000, -4.000000) " points="0.560660172 3.35355339 6.43933983 2.64644661 6.43933983 4.64644661 0.560660172 5.35355339"></polygon>
-                                            <polygon transform="translate(6.500000, 4.000000) scale(-1, 1) rotate(-315.000000) translate(-6.500000, -4.000000) " points="3.56066017 3.35355339 9.43933983 2.64644661 9.43933983 4.64644661 3.56066017 5.35355339"></polygon>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                        </a>
+        <div class="member-additional-form js-member-status js-member-status-c40c992e-430d-4545-95b1-d63645f8a6fa">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12">
+                    <div class="form-group">
+                        <label for="form-edit-1-subject" class="form-label">Футбольная команда</label>
+                        <div class="form-select form-select-bold">
+                            <select name="footballTeam">
+                              <option value="">Выберите команду</option>
+                              {% for one in footballTeams %}
+                                {% if one.id == company.fields.DefaultFootballTeam %}
+                                  <option selected value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                                {% else %}
+                                  <option value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                                {% endif %}
+                              {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
-          </div>
+        </div>
 
-          <div class="member-additional-form js-member-status js-member-status-c40c992e-430d-4545-95b1-d63645f8a6fa">
-              <div class="row">
-                  <div class="col-xs-12 col-sm-12">
-                      <div class="form-group">
-                          <label for="form-edit-1-subject" class="form-label">Футбольная команда</label>
-                          <div class="form-select form-select-bold">
-                              <select name="footballTeam">
-                                <option value="">Выберите команду</option>
-                                {% for one in footballTeams %}
-                                    {% if one.id == company.fields.DefaultFootballTeam %}
-                                        <option selected value="{{ one.id }}">{{ one.fields.teamName }}</option>
-                                    {% else %}
-                                        <option value="{{ one.id }}">{{ one.fields.teamName }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                              </select>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-          <div class="member-additional-form js-member-status js-member-status-0567ede5-b573-4dda-8866-d988d1456f33">
-              <div class="row">
-                  <div class="col-xs-12 col-sm-12">
-                      <div class="form-group">
-                          <label for="form-edit-1-subject" class="form-label">Команда КВН</label>
-                          <div class="form-select form-select-bold">
-                              <select name="KVNTeam">
-                                <option value="">Выберите команду</option>
-                                {% for one in kvnTeams %}
-                                    {% if one.id == company.fields.DefaultKVNTeam %}
-                                        <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
-                                    {% else %}
-                                        <option value="{{ one.id }}">{{ one.fields.Title }}</option>
-                                    {% endif %}
-                                {% endfor %}
-                              </select>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-          <div class="form-group">
-              <label class="form-label" for="form-bio">Биография</label>
-              <textarea class="form-textarea" name="biography" id="form-bio" cols="30" rows="10" maxlength="3000" data-text-count data-text-count-block="#form-bio-counter"></textarea>
-              <div class="form-textarea-counter">
-                  Максимальное количество символов: <span id="form-bio-counter">3000</span>
-              </div>
-          </div>
-
-          <div class="member-additional-form js-member-status 
-          js-member-status-5e5d15db-ad9f-4a7f-9bb3-ea0ae535871a js-member-status-962896cb-10df-464b-8e26-62c79e81f9be">
-              <hr class="form-block-hr m-b-lg">
-
-              <div class="row">
-                  <div class="col-xs-12 col-sm-8">
-                      <div class="form-group">
-                          <label for="form-subject" class="form-label">Тема доклада</label>
-                          <input id="form-subject" name="subject[]" class="form-input" type="text" placeholder="Введите тему доклада">
-                      </div>
-                  </div>
-                  <div class="col-xs-12 col-sm-4">
-                      <div class="form-group">
-                          <label for="form-section" class="form-label">Секция</label>
-                          <div class="form-select">
-                              <select name="section[]" id="form-section">
-                                <option value="">Выберите секцию</option>
-                                {% for section in sections %}
-                                  <option value="{{ section.id }}">{{ section.fields.Title }}</option>
-                                {% endfor %}
-                              </select>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
+        <div class="member-additional-form js-member-status js-member-status-0567ede5-b573-4dda-8866-d988d1456f33">
+          <div class="row">
+            <div class="col-xs-12 col-sm-12">
               <div class="form-group">
-                  <label for="form-theses" class="form-label">Тезисы доклада</label>
-                  <textarea name="theses[]" id="form-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-theses-counter"></textarea>
-                  <div class="form-textarea-counter">
-                      Максимальное количество символов: <span id="form-theses-counter">3000</span>
-                  </div>
-              </div>
-
-              <div class="form-group">
-                <div class="js-file-input form-file-input">
-                        <span class="icon no-td js-file-input-link form-file-input-link">
-                            <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g fill="#E66F35" fill-rule="nonzero">
-                                    <path d="M0.48378626,0.999083969 L1.38265649,0.999083969 L1.38265649,15.0303511 C1.38265649,15.7385649 1.95896183,16.3151756 2.66748092,16.3151756 L21.3692824,16.3151756 C22.0775573,16.3151756 22.6541069,15.7385649 22.6541069,15.0303511 L22.6541069,0.999083969 L23.4601527,0.999083969 C23.7287939,0.999083969 23.9436947,0.784122137 23.9436947,0.515541985 C23.9436947,0.246717557 23.7287939,0.0317557252 23.4601527,0.0317557252 L0.48378626,0.0317557252 C0.214961832,0.0317557252 0,0.246717557 0,0.515541985 C0,0.784122137 0.219969466,0.999083969 0.48378626,0.999083969 Z M2.34992366,0.999083969 L21.6867786,0.999083969 L21.6867786,15.0303511 C21.6867786,15.2061069 21.5450992,15.3478473 21.3692824,15.3478473 L2.66748092,15.3478473 C2.49166412,15.3478473 2.34992366,15.2061069 2.34992366,15.0303511 L2.34992366,0.999083969 Z"></path>
-                                    <path d="M8.35425954,22.9301374 C8.16366412,23.1204885 8.16366412,23.4234504 8.35425954,23.6140458 C8.4470229,23.7068702 8.57392366,23.7557252 8.69606107,23.7557252 C8.81819847,23.7557252 8.94534351,23.7068702 9.03816794,23.6140458 L11.7690992,20.8831145 L11.7690992,23.272 C11.7690992,23.5408244 11.984,23.7557252 12.2528855,23.7557252 C12.5214656,23.7557252 12.7364275,23.5408244 12.7364275,23.272 L12.7364275,20.8831145 L15.4527634,23.5995115 C15.5455878,23.6922748 15.6727328,23.7409466 15.7948702,23.7409466 C15.9170076,23.7409466 16.0439084,23.6922748 16.1366718,23.5995115 C16.3272672,23.408916 16.3272672,23.1059542 16.1366718,22.9153588 L12.7364275,19.5150534 L12.7364275,18.2545344 L14.4219847,18.2545344 C14.690626,18.2545344 14.9055267,18.0396336 14.9055267,17.7709924 C14.9055267,17.5021679 14.690626,17.2872672 14.4219847,17.2872672 L10.0152672,17.2872672 C9.74668702,17.2872672 9.53148092,17.5021679 9.53148092,17.7709924 C9.53148092,18.0396336 9.74668702,18.2545344 10.0152672,18.2545344 L11.7690992,18.2545344 L11.7690992,19.5150534 L8.35425954,22.9301374 Z"></path>
-                                    <path d="M19.879084,8.41032061 L19.0827481,9.21160305 C18.8921527,9.40219847 18.8971603,9.70491603 19.0827481,9.89557252 C19.1755725,9.98833588 19.3024733,10.0372519 19.4246107,10.0372519 C19.5467481,10.0372519 19.6738931,9.98833588 19.7667176,9.89557252 L20.9050382,8.74741985 C20.9978626,8.65459542 21.0467786,8.53245802 21.0467786,8.40555725 C21.0467786,8.27841221 20.9930992,8.15627481 20.9050382,8.06351145 L19.7569466,6.92512977 C19.5662901,6.73477863 19.2635725,6.73954198 19.0729771,6.92512977 C18.8823817,7.11572519 18.8873893,7.41868702 19.0729771,7.60903817 L19.879084,8.41032061 Z"></path>
-                                    <path d="M4.36280916,9.89074809 C4.45563359,9.98357252 4.58253435,10.0324885 4.70467176,10.0324885 C4.82680916,10.0324885 4.94894656,9.98357252 5.04677863,9.89074809 C5.23737405,9.70015267 5.23737405,9.39719084 5.04677863,9.20659542 L4.25050382,8.40555725 L5.05154198,7.60903817 C5.2421374,7.41868702 5.2421374,7.11572519 5.05154198,6.92512977 C4.86119084,6.73477863 4.55822901,6.73477863 4.36763359,6.92512977 L3.21948092,8.06351145 C3.12665649,8.15627481 3.07774046,8.27841221 3.07774046,8.40555725 C3.07774046,8.53245802 3.12665649,8.65459542 3.21948092,8.74741985 L4.36280916,9.89074809 Z"></path>
-                                    <path d="M6.38045802,13.3447328 L17.5682443,13.3447328 C17.8368244,13.3447328 18.0520305,13.129771 18.0520305,12.8609466 L18.0520305,3.49074809 C18.0520305,3.2218626 17.8368244,3.00696183 17.5682443,3.00696183 L6.38045802,3.00696183 C6.11163359,3.00696183 5.89673282,3.2218626 5.89673282,3.49074809 L5.89673282,12.8659542 C5.89673282,13.129771 6.11163359,13.3447328 6.38045802,13.3447328 Z M6.864,3.97429008 L17.0847023,3.97429008 L17.0847023,8.66937405 L14.7543206,6.33899237 C14.5636641,6.14839695 14.2607634,6.14839695 14.0701069,6.33899237 L10.4892824,9.92012214 L9.38027481,8.81587786 C9.28720611,8.72305344 9.1650687,8.67419847 9.03816794,8.67419847 C8.91126718,8.67419847 8.78912977,8.72305344 8.69606107,8.81587786 L6.864,10.6479389 L6.864,3.97429008 Z M6.864,12.0157557 L9.03816794,9.84189313 L10.1471756,10.9509008 C10.24,11.0436641 10.3621374,11.0925802 10.4892824,11.0925802 C10.6161832,11.0925802 10.7383206,11.0436641 10.831084,10.9509008 L14.4122137,7.36977099 L17.0847023,10.0422595 L17.0847023,12.3821679 L6.864,12.3821679 L6.864,12.0157557 Z"></path>
-                                    <path d="M11.1974962,6.45135878 C11.1974962,5.63053435 10.5281221,4.96116031 9.70754198,4.96116031 C8.88671756,4.96116031 8.21734351,5.63053435 8.21734351,6.45135878 C8.21734351,7.272 8.88671756,7.94137405 9.70754198,7.94137405 C10.5281221,7.94137405 11.1974962,7.272 11.1974962,6.45135878 Z M9.18461069,6.45135878 C9.18461069,6.1629313 9.4191145,5.92848855 9.70754198,5.92848855 C9.99572519,5.92848855 10.230229,6.1629313 10.230229,6.45135878 C10.230229,6.73954198 9.99572519,6.9740458 9.70754198,6.9740458 C9.4191145,6.9740458 9.18461069,6.73954198 9.18461069,6.45135878 Z"></path>
-                                </g>
-                            </g>
-                        </svg>
-                            <span class="dotted">Загрузить презентацию</span>
-                            <div class="form-hint">
-                              Суммарный объем загружаемых файлов не более 30 мб
-                            </div>
-                        </span>
-
-                    <input type="file" name="presentation[]" class="js-file-input-field form-file-input-field">
-
-                    <div class="js-file-input-photo form-file-input-photo"></div>
-                    <div class="js-file-input-name form-file-input-name"></div>
-
-                    <a href="#" class="js-file-input-del form-file-input-del">
-                        <svg width="10px" height="9px" viewBox="0 0 10 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                                <g transform="translate(-1024.000000, -765.000000)" fill="#999999">
-                                    <g transform="translate(1024.000000, 764.000000)">
-                                        <g>
-                                            <polygon transform="translate(3.500000, 4.000000) rotate(-315.000000) translate(-3.500000, -4.000000) " points="0.560660172 3.35355339 6.43933983 2.64644661 6.43933983 4.64644661 0.560660172 5.35355339"></polygon>
-                                            <polygon transform="translate(6.500000, 4.000000) scale(-1, 1) rotate(-315.000000) translate(-6.500000, -4.000000) " points="3.56066017 3.35355339 9.43933983 2.64644661 9.43933983 4.64644661 3.56066017 5.35355339"></polygon>
-                                        </g>
-                                        <g transform="translate(5.000000, 7.000000) scale(-1, -1) translate(-5.000000, -7.000000) translate(0.000000, 3.000000)">
-                                            <polygon transform="translate(3.500000, 4.000000) rotate(-315.000000) translate(-3.500000, -4.000000) " points="0.560660172 3.35355339 6.43933983 2.64644661 6.43933983 4.64644661 0.560660172 5.35355339"></polygon>
-                                            <polygon transform="translate(6.500000, 4.000000) scale(-1, 1) rotate(-315.000000) translate(-6.500000, -4.000000) " points="3.56066017 3.35355339 9.43933983 2.64644661 9.43933983 4.64644661 3.56066017 5.35355339"></polygon>
-                                        </g>
-                                    </g>
-                                </g>
-                            </g>
-                        </svg>
-                    </a>
+                <label for="form-edit-1-subject" class="form-label">Команда КВН</label>
+                <div class="form-select form-select-bold">
+                  <select name="KVNTeam">
+                    <option value="">Выберите команду</option>
+                    {% for one in kvnTeams %}
+                      {% if one.id == company.fields.DefaultKVNTeam %}
+                          <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
+                      {% else %}
+                          <option value="{{ one.id }}">{{ one.fields.Title }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
                 </div>
-
-                <p>
-                  <a class="more-lecture">
-                    Добавить еще один доклад
-                  </a>
-                </p>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="text-right">
-              <button type="submit" class="button button-orange-hollow">Сохранить</button>
+        <div class="form-group">
+          <label class="form-label" for="form-bio">Биография</label>
+          <textarea class="form-textarea" name="biography" id="form-bio" cols="30" rows="10" maxlength="3000" data-text-count data-text-count-block="#form-bio-counter"></textarea>
+          <div class="form-textarea-counter">
+              Максимальное количество символов: <span id="form-bio-counter">3000</span>
           </div>
-      </form>
+        </div>
+
+        <div class="member-additional-form js-member-status 
+        js-member-status-5e5d15db-ad9f-4a7f-9bb3-ea0ae535871a js-member-status-962896cb-10df-464b-8e26-62c79e81f9be">
+          {%
+            include 'site/form/lecture' 
+            with {
+              'sections': sections
+            } only
+          %}
+
+          <p>
+            <a class="more-lecture">
+              Добавить еще один доклад
+            </a>
+          </p>
+        </div>
+
+        <div class="text-right">
+            <button type="submit" class="button button-orange-hollow">Сохранить</button>
+        </div>
+    </form>
   </div>
 </div>

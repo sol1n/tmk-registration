@@ -165,9 +165,10 @@ class SiteController extends Controller
         $fields = $request->all();
         $fields['email'] = '';
         $fields['photo'] = '';
-        $fields['presentation'] = '';
         $fields['team'] = $company;
         unset($fields['_token']);
+
+        $this->prepareLectures($fields);
 
         $enFields = $fields['en'];
         unset($fields['en']);
@@ -181,16 +182,6 @@ class SiteController extends Controller
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
         $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
-
-        if ($request->file('presentation'))
-        {
-            $path = $request->presentation->store('presentations');
-            $fields['presentation'] = $path;
-        }
-        else
-        {
-            $fields['presentation'] = isset($member->fields['presentation']) ? $member->fields['presentation'] : null;
-        }
 
         if ($request->file('photo'))
         {
@@ -242,14 +233,9 @@ class SiteController extends Controller
         return redirect('/form/' . $company . '/');
     }
 
-    public function NewMember(Backend $backend, Request $request, $company)
+    private function prepareLectures(array &$fields)
     {
-        $fields = $request->all();
-        $fields['email'] = '';
-        $fields['team'] = $company;
-        unset($fields['_token']);
-
-        if ($fields['subject'] && $fields['subject'][0])
+        if ($fields['subject'] && count($fields['subject']))
         {
             $lectures = [];
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
@@ -261,23 +247,48 @@ class SiteController extends Controller
                 {
                     $lecture['Presentation'] = $fields['presentation'][$k]->store('presentations');
                 }
+                else
+                {
+                    if (isset($fields['saved-presentation'][$k]) && $fields['saved-presentation'][$k])
+                    {
+                        $lecture['Presentation'] = $fields['saved-presentation'][$k];
+                    }
+                }
                 $lecture['Title'] = $fields['subject'][$k];
                 $lecture['Description'] = $fields['theses'][$k];
                 $lecture['Section'] = $fields['section'][$k];
 
-                $lecture = app(\App\Services\ObjectManager::Class)->create($schema, $lecture);
-
+                if (is_numeric($k))
+                {
+                    $lecture = app(\App\Services\ObjectManager::Class)->create($schema, $lecture);
+                }
+                else
+                {
+                    $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $k, $lecture);
+                }
                 $lectures[] = $lecture->id;
-
             }
 
             unset($fields['subject']);
             unset($fields['theses']);
             unset($fields['section']);
-            unset($fields['presentations']);
+            unset($fields['presentation']);
+            unset($fields['saved-presentation']);
 
             $fields['lectures'] = $lectures;
         }
+
+        return true;
+    }
+
+    public function NewMember(Backend $backend, Request $request, $company)
+    {
+        $fields = $request->all();
+        $fields['email'] = '';
+        $fields['team'] = $company;
+        unset($fields['_token']);
+
+        $this->prepareLectures($fields);
 
         $enFields = $fields['en'];
         unset($fields['en']);
