@@ -82,30 +82,32 @@ class SiteController extends Controller
             }
             else
             {
-
                 $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
                 $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['where' => json_encode(['team' => $company->id])], 'en');
 
-                $idsPool = [];
-                foreach ($members as $member)
+                if (count($members))
                 {
-                    $idsPool[] = $member->fields['userId'];
-                }
-
-                $query = ['where' => json_encode(['id' => ['$in' => $idsPool]])];
-                $users = app(\App\Services\UserManager::Class)->search($query);
-
-                foreach ($members as $member)
-                {
-                    foreach ($users as $user)
+                    $idsPool = [];
+                    foreach ($members as $member)
                     {
-                        if ($user->id == $member->fields['userId'])
+                        $idsPool[] = $member->fields['userId'];
+                    }
+
+                    $query = ['where' => json_encode(['id' => ['$in' => $idsPool]])];
+                    $users = app(\App\Services\UserManager::Class)->search($query);
+
+                    foreach ($members as $member)
+                    {
+                        foreach ($users as $user)
                         {
-                            $member->login = $user->username;
+                            if ($user->id == $member->fields['userId'])
+                            {
+                                $member->login = $user->username;
+                            }
                         }
                     }
                 }
-
+                
                 $team = [];
                 foreach ($members as $member)
                 {
