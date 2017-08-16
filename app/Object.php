@@ -294,12 +294,21 @@ class Object
         }
     }
 
+    private function getFileRelation($field, Schema $schema)
+    {
+        $this->relations['ref Files'] = [];
+    }
+
     private function getRelation($field)
     {
         $code = str_replace('ref ', '', $field['type']);
         if ($code == 'Users')
         {
             $this->getUserRelation($field);
+        }
+        elseif ($code == 'Files')
+        {
+            $this->getFileRelation($field);
         }
         else
         {

@@ -325,6 +325,14 @@ class Schema
         }
     }
 
+    private function getFileRelation()
+    {
+        if (! isset($this->relations['ref Files']))
+        {
+            $this->relations['ref Files'] = [];    
+        }
+    }
+
     private function getObjectRelation(Schema $schema)
     {
         $index = 'ref ' . $schema->id;
@@ -341,6 +349,10 @@ class Schema
         if ($code == 'Users')
         {
             $this->getUserRelation();
+        }
+        elseif ($code == 'Files')
+        {
+            $this->getFileRelation();
         }
         else
         {

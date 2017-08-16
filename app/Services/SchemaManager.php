@@ -26,7 +26,7 @@ class SchemaManager
     {
         $result = [
             'basic' => ['Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json'],
-            'refs' => ['ref Users']
+            'refs' => ['ref Users', 'ref Files']
         ];
 
         foreach ($this->list as $schema)
