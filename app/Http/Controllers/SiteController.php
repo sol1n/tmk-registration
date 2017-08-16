@@ -86,6 +86,26 @@ class SiteController extends Controller
                 $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
                 $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['where' => json_encode(['team' => $company->id])], 'en');
 
+                $idsPool = [];
+                foreach ($members as $member)
+                {
+                    $idsPool[] = $member->fields['userId'];
+                }
+
+                $query = ['where' => json_encode(['id' => ['$in' => $idsPool]])];
+                $users = app(\App\Services\UserManager::Class)->search($query);
+
+                foreach ($members as $member)
+                {
+                    foreach ($users as $user)
+                    {
+                        if ($user->id == $member->fields['userId'])
+                        {
+                            $member->login = $user->username;
+                        }
+                    }
+                }
+
                 $team = [];
                 foreach ($members as $member)
                 {
@@ -242,7 +262,8 @@ class SiteController extends Controller
             unset($fields['theses']['en']);
             unset($fields['subject']['en']);
         }
-        if ($fields['subject'] && count($fields['subject']))
+
+        if ($fields['subject'] && count($fields['subject']) && (! is_null($fields['subject'][0])))
         {
             $lectures = [];
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
@@ -331,6 +352,7 @@ class SiteController extends Controller
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
 
         $time = time();
+        $time = mb_substr($time, 2, mb_strlen($time) - 4);
 
         $user = app(\App\Services\UserManager::Class)->create([
             'username' => $time,
