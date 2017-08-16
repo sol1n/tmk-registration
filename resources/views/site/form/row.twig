@@ -86,21 +86,30 @@
           </div>
 
           <div class="row">
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group">
                 <label class="form-label" for="form-edit-1-position">Должность</label>
                 <input id="form-edit-1-position" type="text" name="position" class="form-input" value="{{ member.fields.position }}">
               </div>
             </div>
-
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-6">
+              <div class="form-group">
+                <label class="form-label" for="form-edit-1-position">
+                  Должность <span class="c-gray">(англ)</span>
+                </label>
+                <input id="form-edit-1-position" type="text" name="en[position]" class="form-input" value="{{ member.languages.en.position }}">
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group">
                 <label class="form-label" for="form-edit-1-phone">Телефон</label>
                 <input id="form-edit-1-phone" type="text" name="phoneNumber" class="form-input" data-masked-input="+7 (000) 000-00-00" data-masked-input-placeholder="+7 (___) ___-__-__" data-masked-input-clearifnotmatch placeholder="+7 (___) ___-__-__"  value="{{ member.fields.phoneNumber }}">
               </div>
             </div>
 
-            <div class="col-xs-12 col-sm-4">
+            <div class="col-xs-12 col-sm-6">
               <div class="form-group">
                 <label class="form-label">&nbsp;</label>
                 <div class="js-file-input form-file-input">
