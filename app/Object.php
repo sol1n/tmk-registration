@@ -239,6 +239,10 @@ class Object
                     $this->fields[$field['name']][$k] =  app(\App\Services\UserManager::Class)->find($v);
                 }
             }
+            elseif (is_object($this->fields[$field['name']]))
+            {
+                $this->fields[$field['name']] = $this->fields[$field['name']];
+            }
             else
             {
                 $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
@@ -277,8 +281,19 @@ class Object
             {
                 foreach ($this->fields[$field['name']] as $k => $v)
                 {
-                    $this->fields[$field['name']][$k] =  app(\App\Services\ObjectManager::Class)->find($schema, $v);
+                    if (is_object($v))
+                    {
+                        $this->fields[$field['name']][$k] = $v;
+                    }
+                    else
+                    {
+                        $this->fields[$field['name']][$k] =  app(\App\Services\ObjectManager::Class)->find($schema, $v);
+                    }
                 }
+            }
+            elseif (is_object($this->fields[$field['name']]))
+            {
+                $this->fields[$field['name']] = $this->fields[$field['name']];
             }
             else
             {
@@ -294,7 +309,7 @@ class Object
         }
     }
 
-    private function getFileRelation($field, Schema $schema)
+    private function getFileRelation($field)
     {
         $this->relations['ref Files'] = [];
     }
