@@ -217,11 +217,24 @@ class Object
                 $userIds = [];
                 if (isset($this->fields[$field['name']])) {
                     if (is_array($this->fields[$field['name']])) {
+                        if (
+                            isset($this->fields[$field['name']][0]) && 
+                            is_object($this->fields[$field['name']][0]))
+                        {
+                            foreach ($this->fields[$field['name']] as $obj)
+                            {
+                                $userIds[] = $obj->id;
+                            }
+                        }
                         $userIds = $this->fields[$field['name']];
+                    }
+                    elseif (is_object($this->fields[$field['name']])) {
+                        $userIds = [$this->fields[$field['name']]->id];
                     } else {
                         $userIds = [$this->fields[$field['name']]];
                     }
                 }
+
                 $users = $userIds ? app(\App\Services\UserManager::Class)->findMultipleWithProfiles($userIds) : [];
             }
             else {
