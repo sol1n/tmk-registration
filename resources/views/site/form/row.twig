@@ -131,7 +131,7 @@
             </div>
           </div>
 
-          <div class="{% if member.football %}active{% endif %} member-additional-form js-member-status js-member-status-c40c992e-430d-4545-95b1-d63645f8a6fa">
+          <div class="{% if member.football %}active{% endif %} member-additional-form js-member-status js-member-status-6e1fca1c-5ad6-4105-a590-13adeeea0737">
             <div class="row">
               <div class="col-xs-12 col-sm-12">
                 <div class="form-group">
@@ -153,7 +153,7 @@
             </div>
           </div>
           
-          <div class="{% if member.kvn %}active{% endif %} member-additional-form js-member-status js-member-status-0567ede5-b573-4dda-8866-d988d1456f33">
+          <div class="{% if member.kvn %}active{% endif %} member-additional-form js-member-status js-member-status-cad65dda-7add-4465-9a3a-744e7378752a">
             <div class="row">
               <div class="col-xs-12 col-sm-12">
                 <div class="form-group">
@@ -185,7 +185,7 @@
 
           {% if (member.fields.lectures|length) %}
             {% for lecture in member.fields.lectures %}
-              <div class="active member-additional-form js-member-status js-member-status-5e5d15db-ad9f-4a7f-9bb3-ea0ae535871a js-member-status-962896cb-10df-464b-8e26-62c79e81f9be">
+              <div class="active member-additional-form js-member-status js-member-status-07e6da63-a4d9-45fd-b181-58272cf40bb4 js-member-status-61f6a888-2690-4b32-b339-6155e50eea17">
 
                 {%
                   include 'site/form/lecture' 
@@ -207,7 +207,7 @@
             {% endfor %}
           {% else %}
 
-            <div class="{% if member.report %}active{% endif %} member-additional-form js-member-status js-member-status-5e5d15db-ad9f-4a7f-9bb3-ea0ae535871a js-member-status-962896cb-10df-464b-8e26-62c79e81f9be">
+            <div class="{% if member.report %}active{% endif %} member-additional-form js-member-status js-member-status-07e6da63-a4d9-45fd-b181-58272cf40bb4 js-member-status-61f6a888-2690-4b32-b339-6155e50eea17">
 
               {%
                 include 'site/form/lecture' 

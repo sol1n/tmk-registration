@@ -137,15 +137,16 @@ class SiteController extends Controller
                                 $tmp[] = $status->fields['Title'];
                             }
                         }
-                        if (isset($member->fields['status']) &&  in_array('5a4b73ea-dd18-45ed-9523-e24af036bd13', $member->fields['status']))
+                        if (isset($member->fields['status']) &&  (in_array('07e6da63-a4d9-45fd-b181-58272cf40bb4', $member->fields['status']) || in_array('61f6a888-2690-4b32-b339-6155e50eea17', $member->fields['status'])
+                            ))
                         {
                             $member->report = 1;
                         }
-                        if (isset($member->fields['status']) &&  in_array('c40c992e-430d-4545-95b1-d63645f8a6fa', $member->fields['status']))
+                        if (isset($member->fields['status']) &&  in_array('6e1fca1c-5ad6-4105-a590-13adeeea0737', $member->fields['status']))
                         {
                             $member->football = 1;
                         }
-                        if (isset($member->fields['status']) &&  in_array('0567ede5-b573-4dda-8866-d988d1456f33', $member->fields['status']))
+                        if (isset($member->fields['status']) &&  in_array('cad65dda-7add-4465-9a3a-744e7378752a', $member->fields['status']))
                         {
                             $member->kvn = 1;
                         }
