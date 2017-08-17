@@ -6,6 +6,7 @@ use App\User;
 use App\Backend;
 use Illuminate\Http\Request;
 use App\Exceptions\User\WrongCredentialsException;
+use App\Exceptions\Site\EmptyCompanyList;
 
 class SiteController extends Controller
 {
@@ -46,7 +47,7 @@ class SiteController extends Controller
             }
             else
             {
-                throw new \Exception('Empty companies list');
+                throw new EmptyCompanyList('Empty companies list');
             }
             
             if ($companyCode)
@@ -359,7 +360,7 @@ class SiteController extends Controller
         $user = app(\App\Services\UserManager::Class)->create([
             'username' => $time,
             'password' => $time,
-            'roleId' => 'Player'
+            'roleId' => 'Participant'
         ]);
 
         $fields['userId'] = $user->id;

@@ -14,6 +14,7 @@ use App\Exceptions\Schema\SchemaNotFoundException;
 use App\Exceptions\Schema\SchemaListGetException;
 use App\Exceptions\User\UserNotFoundException;
 use Illuminate\Http\Exceptions\PostTooLargeException;
+use App\Exceptions\Site\EmptyCompanyList;
 
 class Handler extends ExceptionHandler
 {
@@ -67,6 +68,9 @@ class Handler extends ExceptionHandler
         }        
         if ($exception instanceof PostTooLargeException) {
             return response()->view('errors.posttoolarge');
+        }
+        if ($exception instanceof EmptyCompanyList) {
+            return response()->view('errors.emptycompanylist');
         }
         if ($exception instanceof SchemaListGetException || $exception instanceof RoleGetListException) {
             $request->user = isset($request->user) ? $request->user : new User;
