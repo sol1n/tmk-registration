@@ -244,7 +244,7 @@ class SiteController extends Controller
             unset($fields['subject']['en']);
         }
 
-        if ($fields['subject'] && count($fields['subject']) && (! is_null($fields['subject'][0])))
+        if ($fields['subject'] && count($fields['subject']) && (! (isset($fields['subject'][0]) && is_null($fields['subject'][0]))))
         {
             $lectures = [];
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
