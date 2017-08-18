@@ -3,14 +3,14 @@
   <div class="col-xs-12 col-sm-8">
     <div class="form-group">
       <label for="form-edit-1-subject" class="form-label">Тема доклада</label>
-      <input id="form-edit-1-subject" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.Title }}">
+      <input id="form-edit-1-subject" data-name="subject[]" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.Title }}">
     </div>
   </div>
   <div class="col-xs-12 col-sm-4">
     <div class="form-group">
       <label for="form-edit-1-section" class="form-label">Секция</label>
       <div class="form-select">
-        <select name="section[{{ lecture.id }}]" id="form-edit-1-section">
+        <select name="section[{{ lecture.id }}]" data-name="section[]" id="form-edit-1-section">
           <option value="">Не выбрано</option>
           {% for section in sections %}
             {% if section.id == lecture.fields.Section %}
@@ -29,12 +29,12 @@
   <label for="form-edit-1-subject" class="form-label">
     Тема доклада <span class="c-gray">(англ)</span>
   </label>
-  <input id="form-edit-1-subject" name="subject[en][{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
+  <input id="form-edit-1-subject" name="subject[en][{{ lecture.id }}]" data-name="subject[en][]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
 </div>
 
 <div class="form-group">
   <label for="form-edit-1-theses" class="form-label">Тезисы доклада</label>
-  <textarea name="theses[{{ lecture.id }}]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.fields.Description }}</textarea>
+  <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.fields.Description }}</textarea>
   <div class="form-textarea-counter">
       Максимальное количество символов: <span id="form-edit-1-theses-counter">3000</span>
   </div>
@@ -44,7 +44,7 @@
   <label for="form-edit-1-theses" class="form-label">
     Тезисы доклада <span class="c-gray">(англ)</span>
   </label>
-  <textarea name="theses[en][{{ lecture.id }}]" id="form-edit-{{ lecture.id }}-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-{{ lecture.id }}-theses-counter">{{ lecture.languages.en.Description }}</textarea>
+  <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][]" id="form-edit-{{ lecture.id }}-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="3000" data-text-count data-text-count-block="#form-edit-{{ lecture.id }}-theses-counter">{{ lecture.languages.en.Description }}</textarea>
   <div class="form-textarea-counter">
       Максимальное количество символов: <span id="form-edit-{{ lecture.id }}-theses-counter">3000</span>
   </div>
@@ -57,7 +57,7 @@
       <span class="dotted">Загрузить презентацию</span>
     </span>
 
-    <input type="file" name="presentation[{{ lecture.id }}]" class="js-file-input-field form-file-input-field">
+    <input type="file" name="presentation[{{ lecture.id }}]" data-name="presentation[]" class="js-file-input-field form-file-input-field">
 
     <div class="js-file-input-photo form-file-input-photo"></div>
     <div class="js-file-input-name form-file-input-name"></div>

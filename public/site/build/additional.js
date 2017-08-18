@@ -19,6 +19,8 @@ $(function(){
 		newform.fadeIn();
 		newform.find('textarea, select, input').each(function(){
 			$(this).val('');
+			var name = $(this).data('name');
+			$(this).attr('name', name);
 		});
 		newform.find('.js-file-input').removeClass('is-filled').removeClass('is-image');
 		$(this).hide();
