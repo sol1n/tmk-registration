@@ -244,7 +244,26 @@ class SiteController extends Controller
             unset($fields['subject']['en']);
         }
 
-        if ($fields['subject'] && count($fields['subject']) && (! (isset($fields['subject'][0]) && is_null($fields['subject'][0]))))
+        $emptyList = false;
+        foreach ($fields['subject'] as $k => $value)
+        {
+            if (
+                is_null($fields['subject'][$k]) && 
+                is_null($fields['section'][$k]) && 
+                is_null($fields['theses'][$k])
+            )
+            {
+                unset($fields['subject'][$k]);
+                unset($fields['section'][$k]);
+                unset($fields['theses'][$k]);
+            }
+            else
+            {
+                $emptyList = false;
+            }
+        }
+
+        if ($fields['subject'] && count($fields['subject']) && (!$emptyList))
         {
             $lectures = [];
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
