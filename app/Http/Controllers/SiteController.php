@@ -84,7 +84,7 @@ class SiteController extends Controller
             else
             {
                 $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['where' => json_encode(['team' => $company->id])], 'en');
+                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1, 'where' => json_encode(['team' => $company->id])], 'en');
                 
                 $team = [];
                 foreach ($members as $member)
@@ -298,8 +298,8 @@ class SiteController extends Controller
                 if ($enData['theses'][$k] || $enData['subject'][$k])
                 {
                     $enFields = [
-                        'Title' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null,
-                        'Description' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null
+                        'Title' => isset($enData['subject'][$k]) ? $enData['theses'][$k] : null,
+                        'Description' => isset($enData['theses'][$k]) ? $enData['subject'][$k] : null
                     ];
                     $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $lecture->id, $enFields, 'en');
                 }
