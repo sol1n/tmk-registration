@@ -319,6 +319,17 @@ class SiteController extends Controller
         return true;
     }
 
+    private function getRandomPassword(int $length = 6): string 
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $result = '';
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $result;
+    }
+
     public function NewMember(Backend $backend, Request $request, $company)
     {
         $fields = $request->all();
@@ -351,17 +362,16 @@ class SiteController extends Controller
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
 
-        $time = time();
-        $time = mb_substr($time, 2, mb_strlen($time) - 4);
+        $login = $this->getRandomPassword();
 
         $user = app(\App\Services\UserManager::Class)->create([
-            'username' => $time,
-            'password' => $time,
+            'username' => $login,
+            'password' => $login,
             'roleId' => 'Participant'
         ]);
 
         $fields['userId'] = $user->id;
-        $fields['code'] = $time;
+        $fields['code'] = $login;
 
         $member = app(\App\Services\ObjectManager::Class)->create($schema, $fields);
 
