@@ -298,8 +298,8 @@ class SiteController extends Controller
                 if ($enData['theses'][$k] || $enData['subject'][$k])
                 {
                     $enFields = [
-                        'Title' => isset($enData['subject'][$k]) ? $enData['theses'][$k] : null,
-                        'Description' => isset($enData['theses'][$k]) ? $enData['subject'][$k] : null
+                        'Title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
+                        'Description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null
                     ];
                     $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $lecture->id, $enFields, 'en');
                 }
