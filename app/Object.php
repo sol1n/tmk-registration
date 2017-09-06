@@ -109,7 +109,7 @@ class Object
             $query = http_build_query($query);
         }
         else {
-            $query = http_build_query(['take' => 200]);
+            $query = http_build_query(['take' => -1]);
         }
 
         $client = new Client;
