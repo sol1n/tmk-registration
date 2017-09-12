@@ -275,12 +275,35 @@ class Object
             $count = $this->getRelationObjectCount($field, $schema);
             if ($count > config('objects.ref_count_for_select')) {
                 $objectIds = [];
-                if (is_array($this->fields[$field['name']])) {
-                    $objectIds = $this->fields[$field['name']];
-                } else {
-                    $objectIds = [$this->fields[$field['name']]];
+
+                if (isset($this->fields[$field['name']]) && is_array($this->fields[$field['name']])) 
+                {
+                    foreach ($this->fields[$field['name']] as $related)
+                    {
+                        if (is_object($related))
+                        {
+                            $objectIds[] = $related->id;
+                        }
+                        else
+                        {
+                            $objectIds[] = $related;
+                        }
+                    }
+                } 
+                elseif (isset($this->fields[$field['name']])) 
+                {
+                    if (is_object($this->fields[$field['name']]))
+                    {
+                        $objectIds = [$this->fields[$field['name']]->id];
+                    }
+                    else
+                    {
+                        $objectIds = [$this->fields[$field['name']]];
+                    }
                 }
+
                 $elements = $objectIds ? app(\App\Services\ObjectManager::Class)->search($schema, ['where' => json_encode(['id' => ['$in' => $objectIds]])]) : [];
+
             }
             else {
                 $elements = app(\App\Services\ObjectManager::Class)->all($schema);

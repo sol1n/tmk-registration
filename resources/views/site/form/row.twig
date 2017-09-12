@@ -145,9 +145,9 @@
                     <option value="">Выберите команду</option>
                     {% for one in footballTeams %}
                       {% if one.id == member.fields.footballTeam %}
-                        <option selected value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                        <option selected value="{{ one.id }}">{{ one.fields.title }}</option>
                       {% else %}
-                        <option value="{{ one.id }}">{{ one.fields.teamName }}</option>
+                        <option value="{{ one.id }}">{{ one.fields.title }}</option>
                       {% endif %}
                     {% endfor %}
                     </select>
