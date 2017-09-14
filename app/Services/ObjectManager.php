@@ -89,7 +89,15 @@ class ObjectManager
             return $item->id == $id;
         });
 
-        $object = $list->get($index);
+        if ($index) 
+        { 
+            $object = $list->get($index); 
+        } 
+        else 
+        { 
+            $object = $this->model::get($schema, $id, $this->backend); 
+        } 
+        
         $object->save($fields, $this->backend, $language);
         $list->put($index, $object);
 
