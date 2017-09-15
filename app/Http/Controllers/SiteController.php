@@ -74,7 +74,7 @@ class SiteController extends Controller
             $footballTeams = app(\App\Services\ObjectManager::Class)->all($schema);
 
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-            $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, [], 'en');
+            $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
             
             if (! isset($company))
             {
