@@ -105,7 +105,11 @@
                 <a href="#" title="Редактировать участника" data-member-edit="#member-{{ member.id }}-edit">
                   {% if member.fields.photo %}
                     <div class="members-table-photo">
-                      <img src="/{{ member.fields.photo }}" class="" alt="">
+                      {% if member.preivew is defined %}
+                        <img src="/{{ member.preivew }}" class="" alt="">
+                      {% else %}
+                        <img src="/{{ member.fields.photo }}" class="" alt="">
+                      {% endif %}
                     </div>
                   {% endif %}
                 </a>

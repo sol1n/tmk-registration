@@ -7,6 +7,7 @@ use App\Backend;
 use Illuminate\Http\Request;
 use App\Exceptions\User\WrongCredentialsException;
 use App\Exceptions\Site\EmptyCompanyList;
+use Illuminate\Support\Facades\Storage;
 
 class SiteController extends Controller
 {
@@ -75,6 +76,8 @@ class SiteController extends Controller
 
             $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
             $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
+
+            $storage = Storage::disk('local');
             
             if (! isset($company))
             {
@@ -130,6 +133,15 @@ class SiteController extends Controller
 
                         $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
                         $team[] = $member;
+                    }
+
+                    if (isset($member->fields['photo']))
+                    {
+                        $preview = str_replace('images', 'preview', $member->fields['photo']);
+                        if ($storage->exists($preview))
+                        {
+                            $member->preivew = $preview;
+                        }
                     }
                 } 
             }
@@ -367,7 +379,7 @@ class SiteController extends Controller
         $user = app(\App\Services\UserManager::Class)->create([
             'username' => $login,
             'password' => $login,
-            'roleId' => 'Participant'
+            'roleId' => 'Player'
         ]);
 
         $fields['userId'] = $user->id;
