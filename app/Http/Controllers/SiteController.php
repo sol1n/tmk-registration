@@ -379,7 +379,7 @@ class SiteController extends Controller
         $user = app(\App\Services\UserManager::Class)->create([
             'username' => $login,
             'password' => $login,
-            'roleId' => 'Player'
+            'roleId' => 'Participant'
         ]);
 
         $fields['userId'] = $user->id;
