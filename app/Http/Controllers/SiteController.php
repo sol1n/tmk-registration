@@ -25,9 +25,7 @@ class SiteController extends Controller
         }
         else
         {
-            return view('site/login', [
-            'message' => session('login-error')
-          ]);
+            return view('site/close');
         }
     }
 
@@ -87,7 +85,7 @@ class SiteController extends Controller
             else
             {
                 $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1, 'where' => json_encode(['team' => $company->id])], 'en');
+                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['order' => 'lastName', 'take' => -1, 'where' => json_encode(['team' => $company->id])], 'en');
                 
                 $team = [];
                 foreach ($members as $member)
@@ -146,16 +144,7 @@ class SiteController extends Controller
                 } 
             }
 
-            return view('site/form', [
-                'user' => $user,
-                'company' => $company,
-                'companies' => $userCompanies,
-                'team' => $team,
-                'statuses' => $statuses,
-                'sections' => $sections,
-                'kvnTeams' => $kvnTeams,
-                'footballTeams' => $footballTeams
-            ]);
+            return view('site/close');
         }
     }
 
