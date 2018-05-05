@@ -9,11 +9,16 @@ use App\Exceptions\User\WrongCredentialsException;
 
 class AuthController extends Controller
 {
-    public function ShowAuthForm()
+    public function ShowAuthForm(Backend $backend, Request $request)
     {
-        return view('auth/login', [
-        'message' => session('login-error')
-      ]);
+        if (isset($backend->token))
+        {
+            return redirect('/form/');
+        }
+        else
+        {
+            return view('login');
+        }
     }
 
     public function ProcessLogin(Backend $backend, Request $request)
@@ -21,10 +26,16 @@ class AuthController extends Controller
         try {
             User::login($backend, $request->all());
         } catch (WrongCredentialsException $e) {
-            $request->session()->flash('login-error', 'Wrong сredentials data');
-            return redirect('/' . $backend->code . '/login/');
+            $request->session()->flash('login-error', 'Некорректные логин или пароль');
+            return redirect('/');
         }
 
-        return redirect($backend->code . '/');
+        return redirect('/form/');
+    }
+
+    public function ProcessLogout(Backend $backend)
+    {
+        $backend->logout();
+        return redirect('/');
     }
 }

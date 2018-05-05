@@ -110,8 +110,7 @@ class Object
         $list = new Collection;
 
         if (isset($query['search'])) {
-
-            $searchQuery = ['where' => json_encode($query['search'])];
+            $searchQuery = ['where' => ($query['search'])];
             unset($query['search']);
             $query = array_merge($query, $searchQuery);
         }
@@ -120,16 +119,35 @@ class Object
             $query['order'] = $order;
         }
 
+        if (isset($query['order']) && !is_array($query['order'])) {
+            if (mb_strpos($query['order'], '-') !== false) {
+                $query['order'] = [
+                    str_replace('-', '', $query['order']) => 'desc'
+                ];
+            } else {
+                $query['order'] = [
+                    $query['order'] => 'asc'
+                ];
+            }
+        }
+
+        if (isset($query['where']) && is_string($query['where'])) {
+            $query['where'] = json_decode($query['where']);
+        }
+
+        if (isset($query['include']) && is_string($query['include'])) {
+            $query['include'] = json_decode($query['include']);
+        }
+
         if (!isset($query['take'])) {
             $query['take'] = -1;
         }
 
-        $query = http_build_query($query);
-
         $json = self::jsonRequest([
-            'method' => 'GET',
+            'method' => 'POST',
             'headers' => ['X-Appercode-Session-Token' => $backend->token],
-            'url' => $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : ''),
+            'url' => $backend->url . 'objects/' . $schema->id . '/query',
+            'json' => $query
         ]);
 
         foreach ($json as $rawData) {
@@ -143,20 +161,44 @@ class Object
     {
         $list = new Collection;
 
-        if ($query) {
-            $query = http_build_query($query);
+        if (isset($query['search'])) {
+            $searchQuery = ['where' => ($query['search'])];
+            unset($query['search']);
+            $query = array_merge($query, $searchQuery);
         }
-        else {
-            $query = http_build_query(['take' => 200]);
+
+        if (isset($query['order']) && !is_array($query['order'])) {
+            if (mb_strpos($query['order'], '-') !== false) {
+                $query['order'] = [
+                    str_replace('-', '', $query['order']) => 'desc'
+                ];
+            } else {
+                $query['order'] = [
+                    $query['order'] => 'asc'
+                ];
+            }
+        }
+
+        if (isset($query['where']) && is_string($query['where'])) {
+            $query['where'] = json_decode($query['where']);
+        }
+
+        if (isset($query['include']) && is_string($query['include'])) {
+            $query['include'] = json_decode($query['include']);
+        }
+
+        if (!isset($query['take'])) {
+            $query['take'] = -1;
         }
 
         $headers = ['X-Appercode-Session-Token' => $backend->token];
-        $url = $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : '');
+        $url = $backend->url . 'objects/' . $schema->id . '/query';
 
         $json = self::jsonRequest([
-            'method' => 'GET',
+            'method' => 'POST',
             'headers' => $headers,
             'url' => $url,
+            'json' => $query
         ]);
 
         $tempData = [];
@@ -168,9 +210,10 @@ class Object
         $headers['X-Appercode-Language'] = $language;
 
         $json = self::jsonRequest([
-            'method' => 'GET',
+            'method' => 'POST',
             'headers' => $headers,
             'url' => $url,
+            'json' => $query
         ]);
 
         foreach ($json as $localizedRawData) {

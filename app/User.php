@@ -82,6 +82,9 @@ class User
         if (Cookie::get($backend->code . '-refresh-token')) {
             $this->refreshToken = Cookie::get($backend->code .'-refresh-token');
         }
+        if (Cookie::get($backend->code . '-id')) {
+            $this->id = (int) Cookie::get($backend->code .'-id');
+        }
     }
 
     public function getProfiles(Backend $backend)

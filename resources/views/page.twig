@@ -1,62 +1,37 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!doctype html>
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>{% block pageTitle %}{% endblock %} - {{ settings.title }}</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  {% block headerCss %}
-    {% include "blocks/headerCss.twig" %}
-  {% endblock %}
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="/site/build/style.min.css">
+  <link rel="stylesheet" href="/site/build/additional.css">
+  <meta name="theme-color" content="#006A98">
+  <title>{% block pageTitle %}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="/site/favicon.png">
 </head>
-
 <body>
-  <div id="wrapper">
-    {% block sidebar %}
-      {% include "blocks/sidebar.twig" %}
-    {% endblock %}
 
-    <div id="page-wrapper" class="gray-bg">
-        <nav class="row wrapper border-bottom white-bg page-heading">
-          {% block breadcrumbs %}{% endblock %}
-        </nav>
-      
-      <div class="wrapper wrapper-content">
-        {% block content %}
-          content here
-        {% endblock %}
-
-      </div>
-      
-      {% block footer %}
-        {% include "blocks/footer.twig" %}
-      {% endblock %}
-
-    </div>
-        
+<header class="main-header">
+  {% if autorized %}
+  <div class="wrapper">
+    <p class="main-header-logout">
+      <a href="/logout/">Выйти</a>
+    </p>
   </div>
-  <script src="{{ asset('/assets/js/jquery-2.1.1.js') }}"></script>
-  <script src="{{ asset('/assets/js/bootstrap.min.js') }}"></script>
-  <script src="{{ asset('/assets/js/plugins/metisMenu/jquery.metisMenu.js') }}"></script>
-  <script src="{{ asset('/assets/js/plugins/chosen/chosen.jquery.js') }}"></script>
-  <script src="{{ asset('/assets/js/plugins/slimscroll/jquery.slimscroll.min.js') }}"></script>
-  <script src="{{ asset('/assets/js/plugins/datapicker/bootstrap-datepicker.js') }}"></script>
-  <script src="{{ asset('/assets/js/plugins/summernote/summernote.min.js') }}"></script>
-  <script type="text/javascript">
-    $(function(){
-      $('#collections-list').slimScroll({
-          height: '55vh'
-      });    
-      $('#page-wrapper').slimScroll({
-          height: '100vh'
-      });
-      $('.chosen-select').chosen({width:"100%"});
-      $('[data-html-editor]').summernote({disableResizeEditor: true});
-      $('.note-statusbar').hide();
-      $('[data-datepicker]').datepicker();
+  {% endif %}
+  <a href="/" class="main-header-logo">
+    <img src="/site/images/logo.png" alt="Горизонты">
+  </a>
+</header>
 
-    })
-  </script>
-  {% block additionalJs %}{% endblock %}
+<main>
+  <div class="wrapper m-b-xl">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<script src="/site/build/scripts.min.js"></script>
+<script src="/site/build/additional.js"></script>
 </body>
 </html>

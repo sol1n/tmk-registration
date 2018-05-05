@@ -10,12 +10,12 @@
         title="Скрыть форму" 
         data-member-edit="#member-{{ member.id }}-edit"
       >
-        {{ source('/site/svg/icon-mutiselect-close') }}
+        {{ source('svg/icon-mutiselect-close') }}
       </a>
 
       <div class="form-block-padding">
         <form 
-          action="/form/{{ company.id }}/user/{{ member.id }}/" 
+          action="{{ route('saveMember', {company: companyId, profile: member.id}) }}" 
           method="POST" 
           enctype="multipart/form-data"
         >
@@ -114,7 +114,7 @@
                 <label class="form-label">&nbsp;</label>
                 <div class="js-file-input form-file-input">
                   <span class="icon no-td js-file-input-link form-file-input-link">
-                    {{ source('/site/svg/icon-photo') }}
+                    {{ source('svg/icon-photo') }}
                     {% if member.fields.photo %}
                       <span class="dotted">Изменить фотографию</span>
                     {% else %}
@@ -128,52 +128,8 @@
                   <div class="js-file-input-name form-file-input-name"></div>
 
                   <a href="#" class="js-file-input-del form-file-input-del">
-                    {{ source('/site/svg/icon-list-del') }}
+                    {{ source('svg/icon-list-del') }}
                   </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="{% if member.football %}active{% endif %} member-additional-form js-member-status js-member-status-6e1fca1c-5ad6-4105-a590-13adeeea0737">
-            <div class="row">
-              <div class="col-xs-12 col-sm-12">
-                <div class="form-group">
-                  <label for="form-edit-1-subject" class="form-label">Футбольная команда</label>
-                  <div class="form-select form-select-bold">
-                    <select name="footballTeam">
-                    <option value="">Выберите команду</option>
-                    {% for one in footballTeams %}
-                      {% if one.id == member.fields.footballTeam %}
-                        <option selected value="{{ one.id }}">{{ one.fields.title }}</option>
-                      {% else %}
-                        <option value="{{ one.id }}">{{ one.fields.title }}</option>
-                      {% endif %}
-                    {% endfor %}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="{% if member.kvn %}active{% endif %} member-additional-form js-member-status js-member-status-cad65dda-7add-4465-9a3a-744e7378752a">
-            <div class="row">
-              <div class="col-xs-12 col-sm-12">
-                <div class="form-group">
-                  <label for="form-edit-1-subject" class="form-label">Команда КВН</label>
-                  <div class="form-select form-select-bold">
-                    <select name="KVNTeam">
-                    <option value="">Выберите команду</option>
-                    {% for one in kvnTeams %}
-                      {% if one.id == member.fields.KVNTeam %}
-                        <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
-                      {% else %}
-                        <option value="{{ one.id }}">{{ one.fields.Title }}</option>
-                      {% endif %}
-                    {% endfor %}
-                    </select>
-                  </div>
                 </div>
               </div>
             </div>
@@ -199,10 +155,17 @@
 
           {% if (member.fields.lectures|length) %}
             {% for lecture in member.fields.lectures %}
-              <div class="active member-additional-form js-member-status js-member-status-07e6da63-a4d9-45fd-b181-58272cf40bb4 js-member-status-61f6a888-2690-4b32-b339-6155e50eea17">
+              <div class="
+                active 
+                member-additional-form 
+                js-member-status
+                {% for status in lectureStatuses %}
+                  js-member-status-{{ status }} 
+                {% endfor %}
+                ">
 
                 {%
-                  include 'site/form/lecture' 
+                  include 'form/lecture' 
                   with {
                     'sections': sections,
                     'lecture': lecture
@@ -221,10 +184,17 @@
             {% endfor %}
           {% else %}
 
-            <div class="{% if member.report %}active{% endif %} member-additional-form js-member-status js-member-status-07e6da63-a4d9-45fd-b181-58272cf40bb4 js-member-status-61f6a888-2690-4b32-b339-6155e50eea17">
+            <div class="
+              {% if member.report %}active{% endif %} 
+                member-additional-form 
+                js-member-status 
+                {% for status in lectureStatuses %}
+                  js-member-status-{{ status }} 
+                {% endfor %}
+              ">
 
               {%
-                include 'site/form/lecture' 
+                include 'form/lecture' 
                 with {
                   'sections': sections
                 } only

@@ -6,159 +6,114 @@ use App\User;
 use App\Backend;
 use Illuminate\Http\Request;
 use App\Exceptions\User\WrongCredentialsException;
-use App\Exceptions\Site\EmptyCompanyList;
+use GuzzleHttp\Exception\ClientException;
+
 use Illuminate\Support\Facades\Storage;
+use App\Services\TmkHelper;
 
 class SiteController extends Controller
 {
-    public function ProcessLogout(Backend $backend)
-    {
-        $backend->logout();
-        return redirect('/');
-    }
+    const NEW_USER_ROLE = 'Participant';
+    const LECTURE_STATUSES = ['07e6da63-a4d9-45fd-b181-58272cf40bb4'];
 
-    public function ShowAuthForm(Backend $backend, Request $request)
+    private $helper;
+
+    public function __construct()
     {
-        if (isset($backend->token))
-        {
-            return redirect('/form/');
-        }
-        else
-        {
-            return view('site/close');
-        }
+        $this->middleware(function ($request, $next) {
+            if (!app(Backend::Class)->authorized()) {
+                return redirect()->route('index');
+            }
+
+            $this->helper = new TmkHelper(app(Backend::Class));
+
+            return $next($request);
+        });
     }
 
     public function ShowEditForm(Backend $backend, $companyCode = null)
     {
+        $user = $this->helper->getCurrentUser();
+
+        $companies = $this->helper->checkCompanyAvailability($user, $companyCode);
+
+
+        $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
+        $statuses = app(\App\Services\ObjectManager::Class)->all($schema);
+
+        $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
+        $sections = app(\App\Services\ObjectManager::Class)->all($schema);
+
+        $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
+        $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
+
         
-        if (!isset($backend->token))
+        if (is_null($companyCode))
         {
-            return redirect('/');
+            $company = null;
+            $team = null;
         }
         else
         {
-            $user = app(\App\Services\UserManager::Class)->findWithProfiles(session('tmk-id'));
-
-            if (isset($user->profiles['UserProfiles']['object']->fields['companies']))
-            {
-                $userCompanies = $user->profiles['UserProfiles']['object']->fields['companies'];
-            }
-            else
-            {
-                throw new EmptyCompanyList('Empty companies list');
-            }
+            $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
+            $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, [
+                'order' => 'lastName', 
+                'take' => -1, 
+                'where' => ['team' => $companyCode]
+            ], 'en');
             
-            if ($companyCode)
+            $team = [];
+            foreach ($members as $member)
             {
-                foreach ($userCompanies as $one)
+                if (isset($member->fields['lectures']) && count($member->fields['lectures']))
                 {
-                    if ($one->id == $companyCode)
+                    foreach ($member->fields['lectures'] as $k => $lectureID)
                     {
-                        $company = $one;
-                    }
-                }
-            }
-
-            $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
-            $statuses = app(\App\Services\ObjectManager::Class)->all($schema);
-
-            $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
-            $sections = app(\App\Services\ObjectManager::Class)->all($schema);
-
-            $schema = app(\App\Services\SchemaManager::Class)->find('KVNTeams');
-            $kvnTeams = app(\App\Services\ObjectManager::Class)->all($schema);
-
-            $schema = app(\App\Services\SchemaManager::Class)->find('footballTeam');
-            $footballTeams = app(\App\Services\ObjectManager::Class)->all($schema);
-
-            $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-            $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
-
-            $storage = Storage::disk('local');
-            
-            if (! isset($company))
-            {
-                $company = null;
-                $team = null;
-            }
-            else
-            {
-                $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-                $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['order' => 'lastName', 'take' => -1, 'where' => json_encode(['team' => $company->id])], 'en');
-                
-                $team = [];
-                foreach ($members as $member)
-                {
-                    if (isset($member->fields['lectures']) && count($member->fields['lectures']))
-                    {
-                        foreach ($member->fields['lectures'] as $k => $lectureID)
+                        foreach ($lectures as $lecture)
                         {
-                            foreach ($lectures as $lecture)
+                            if ($lectureID == $lecture->id)
                             {
-                                if ($lectureID == $lecture->id)
-                                {
-                                    $member->fields['lectures'][$k] = $lecture;
-                                }
+                                $member->fields['lectures'][$k] = $lecture;
                             }
                         }
                     }
+                }
 
-                    if (isset($member->fields['team']) && $member->fields['team'] == $company->id)
+                if (isset($member->fields['status']) && count($member->fields['status']))
+                {
+                    $tmp = [];
+                    foreach ($member->fields['status'] as $k => $statusID)
                     {
-                        $tmp = [];
-
+                        if (in_array($statusID, self::LECTURE_STATUSES)) {
+                            $member->report = true;
+                        }
                         foreach ($statuses as $status)
                         {
-                            if (isset($member->fields['status']) && in_array($status->id, $member->fields['status']))
+                            if ($statusID == $status->id)
                             {
                                 $tmp[] = $status->fields['Title'];
                             }
                         }
-                        if (isset($member->fields['status']) &&  (in_array('07e6da63-a4d9-45fd-b181-58272cf40bb4', $member->fields['status']) || in_array('61f6a888-2690-4b32-b339-6155e50eea17', $member->fields['status'])
-                            ))
-                        {
-                            $member->report = 1;
-                        }
-                        if (isset($member->fields['status']) &&  in_array('6e1fca1c-5ad6-4105-a590-13adeeea0737', $member->fields['status']))
-                        {
-                            $member->football = 1;
-                        }
-                        if (isset($member->fields['status']) &&  in_array('cad65dda-7add-4465-9a3a-744e7378752a', $member->fields['status']))
-                        {
-                            $member->kvn = 1;
-                        }
-
-                        $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
-                        $team[] = $member;
                     }
+                    $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
+                }
 
-                    if (isset($member->fields['photo']))
-                    {
-                        $preview = str_replace('images', 'preview', $member->fields['photo']);
-                        if ($storage->exists($preview))
-                        {
-                            $member->preivew = $preview;
-                        }
-                    }
-                } 
-            }
+                $team[] = $member;
 
-            return view('site/close');
-        }
-    }
-
-    public function ProcessLogin(Backend $backend, Request $request)
-    {
-        try {
-            User::login($backend, $request->all());
-        } catch (WrongCredentialsException $e) {
-            $request->session()->flash('login-error', 'Некорректные логин или пароль');
-            return redirect('/');
+            } 
         }
 
-        return redirect('/form/');
+        return view('form', [
+            'lectureStatuses' => self::LECTURE_STATUSES,
+            'members' => $members,
+            'statuses' => $statuses,
+            'sections' => $sections,
+            'companies' => $companies,
+            'companyId' => $companyCode
+        ]);
     }
+
+    
 
     public function ProcessMember(Backend $backend, Request $request, $company, $profile)
     {
@@ -204,33 +159,28 @@ class SiteController extends Controller
         return redirect('/form/' . $company . '/');
     }
 
-    public function RemoveMember(Backend $backend, Request $request, $company, $profile)
+    public function RemoveMember(Backend $backend, Request $request, $companyId, $profileId)
     {
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-        $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
+        $member = app(\App\Services\ObjectManager::Class)->find($schema, $profileId);
 
-        $fields = $member->fields;
-        
-
-        foreach ($schema->fields as $field)
-        {
-            $index = $field['name'];
-            if ($field['multiple'])
-            {
-                $fields[$index] = isset($fields[$index]) ? $fields[$index] : [];
+        if ($member) {
+            $userId = $member->fields['userId'] ?? null;
+            if (! is_null($userId)) {
+                app(\App\Services\UserManager::Class)->delete($userId);
             }
-            else
-            {
-                $fields[$index] = isset($fields[$index]) ? $fields[$index] : null;
+            if (isset($member->fields['lectures']) and is_array($member->fields['lectures'])) {
+                foreach ($member->fields['lectures'] as $lectureId) {
+                    $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
+                    app(\App\Services\ObjectManager::Class)->delete($schema, $lectureId);
+                }
             }
+            $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
+            app(\App\Services\ObjectManager::Class)->delete($schema, $member->id);
         }
 
-        $fields['team'] = "00000000-0000-0000-0000-000000000000";
-
-        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $fields);
-
-        return redirect('/form/' . $company . '/');
+        return redirect()->route('company', ['company' => $companyId]);
     }
 
     private function prepareLectures(array &$fields)
@@ -320,22 +270,10 @@ class SiteController extends Controller
         return true;
     }
 
-    private function getRandomPassword(int $length = 6): string 
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $charactersLength = strlen($characters);
-        $result = '';
-        for ($i = 0; $i < $length; $i++) {
-            $result .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $result;
-    }
-
-    public function NewMember(Backend $backend, Request $request, $company)
+    public function NewMember(Backend $backend, Request $request, $companyId)
     {
         $fields = $request->all();
-        $fields['email'] = '';
-        $fields['team'] = $company;
+        $fields['team'] = $companyId;
         unset($fields['_token']);
 
         $this->prepareLectures($fields);
@@ -351,25 +289,25 @@ class SiteController extends Controller
             }
         }
 
-        if ($request->file('photo'))
-        {
-            $path = $request->photo->store('images');
-            $fields['photo'] = $path;
-        }
-        else
-        {
-            $fields['photo'] = null;
+        if ($request->file('photo')) {
+            $fields['photoFileId'] = $this->helper->uploadFile($request->file('photo'));
         }
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
 
-        $login = $this->getRandomPassword();
-
-        $user = app(\App\Services\UserManager::Class)->create([
-            'username' => $login,
-            'password' => $login,
-            'roleId' => 'Participant'
-        ]);
+        do {
+            $duplicate = false;
+            $login = $this->helper->getRandomPassword();
+            try {
+                $user = app(\App\Services\UserManager::Class)->create([
+                    'username' => $login,
+                    'password' => $login,
+                    'roleId' => self::NEW_USER_ROLE
+                ]);
+            } catch(ClientException $e) {
+                $duplicate = true;
+            }
+        } while($duplicate);
 
         $fields['userId'] = $user->id;
         $fields['code'] = $login;
@@ -381,43 +319,6 @@ class SiteController extends Controller
             app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
         }
 
-        return redirect('/form/' . $company . '/');
-    }
-
-
-    public function ProcessForm(Backend $backend, Request $request, $companyCode)
-    {
-        $user = app(\App\Services\UserManager::Class)->findWithProfiles(session('tmk-id'));
-        if (isset($user->profiles['UserProfiles']['object']->fields['companies']))
-        {
-            $userCompanies = $user->profiles['UserProfiles']['object']->fields['companies'];
-        }
-        else
-        {
-            throw new Exception('Empty companies list');
-        }
-        
-        if ($companyCode)
-        {
-            foreach ($userCompanies as $one)
-            {
-                if ($one->id == $companyCode)
-                {
-                    $company = $one;
-                }
-            }
-        }
-
-        if (! isset($company))
-        {
-            throw new Exception('No company provided');
-        }
-
-        $fields = $request->only(['DefaultFootballTeam', 'DefaultKVNTeam']);
-        $fields['Title'] = $company->fields['Title'];
-
-        app(\App\Services\ObjectManager::Class)->save($company->schema, $company->id, $fields);
-
-        return redirect('/form/' . $company->id . '/');
+        return redirect()->route('company', ['company' => $companyId]);
     }
 }

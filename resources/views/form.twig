@@ -1,4 +1,4 @@
-{% extends "site/page.twig" %}
+{% extends "page.twig" %}
 
 {% block pageTitle %}Редактирование участников{% endblock %}
 
@@ -12,11 +12,11 @@
       <div class="form-select form-select-bold">
         <select name="company" id="form-company-name">
           <option value="">Выберите компанию</option>
-          {% for one in companies %}
-            {% if one.id == company.id %}
-              <option selected value="/form/{{ one.id }}/">{{ one.fields.Title }}</option>
+          {% for id, company in companies %}
+            {% if id == companyId %}
+              <option selected value="/form/{{ id }}/">{{ company.Title }}</option>
             {% else %}
-              <option value="/form/{{ one.id }}/">{{ one.fields.Title }}</option>
+              <option value="/form/{{ id }}/">{{ company.Title }}</option>
             {% endif %}
           {% endfor %}
         </select>
@@ -24,63 +24,9 @@
     </div>
   </div>
 
-  {% if company %}
-    <div class="block-title m-b-xs">Команды</div>
-    <div class="block-subtitle m-b-md">
-      Команды КВН и футбола, назначаемые по умолчанию для новых участников компании
-    </div>
-    <form action="/form/{{ company.id }}/" method="POST" class="form-block m-b-lg" enctype="multipart/form-data">
-      {{ csrf_field() }}
-      <div class="form-block-padding">
-        <div class="row">
+  {% if companyId %}
 
-          <div class="col-xs-12 col-sm-4">
-            <div class="form-group">
-              <label class="form-label" for="form-football-team-name">
-                  Футбольная команда
-              </label>    
-              <div class="form-select form-select-bold">
-                <select name="DefaultFootballTeam">
-                <option value="">Выберите команду</option>
-                {% for one in footballTeams %}
-                  {% if one.id == company.fields.DefaultFootballTeam %}
-                      <option selected value="{{ one.id }}">{{ one.fields.title }}</option>
-                  {% else %}
-                      <option value="{{ one.id }}">{{ one.fields.title }}</option>
-                  {% endif %}
-                {% endfor %}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-xs-12 col-sm-4">
-              <div class="form-group">
-                  <label class="form-label" for="form-kvn-team-name">Команда КВН</label>
-                  <div class="form-select form-select-bold">
-                    <select name="DefaultKVNTeam">
-                    <option value="">Выберите команду</option>
-                    {% for one in kvnTeams %}
-                        {% if one.id == company.fields.DefaultKVNTeam %}
-                            <option selected value="{{ one.id }}">{{ one.fields.Title }}</option>
-                        {% else %}
-                            <option value="{{ one.id }}">{{ one.fields.Title }}</option>
-                        {% endif %}
-                    {% endfor %}
-                    </select>
-                  </div>
-              </div>
-          </div>
-
-          <div class="col-xs-12 col-sm-4">
-              <label class="form-label">&nbsp;</label>
-              <button type="submit" class="button button-orange-hollow button-block">Сохранить</button>
-          </div>
-        </div>
-      </div>
-    </form>
-
-    {% if team|length %}
+    {% if members|length %}
       <div class="block-title">Участники</div>
       <div class="form-block m-b-lg">
         <table class="members-table">
@@ -94,22 +40,18 @@
             <th class="members-table-cell">Презентация</th>
             <th class="members-table-cell">&nbsp;</th>
           </tr>
-          {% for member in team %}
+          {% for member in members %}
             <tr class="members-table-row">
               <td class="members-table-cell members-table-cell-arrow members-table-cell-link">
                 <a href="#" title="Редактировать участника" data-member-edit="#member-{{ member.id }}-edit">
-                  {{ source('/site/svg/icon-list-arrow-right') }}
+                  {{ source('svg/icon-list-arrow-right') }}
                 </a>
               </td>
               <td class="members-table-cell members-table-cell-link">
                 <a href="#" title="Редактировать участника" data-member-edit="#member-{{ member.id }}-edit">
-                  {% if member.fields.photo %}
+                  {% if member.fields.photoFileId %}
                     <div class="members-table-photo">
-                      {% if member.preivew is defined %}
-                        <img src="/{{ member.preivew }}" class="" alt="">
-                      {% else %}
-                        <img src="/{{ member.fields.photo }}" class="" alt="">
-                      {% endif %}
+                      <img src="{{ backend.url }}images/{{ member.fields.photoFileId }}/download/photo-{{ member.id }}.jpg?width=50&height=50" class="" alt="">
                     </div>
                   {% endif %}
                 </a>
@@ -139,27 +81,26 @@
               <td class="members-table-cell text-center">
                 {% if member.fields.lectures[0] %}
                   <a target="_blank" href="/{{ member.fields.lectures[0].fields.Presentation }}" title="Скачать презентацию" class="members-table-presentation-link">
-                    {{ source('/site/svg/icon-presentation') }}
+                    {{ source('svg/icon-presentation') }}
                   </a>
                 {% endif %}
               </td>
 
               <td class="members-table-cell members-table-del">
-                <a href="/form/{{ company.id }}/user/{{ member.id }}/remove" class="members-table-del-link" data-action-confirm="Вы действительно хотите удалить этого участника?">
-                  {{ source('/site/svg/icon-trash') }}
+                <a href="{{ route('removeMember', {company: companyId, profile: member.id}) }}" class="members-table-del-link" data-action-confirm="Вы действительно хотите удалить этого участника?">
+                  {{ source('svg/icon-trash') }}
                 </a>
               </td>
             </tr>
             
             {%
-              include 'site/form/row' 
+              include 'form/row' 
               with {
-                'company': company,
+                'companyId': companyId,
                 'member': member,
                 'statuses': statuses,
-                'footballTeams': footballTeams,
-                'kvnTeams': kvnTeams,
-                'sections': sections
+                'sections': sections,
+                'lectureStatuses': lectureStatuses
               } only
             %}
 
@@ -176,13 +117,12 @@
     </div>
 
     {%
-      include 'site/form/newmember' 
+      include 'form/newmember' 
       with {
-        'company': company,
+        'companyId': companyId,
         'statuses': statuses,
-        'footballTeams': footballTeams,
-        'kvnTeams': kvnTeams,
-        'sections': sections
+        'sections': sections,
+        'lectureStatuses': lectureStatuses
       } only
     %}
   {% endif %}
