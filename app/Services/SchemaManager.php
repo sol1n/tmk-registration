@@ -25,7 +25,7 @@ class SchemaManager
     public function fieldTypes(): array
     {
         $result = [
-            'basic' => ['Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'String', 'Text', 'Uuid', 'Json'],
+            'basic' => ['String', 'Integer', 'Double', 'Money', 'DateTime', 'Boolean', 'Text', 'Uuid', 'Json'],
             'refs' => ['ref Users', 'ref Files']
         ];
 

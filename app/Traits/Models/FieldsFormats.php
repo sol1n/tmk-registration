@@ -4,39 +4,33 @@ namespace App\Traits\Models;
 
 use App\Schema;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cookie;
 
 trait FieldsFormats
 {
     private static function formatStringField($data, $field)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if ($v)
-                    {
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if ($v) {
                         $data[$k] = (String)$v;
-                    }
-                    else
-                    {
+                        $data[$k] = $data[$k] == '<p><br></p>' ? '' : $data[$k];
+                    } else {
                         unset($data[$k]);
                     }
                 }
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
+                $data = null;
             }
-            else
-            {
-                $data = [];
-            }
-        }
-        else
-        {
-            if ($data)
-            {
+        } else {
+            if ($data) {
                 $data = (String)$data;
-            }
-            else{
+                $data = $data == '<p><br></p>' ? '' : $data;
+            } else {
                 $data = null;
             }
         }
@@ -46,77 +40,57 @@ trait FieldsFormats
 
     private static function formatJsonField($data, $field)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if (!$v)
-                    {
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if (!$v) {
                         unset($data[$k]);
-                    }
-                    else{
-                        if (is_array($v))
-                        {
+                    } else {
+                        if (is_array($v)) {
                             $data[$k] = json_encode($v, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                         }
                     }
                 }
-            }
-            else
-            {
-                $data = [];
-            }
-        }
-        else
-        {
-            if (!$data)
-            {
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
                 $data = null;
             }
-            else
-            {
-                if (is_array($data))
-                {
+        } else {
+            if (!$data) {
+                $data = null;
+            } else {
+                if (is_array($data)) {
                     $data = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                 }
             }
         }
 
         return $data;
-    }    
+    }
 
     private static function formatIntegerField($data, $field)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if ($v)
-                    {
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if ($v) {
                         $data[$k] = (Integer)$v;
-                    }
-                    else
-                    {
+                    } else {
                         unset($data[$k]);
                     }
-                }   
+                }
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
+                $data = null;
             }
-            else
-            {
-                $data = [];
-            }
-        }
-        else
-        {
-            if (is_numeric($data))
-            {
+        } else {
+            if (is_numeric($data)) {
                 $data = (Integer)$data;
-            }
-            else{
+            } else {
                 $data = null;
             }
         }
@@ -126,107 +100,88 @@ trait FieldsFormats
 
     private static function formatFloatField($data, $field)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if ($v)
-                    {
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if ($v) {
                         $data[$k] = (Float)$v;
-                    }
-                    else
-                    {
+                    } else {
                         unset($data[$k]);
                     }
                 }
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
+                $data = null;
             }
-            else{
-                $data = [];
-            }
-        }
-        else
-        {
-            if ($data)
-            {
+        } else {
+            if ($data) {
                 $data = (Float)$data;
-            }
-            else{
+            } else {
                 $data = null;
             }
         }
-
         return $data;
     }
 
-    private static function formatDateTimeField($data, $field)
+    private static function formatDateTimeField($data, $field, Schema $schema)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if ($v)
-                    {
-                        $date = new Carbon($v);
-                        $data[$k] = $date->toAtomString();
-                    }
-                    else
-                    {
+        $timezone = $schema->getTimezoneForField($field['name']);
+        $convert = function ($data) use($timezone) {
+            $date = new Carbon($data, $timezone);
+            if ($timezone != 'UTC') {
+                $date->setTimezone('UTC');
+            }
+            return $date->toAtomString();
+        };
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if ($v) {
+                        $data[$k] = $convert($v);
+                    } else {
                         unset($data[$k]);
                     }
                 }
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
+                $data = null;
             }
-            else{
-                $data = [];
-            }
-        }
-        else
-        {
-            if ($data)
-            {
-                $date = new Carbon($data);
-                $data = $date->toAtomString();
-            }
-            else{
+        } else {
+            if ($data) {
+//                $date = new Carbon($data, $timezone);
+                $data = $convert($data);// $date->toAtomString();
+            } else {
                 $data = null;
             }
         }
-
         return $data;
     }
 
     private static function formatBooleanField($data, $field)
     {
-        if ($field['multiple'])
-        {
-            if ($data)
-            {
-                foreach ($data as $k => $v)
-                {
-                    if ($v)
-                    {
+        if ($field['multiple']) {
+            if ($data) {
+                foreach ($data as $k => $v) {
+                    if ($v) {
                         $data[$k] = is_bool($data[$k]) ? $data[$k] : $data[$k] == 'on';
-                    }
-                    else
-                    {
+                    } else {
                         unset($data[$k]);
                     }
                 }
+                if (empty($data)) {
+                    $data = null;
+                }
+            } else {
+                $data = null;
             }
-            else{
-                $data = [];
-            }
-        }
-        else
-        {
-            if (is_bool($data) || is_string($data))
-            {
+        } else {
+            if (is_bool($data) || is_string($data)) {
                 $data = is_bool($data) ? $data : $data == 'on';
-            }
-            else{
+            } else {
                 $data = null;
             }
         }
@@ -234,9 +189,9 @@ trait FieldsFormats
         return $data;
     }
 
-    private static function prepareRawData($data, Schema $schema): array
+    private static function prepareRawData($data, Schema $schema, $keepNull = true): array
     {
-        $systemFields = ['id', 'createdAt', 'updatedAt', 'ownerId'];
+        $systemFields = ['id', 'createdAt', 'ownerId'];
         foreach ($systemFields as $field) {
             if (array_key_exists($field, $data)) {
                 unset($data[$field]);
@@ -244,8 +199,7 @@ trait FieldsFormats
         }
 
         foreach ($schema->fields as $field) {
-            if (isset($data[$field['name']]))
-            {
+            if (isset($data[$field['name']])) {
                 switch ($field['type']) {
                     case 'String':
                     case 'Uuid':
@@ -254,21 +208,15 @@ trait FieldsFormats
                         break;
                     case 'Json':
                         $data[$field['name']] = self::formatJsonField($data[$field['name']], $field);
-                        break;                   
+                        break;
                     case 'DateTime':
-                        $data[$field['name']] = self::formatDateTimeField($data[$field['name']], $field);
-                        break;              
+                        $data[$field['name']] = self::formatDateTimeField($data[$field['name']], $field, $schema);
+                        break;
                     case 'Integer':
                         $data[$field['name']] = self::formatIntegerField($data[$field['name']], $field);
-                        break;                
+                        break;
                     case 'Boolean':
-                        if (isset($data[$field['name']]))
-                        {
                             $data[$field['name']] = self::formatBooleanField($data[$field['name']], $field);
-                        }
-                        else{
-                            $data[$field['name']] = false;
-                        }
                         break;
                     case 'Double':
                     case 'Money':
@@ -277,14 +225,25 @@ trait FieldsFormats
                     default:
                         break;
                 }
+                if ($field['multiple'] and !is_null($data[$field['name']]) and !is_array($data[$field['name']])) {
+                    $data[$field['name']] = [$data[$field['name']]];
+                }
             }
+            else {
+                switch ($field['type']) {
+                    case 'Boolean':
+                        $data[$field['name']] = false;
+                    break;
+                }
+            }
+
         }
 
-        foreach ($data as $key => $value)
-        {
-            if (is_null($value))
-            {
-                unset($data[$key]);
+        if (!$keepNull) {
+            foreach ($data as $key => $value) {
+                if (is_null($value)) {
+                    unset($data[$key]);
+                }
             }
         }
 

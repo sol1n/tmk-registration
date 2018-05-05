@@ -9,9 +9,12 @@ use App\Helpers\Breadcrumb;
 use App\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 
 class FileManager
 {
@@ -22,14 +25,11 @@ class FileManager
 
     public function __construct()
     {
-//        $user = new User();
-//        $this->token = $user->token();
         $this->backend = app(Backend::Class);
     }
 
     public function fetchCollection(){
         $files = $this->getCollectionFromCache();
-//        $files = null;
         if (is_null($files)) {
             $files = File::tree($this->backend);
             $this->saveCollectionToCache($files);
@@ -107,7 +107,9 @@ class FileManager
 
     private function getCacheTag(): String
     {
-        return app(Backend::Class)->code . '-'. static::CACHE_ID;
+        $backend = app(Backend::Class);
+        $userId = request()->session()->get($backend->code.'-id');
+        return $backend->code . '-' . static::CACHE_ID . '-' . $userId;
     }
 
 
@@ -129,11 +131,11 @@ class FileManager
         }
     }
 
-    public function search($query)
+    public function search($query, $folder)
     {
         $result = new Collection();
         $files = $this->all();
-        $result = $this->doSearch($files, $query);
+        $result = $this->doSearch($files, $query, $folder);
         return $result;
     }
 
@@ -144,21 +146,30 @@ class FileManager
     }
 
     /**
-     * @param $data
+     * @param Collection $data
      * @param $query
      * @return Collection
      */
-    private function doSearch($data, $query) {
+    private function doSearch($data, $query, $folder) {
         $result = new Collection();
-//        $files = $this->all();
-        foreach ($data as $file) {
+
+        $dfs = function($data, $file, $query, $folder) use(&$dfs) {
+            $result = [];
             /**
              * @var File $file
              */
-            if (str_contains($file->name, $query) or str_contains($file->id, $query)){
-                $result->push($this->extractBaseFields($file));
+            if (str_contains($file->name, $query) or str_contains($file->id, $query) and $file->id != $folder){
+                $result[] = $this->extractBaseFields($file);
             }
-        }
+            
+            foreach ($file->children as $child) {
+               $result = array_merge($result, $dfs($data, $data->get($child),$query, $folder));
+            }
+            return $result;
+        };
+
+        $result = collect($dfs($data, $data->get($folder), $query,$folder));
+
         return $result;
     }
 
@@ -195,9 +206,10 @@ class FileManager
         $props = [
             'parentId' => $parentId,
             'name' => $fileProperties['name'],
+            'shareStatus' => isset($fileProperties['shareStatus']) ? $fileProperties['shareStatus'] : File::STATUS_LOCAL,
             'isFile' => true,
             'fileType' =>  'file',
-            'length' => $fileProperties['size']
+            'length' => $fileProperties['size'],
         ];
         $file = File::createFile($props, $this->backend);
         $file->length = $fileProperties['size'];
@@ -214,7 +226,7 @@ class FileManager
         return $result;
     }
 
-    public function uploadFile(String $fileId, UploadedFile $file){
+    public function uploadFile(String $fileId, SymfonyUploadedFile $file){
 
         $multipart = [
                 [
@@ -302,7 +314,6 @@ class FileManager
          */
         $file = $files->get($id);
         $fileRights = $file->rights['total'];
-        //dd($rights);
         foreach ($rights as $rightName => $rightValue){
             if (!isset($fileRights[$rightName])) {
                 $fileRights[$rightName] = $rightValue;
@@ -316,7 +327,7 @@ class FileManager
         $file->rights['total'] = $fileRights;
         $files->put($id, $file);
         foreach ($file->children as $child){
-            $this->updateRights($files, $child, $rights);
+            $this->updateRights($files, $child, $rights, $deletingRights);
         }
     }
 
@@ -391,5 +402,28 @@ class FileManager
             return ['fileResult' => $file->getFile($this->backend), 'file' => $file];
         }
         return ['fileResult' => null, 'file' => $file];
+    }
+
+    public function resize($id)
+    {
+        $response = File::resize($this->backend, $id);
+        return $response? true : false;
+    }
+
+    public function count() {
+        return $this->all()->count();
+    }
+
+    public function getLocale() {
+        $locale = __('file');
+        $locale = array_merge($locale, [
+            'edit' => __('common.edit'),
+            'delete' => __('common.delete'),
+            'actions' => __('common.actions'),
+            'created at' => __('common.created at'),
+            'restore' => __('common.restore'),
+            'search' => __('common.search'),
+        ]);
+        return $locale;
     }
 }

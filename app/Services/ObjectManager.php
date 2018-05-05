@@ -5,11 +5,13 @@ namespace App\Services;
 use App\Backend;
 use App\Object;
 use App\Schema;
+use App\Traits\Models\SchemaSearch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class ObjectManager
 {
+
     private $backend;
     private $lists;
 
@@ -28,7 +30,11 @@ class ObjectManager
         {
             if (! $objects = $this->getFromCache($schema)) 
             {
-                $objects = $this->model::list($schema, $this->backend, $query);
+                try {
+                    $objects = $this->model::list($schema, $this->backend, $query);
+                } catch (\Exception $e) {
+                    $objects = collect([]);
+                }
                 $this->saveToCache($schema, $objects);
             }
 
@@ -60,19 +66,45 @@ class ObjectManager
 
     public function find(Schema $schema, $id): Object
     {
-        $this->initList($schema);
-        $object = $this->lists->get($schema->id)->where('id', $id)->first();
-        if (! is_null($object)) {
-            return $object;
-        } else {
-            return $this->model::get($schema, $id, $this->backend);
+        try {
+            $this->initList($schema);
+            $object = $this->lists->get($schema->id)->where('id', $id)->first();
+            if (! is_null($object)) {
+                return $object;
+            }
+        } catch (\Exception $e) {
+
         }
+        
+        return $this->model::get($schema, $id, $this->backend);
     }
 
     public function all(Schema $schema, $query = []): Collection
     {
         $this->initList($schema, $query);
         return $this->lists->get($schema->id);
+    }
+
+    public function allByPage(Schema $schema, $query = [])
+    {
+        $params = [];
+        if (isset($query['page'])) {
+            $params['take'] = config('objects.objects_per_page');
+            $params['skip'] = ($query['page'] - 1) * config('objects.objects_per_page');
+        }
+        if (isset($query['search'])) {
+            $params['search'] = $query['search'];
+        }
+
+        if (isset($query['order'])) {
+            $params['order'] = $query['order'];
+        }
+
+        $list = $this->model::list($schema, $this->backend, $params);
+        foreach ($list as $key => $item) {
+            $list[$key] = $item;
+        }
+        return $list;
     }
 
     public function allWithLang(Schema $schema, $query = [], $language): Collection
@@ -89,14 +121,32 @@ class ObjectManager
             return $item->id == $id;
         });
 
-        if ($index) 
-        { 
-            $object = $list->get($index); 
-        } 
-        else 
-        { 
-            $object = $this->model::get($schema, $id, $this->backend); 
-        } 
+        $findField = function ($name) use ($schema) {
+            $result = [];
+            foreach ($schema->fields as $field) {
+                if ($field['name'] == $name) {
+                    $result = $field;
+                    break;
+                }
+            }
+            return $result;
+        };
+
+        foreach ($fields as $key => $field) {
+            $schemField = $findField($key);
+            if (is_null($field)) {
+                $fields[$key] = isset($schemField['multiple']) && $schemField['multiple'] ? [] : null;
+            }
+        }
+
+        if ($index)
+        {
+            $object = $list->get($index);
+        }
+        else
+        {
+            $object = $this->model::get($schema, $id, $this->backend);
+        }
         
         $object->save($fields, $this->backend, $language);
         $list->put($index, $object);
@@ -110,10 +160,10 @@ class ObjectManager
     public function create(Schema $schema, array $fields): Object
     {
         $object = $this->model::create($schema, $fields, $this->backend);
-        $this->initList($schema);
-        $this->lists->get($schema->id)->push($object);
+        //$this->initList($schema);
+        //$this->lists->get($schema->id)->push($object);
 
-        $this->saveToCache($schema, $this->lists->get($schema->id));
+        //$this->saveToCache($schema, $this->lists->get($schema->id));
 
         return $object;
     }
@@ -133,8 +183,8 @@ class ObjectManager
         return $object;
     }
 
-    public function count(Schema $schema) {
-        return Object::count($schema, $this->backend);
+    public function count(Schema $schema, $query = []) {
+        return Object::count($schema, $this->backend, $query);
     }
 
     public function search(Schema $schema, $query = []) {
@@ -143,5 +193,13 @@ class ObjectManager
             $result = Object::list($schema, $this->backend, $query);
         }
         return $result;
+    }
+
+    public function makeSearchQuery($schema) {
+        $searchQuery = Object::makeSearchQuery($schema);
+//        if ($searchQuery) {
+//            $searchQuery = ['where' => json_encode($searchQuery)];
+//        }
+        return $searchQuery;
     }
 }

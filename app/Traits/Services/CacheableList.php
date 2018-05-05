@@ -34,22 +34,29 @@ trait CacheableList
 
     private function initList()
     {
-        if (! $this->list = $this->getFromCache()) {
-            $this->list = $this->model::list($this->backend);
-            $this->saveToCache($this->list);
+        $cache = $this->getFromCache();
+        if (is_null($cache) && $this->backend->authorized()) {
+            $cache = $this->model::list($this->backend);
+            $this->saveToCache($cache);
         }
+        $this->list = $cache;
     }
 
     public function find(String $id)
     {
-        foreach ($this->list as $element) {
-            if ($element->id == $id) {
-                return $element;
+        if ($this->list) {
+            foreach ($this->list as $element) {
+                if ($element->id == $id) {
+                    return $element;
+                }
             }
         }
+        
         $element = $this->model::get($id, $this->backend);
-        $this->list->push($element);
-        $this->saveToCache($this->list);
+        if ($this->list) {
+            $this->list->push($element);
+            $this->saveToCache($this->list);
+        }
 
         return $element;
     }

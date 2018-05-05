@@ -21,31 +21,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer(['dashboard', 'schema.*', 'object.*', 'errors.*', 'settings.*', 'users.*', 'roles.*', 'files.*'], function($view){
-            $view->with('schemas', app(SchemaManager::class)->all());
-            $view->with('settings', app(Settings::class));
-        });
-
-        View::composer(['site.form'], function($view){
-            $backend = app(Backend::Class);
-            $view->with('autorized', session($backend->code . '-session-token'));
-        });
+        // View::composer(['site.form'], function($view){
+        //     $backend = app(Backend::Class);
+        //     $view->with('autorized', session($backend->code . '-session-token'));
+        // });
 
         View::composer('*', function($view){
             $view->with('backend', app(Backend::Class));
-        });
-
-        Validator::extend('rights_unique', function ($attribute, $value, $parameters, $validator) {
-            $result = true;
-            $ids = [];
-            foreach ($value as $item) {
-                if (in_array($item['id'], $ids)) {
-                    $result = false;
-                    break;
-                }
-                $ids[] = $item['id'];
-            }
-            return $result;
         });
     }
 

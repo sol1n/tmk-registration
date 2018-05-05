@@ -3,25 +3,27 @@
 namespace App;
 
 use App\Backend;
+use App\Services\FileManager;
 use App\Services\ObjectManager;
 use App\Services\UserManager;
+use App\Traits\Models\SchemaSearch;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Exception\ServerException;
-use GuzzleHttp\Exception\ClientException;
 use App\Exceptions\Object\ObjectSaveException;
 use App\Exceptions\Object\ObjectCreateException;
 use App\Exceptions\Object\ObjectNotFoundException;
+use App\Exceptions\User\UserNotFoundException;
 use App\Traits\Controllers\ModelActions;
 use App\Traits\Models\FieldsFormats;
+use Mockery\Exception;
 use Monolog\Handler\SyslogHandler;
+use App\Traits\Models\AppercodeRequest;
+use PhpParser\Node\Stmt\Catch_;
+
 
 class Object
 {
-    use ModelActions, FieldsFormats;
+    use ModelActions, FieldsFormats, SchemaSearch, AppercodeRequest;
 
     public $fields;
     public $schema;
@@ -33,7 +35,7 @@ class Object
 
     public function save($data, Backend $backend, $language = null): Object
     {
-        $this->fields = static::prepareRawData($data, $this->schema);
+        $this->fields = static::prepareRawData($data, $this->schema, true);
 
         $headers = [
             'X-Appercode-Session-Token' => $backend->token
@@ -44,81 +46,91 @@ class Object
             $headers['X-Appercode-Language'] = $language;
         }
 
-        $client = new Client;
-        try {
-            $r = $client->put($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, [
-                'headers' => $headers, 
-                'json' => $this->fields
-            ]);
-        } catch (ServerException $e) {
-            throw new ObjectSaveException;
-        }
+        self::request([
+            'method' => 'PUT',
+            'headers' => $headers,
+            'json' => $this->fields,
+            'url' => $backend->url . 'objects/' . $this->schema->id . '/' . $this->id,
+        ]);
+
+        $newTime = $this->requestUpdatedAt($backend);
+        $this->updatedAt = new Carbon($newTime);
 
         return $this;
     }
 
+    public function requestUpdatedAt(Backend $backend): String
+    {
+        $query = http_build_query(['include' => json_encode(['updatedAt'])]);
+        $json = self::jsonRequest([
+            'method' => 'GET',
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $this->schema->id . '/' . $this->id . '?' . $query,
+        ]);
+
+        return $json['updatedAt'] ?? '';
+    }
+
     public static function get(Schema $schema, $id, Backend $backend): Object
     {
-        $client = new Client;
-        try {
-            $r = $client->get($backend->url . 'objects/' . $schema->id . '/' . $id, ['headers' => [
-                'X-Appercode-Session-Token' => $backend->token
-            ]]);
-        } catch (ClientException $e) {
-            throw new ObjectNotFoundException;
-        }
-
-        $json = json_decode($r->getBody()->getContents(), 1);
+        $json = self::jsonRequest([
+            'method' => 'GET',
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $schema->id . '/' . $id,
+        ]);
 
         return static::build($schema, $json);
     }
 
     public static function create(Schema $schema, $fields, Backend $backend): Object
     {
-        $fields = self::prepareRawData($fields, $schema);
-
-        $client = new Client;
-        try {
-            $r = $client->post($backend->url . 'objects/' . $schema->id, ['headers' => [
-                'X-Appercode-Session-Token' => $backend->token
-            ], 'json' => $fields]);
-        } catch (ServerException $e) {
-            throw new ObjectCreateException;
-        }
-
-        $json = json_decode($r->getBody()->getContents(), 1);
+        $json = self::jsonRequest([
+            'method' => 'POST',
+            'json' => self::prepareRawData($fields, $schema),
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $schema->id,
+        ]);
 
         return static::build($schema, $json);
     }
 
     public function delete(Backend $backend): Object
     {
-        $client = new Client;
-        $r = $client->delete($backend->url . 'objects/' . $this->schema->id . '/' . $this->id, ['headers' => [
-            'X-Appercode-Session-Token' => $backend->token
-        ]]);
+        self::request([
+            'method' => 'DELETE',
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $this->schema->id . '/' . $this->id,
+        ]);
 
         return $this;
     }
 
-    public static function list(Schema $schema, Backend $backend, $query = null): Collection
+    public static function list(Schema $schema, Backend $backend, $query = [], $order = ''): Collection
     {
         $list = new Collection;
 
-        if ($query) {
-            $query = http_build_query($query);
-        }
-        else {
-            $query = http_build_query(['take' => -1]);
+        if (isset($query['search'])) {
+
+            $searchQuery = ['where' => json_encode($query['search'])];
+            unset($query['search']);
+            $query = array_merge($query, $searchQuery);
         }
 
-        $client = new Client;
-        $url = $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : '');
-        $r = $client->get($url, ['headers' => [
-            'X-Appercode-Session-Token' => $backend->token
-        ]]);
+        if ($order) {
+            $query['order'] = $order;
+        }
 
-        $json = json_decode($r->getBody()->getContents(), 1);
+        if (!isset($query['take'])) {
+            $query['take'] = -1;
+        }
+
+        $query = http_build_query($query);
+
+        $json = self::jsonRequest([
+            'method' => 'GET',
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : ''),
+        ]);
 
         foreach ($json as $rawData) {
             $list->push(Object::build($schema, $rawData));
@@ -138,15 +150,14 @@ class Object
             $query = http_build_query(['take' => 200]);
         }
 
-        $headers = [
-            'X-Appercode-Session-Token' => $backend->token
-        ];
-
-        $client = new Client;
+        $headers = ['X-Appercode-Session-Token' => $backend->token];
         $url = $backend->url . 'objects/' . $schema->id . ($query ? '?' . $query : '');
-        $r = $client->get($url, ['headers' => $headers]);
 
-        $json = json_decode($r->getBody()->getContents(), 1);
+        $json = self::jsonRequest([
+            'method' => 'GET',
+            'headers' => $headers,
+            'url' => $url,
+        ]);
 
         $tempData = [];
 
@@ -156,9 +167,11 @@ class Object
 
         $headers['X-Appercode-Language'] = $language;
 
-        $r = $client->get($url, ['headers' => $headers]);
-
-        $json = json_decode($r->getBody()->getContents(), 1);
+        $json = self::jsonRequest([
+            'method' => 'GET',
+            'headers' => $headers,
+            'url' => $url,
+        ]);
 
         foreach ($json as $localizedRawData) {
             $id = $localizedRawData['id'];
@@ -171,26 +184,30 @@ class Object
         return $list;
     }
 
-    public static function count(Schema $schema, Backend $backend) {
-        $result = 0;
-        $client = new Client;
-        $url = $backend->url . 'objects/' . $schema->id . '?take=1&count=true';
-        $r = $client->get($url, ['headers' => [
-            'X-Appercode-Session-Token' => $backend->token
-        ]]);
-        if ($r->getHeader('x-appercode-totalitems')){
-            $result = $r->getHeader('x-appercode-totalitems')[0];
+    public static function count(Schema $schema, Backend $backend, $query = []) 
+    {
+        $searchQuery = [];
+        if (isset($query['search'])) {
+            $searchQuery = ['where' => json_encode($query['search'])];
         }
 
-        return $result;
+        $query = http_build_query(array_merge(['take' => 0, 'count' => 'true'], $searchQuery));
+
+        return self::countRequest([
+            'method' => 'GET',
+            'headers' => ['X-Appercode-Session-Token' => $backend->token],
+            'url' => $backend->url . 'objects/' . $schema->id . '?' . $query,
+        ]);
     }
 
     public static function build(Schema $schema, $data, $localizedData = null): Object
     {
         $object = new static();
+
         $object->id = $data['id'];
         $object->createdAt = new Carbon($data['createdAt']);
         $object->updatedAt = new Carbon($data['updatedAt']);
+
         $object->fields = self::prepareRawData($data, $schema);
 
         if (! is_null($localizedData))
@@ -223,13 +240,13 @@ class Object
                         {
                             foreach ($this->fields[$field['name']] as $obj)
                             {
-                                $userIds[] = $obj->id;
+                                $userIds[] = (int)$obj->id;
                             }
                         }
                         $userIds = $this->fields[$field['name']];
                     }
                     elseif (is_object($this->fields[$field['name']])) {
-                        $userIds = [$this->fields[$field['name']]->id];
+                        $userIds = [(int)$this->fields[$field['name']]->id];
                     } else {
                         $userIds = [$this->fields[$field['name']]];
                     }
@@ -241,29 +258,6 @@ class Object
                 $users = app(\App\Services\UserManager::Class)->allWithProfiles();
             }
             $this->relations['ref Users'] = $users;
-        }
-        
-        if (isset($this->fields[$field['name']]))
-        {
-            if (is_array($this->fields[$field['name']]))
-            {
-                foreach ($this->fields[$field['name']] as $k => $v)
-                {
-                    $this->fields[$field['name']][$k] =  app(\App\Services\UserManager::Class)->find($v);
-                }
-            }
-            elseif (is_object($this->fields[$field['name']]))
-            {
-                $this->fields[$field['name']] = $this->fields[$field['name']];
-            }
-            else
-            {
-                $this->fields[$field['name']] = app(\App\Services\UserManager::Class)->find($this->fields[$field['name']]);
-            }
-        }
-        else
-        {
-            $this->fields[$field['name']] = null;
         }
     }
 
@@ -278,76 +272,43 @@ class Object
 
                 if (isset($this->fields[$field['name']]) && is_array($this->fields[$field['name']])) 
                 {
-                    foreach ($this->fields[$field['name']] as $related)
-                    {
-                        if (is_object($related))
-                        {
-                            $objectIds[] = $related->id;
-                        }
-                        else
-                        {
-                            $objectIds[] = $related;
-                        }
-                    }
+                    $objectIds = $this->fields[$field['name']];
                 } 
                 elseif (isset($this->fields[$field['name']])) 
                 {
-                    if (is_object($this->fields[$field['name']]))
-                    {
-                        $objectIds = [$this->fields[$field['name']]->id];
-                    }
-                    else
-                    {
-                        $objectIds = [$this->fields[$field['name']]];
-                    }
+                    $objectIds = [$this->fields[$field['name']]];
                 }
-
-                $elements = $objectIds ? app(\App\Services\ObjectManager::Class)->search($schema, ['where' => json_encode(['id' => ['$in' => $objectIds]])]) : [];
-
+                $elements = $objectIds ? app(\App\Services\ObjectManager::Class)->search($schema, ['take' => -1, 'where' => json_encode(['id' => ['$in' => $objectIds]])]) : [];
             }
-            else {
-                $elements = app(\App\Services\ObjectManager::Class)->all($schema);
-            }
-            $this->relations[$index] = $elements;    
-        }
-        
-        if (isset($this->fields[$field['name']]))
-        {
-            if (is_array($this->fields[$field['name']]))
+            else 
             {
-                foreach ($this->fields[$field['name']] as $k => $v)
-                {
-                    if (is_object($v))
-                    {
-                        $this->fields[$field['name']][$k] = $v;
-                    }
-                    else
-                    {
-                        $this->fields[$field['name']][$k] =  app(\App\Services\ObjectManager::Class)->find($schema, $v);
-                    }
-                }
+                $elements = app(\App\Services\ObjectManager::Class)->search($schema, ['take' => -1]);
             }
-            elseif (is_object($this->fields[$field['name']]))
-            {
-                $this->fields[$field['name']] = $this->fields[$field['name']];
-            }
-            else
-            {
-                if ($this->fields[$field['name']] != "00000000-0000-0000-0000-000000000000")
-                {
-                    $this->fields[$field['name']] = app(\App\Services\ObjectManager::Class)->find($schema, $this->fields[$field['name']]);
-                }
-            }
-        }
-        else
-        {
-            $this->fields[$field['name']] = null;
+            $this->relations[$index] = $elements;
         }
     }
 
     private function getFileRelation($field)
     {
-        $this->relations['ref Files'] = [];
+        $relation = [];
+        if (isset($this->fields[$field['name']]) and $this->fields[$field['name']])  {
+            $filesIds = [];
+            if (is_array($this->fields[$field['name']])) {
+                $filesIds = $this->fields[$field['name']];
+            } else {
+                $filesIds = [$this->fields[$field['name']]];
+            }
+            $files = File::tree(app(Backend::class));
+            foreach ($filesIds as $filesId) {
+                if ($file = $files->get($filesId, false)) {
+                    $relation[] = $file;
+                }
+            }
+            if ($relation and !$field['multiple']) {
+                $relation = $relation[0];
+            }
+        }
+        $this->relations['ref Files'][$field['name']] = $relation;
     }
 
     private function getRelation($field)
@@ -381,12 +342,21 @@ class Object
             $code = str_replace('ref ', '', $field['type']);
             if ($code == 'Users') {
                 return $this->getRelationUserCount($field);
-            } else {
+            }
+            elseif ($code == 'Files') {
+                return 1;
+            }
+            else {
                 $schema = app(\App\Services\SchemaManager::Class)->find($code);
                 return $this->getRelationObjectCount($field, $schema);
             }
         }
         return 0;
+    }
+
+    public function getFileField($field)
+    {
+        return isset($this->relations[$field['type']][$field['name']]) ?? ($field->multiple ? [] : null);
     }
 
     public function withRelations(): Object
@@ -405,17 +375,24 @@ class Object
 
     public function shortView(): String
     {
-        if (isset($this->schema->viewData->shortView))
+        if ($template = $this->schema->getShortViewTemplate())
         {
-            $template = $this->schema->viewData->shortView;
+            $isFilled = false;
             foreach ($this->fields as $key => $field){
                 if ((is_string($field) || is_numeric($field)) && mb_strpos($template, ":$key:") !== false)
                 {
                     $template = str_replace(":$key:", $field, $template);
+                    if (!$isFilled) $isFilled = true;
                 }
             }
-            $template = str_replace(":id:", $this->id, $template);
-            return $template;
+            if ($isFilled) {
+                $template = str_replace(":id:", $this->id, $template);
+            }
+            else{
+                $template = '';
+            }
+
+            return $template ? $template : $this->id;
         }
         else
         {
@@ -423,24 +400,56 @@ class Object
         }
     }
 
-    public static function getShortViewFields(Schema $schema) {
-        $viewFields = [];
-        if (isset($schema->viewData->shortView))
-        {
-            $template = $schema->viewData->shortView;
-
-            foreach ($schema->fields as $field) {
-                if ((is_string($field['name']) || is_numeric($field['name'])) && mb_strpos($template, ":".$field['name'].":") !== false)
-                {
-                    $viewFields[] = $field['name'];
-                }
+    public function hasLocalizedFields() : bool {
+        $result = false;
+        foreach ($this->schema->fields as $field) {
+            if (isset($field['localized']) and $field['localized']) {
+                $result = true;
+                break;
             }
         }
-        else
-        {
-            $viewFields = ['id'];
-        }
-        return $viewFields;
+        return $result;
     }
 
+    public static function getUserProfiles(Backend $backend, Schema $schema, $users = [])
+    {
+        $result = [];
+        if ($users) {
+            $query = http_build_query(['where' => json_encode(['userId' => ['$in' => $users]])]);
+
+            $json = self::jsonRequest([
+                'method' => 'GET',
+                'headers' => ['X-Appercode-Session-Token' => $backend->token],
+                'url' => $backend->url . 'objects/' . $schema->id . '?' . $query,
+            ]);
+
+            foreach ($json as $item) {
+                $result[] = static::build($schema, $item);
+            }
+
+        }
+        return collect($result);
+    }
+
+    public function hasChildren()
+    {
+        return boolval(app(ObjectManager::class)->count($this->schema, ['search' => ['parentId' => $this->id]]));
+    }
+
+    public static function nessecaryFields($isHierarchy = false)
+    {
+        $fields = ['id', 'createdAt', 'updatedAt'];
+        if ($isHierarchy) {
+            $fields[] = 'parentId';
+        }
+        return $fields;
+    }
+
+    /**
+     * Returns updated at in original format
+     * @return mixed
+     */
+    public function updatedAtRaw() {
+        return $this->updatedAt->format("Y-m-d\TH:i:s.uP");
+    }
 }
