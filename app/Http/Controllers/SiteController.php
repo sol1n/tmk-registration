@@ -105,7 +105,7 @@ class SiteController extends Controller
 
         return view('form', [
             'lectureStatuses' => self::LECTURE_STATUSES,
-            'members' => $members,
+            'members' => $members ?? null,
             'statuses' => $statuses,
             'sections' => $sections,
             'companies' => $companies,
@@ -224,14 +224,11 @@ class SiteController extends Controller
                 $lecture = [];
                 if (isset($fields['presentation'][$k]))
                 {
-                    $lecture['Presentation'] = $fields['presentation'][$k]->store('presentations');
+                    $lecture['presentationFileId'] = $this->helper->uploadPresentation($fields['presentation'][$k]);
                 }
-                else
+                elseif (isset($fields['saved-presentation'][$k]) && $fields['saved-presentation'][$k])
                 {
-                    if (isset($fields['saved-presentation'][$k]) && $fields['saved-presentation'][$k])
-                    {
-                        $lecture['Presentation'] = $fields['saved-presentation'][$k];
-                    }
+                    $lecture['presentationFileId'] = $fields['saved-presentation'][$k];
                 }
                 $lecture['Title'] = $fields['subject'][$k];
                 $lecture['Description'] = $fields['theses'][$k];
@@ -290,7 +287,7 @@ class SiteController extends Controller
         }
 
         if ($request->file('photo')) {
-            $fields['photoFileId'] = $this->helper->uploadFile($request->file('photo'));
+            $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');

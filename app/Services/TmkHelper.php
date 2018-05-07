@@ -12,7 +12,8 @@ use App\Exceptions\Site\EmptyCompanyList;
 
 class TmkHelper
 {
-    const FILE_DIRECORY = 'dea7f51b-f59b-4bdd-950f-fe07b531ea78';
+    const PHOTO_DIRECTORY = '892630b0-b07c-4cfa-9290-378cd0bfd16e';
+    const PRESENTATION_DIRECTORY = '43308c2c-f012-4877-bd12-ffa697b5a42b';
 
     private $backend;
 
@@ -23,13 +24,7 @@ class TmkHelper
 
     public function getRandomPassword(int $length = 6): string 
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $charactersLength = strlen($characters);
-        $result = '';
-        for ($i = 0; $i < $length; $i++) {
-            $result .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $result;
+        return (string) rand(100000, 999999);
     }
 
     public function getCurrentUser()
@@ -63,7 +58,7 @@ class TmkHelper
         }
     }
 
-    public function uploadFile($file) {
+    public function uploadFile($file, $parent) {
         $fileProperties = [
             'name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
@@ -77,7 +72,7 @@ class TmkHelper
             "shareStatus" => "shared"
         ];
 
-        $result = app(FileManager::class)->createFile($fileProperties, self::FILE_DIRECORY);
+        $result = app(FileManager::class)->createFile($fileProperties, $parent);
         $uploadResult = app(FileManager::class)->uploadFile(
             $result['file']->id,
             $file
@@ -88,6 +83,14 @@ class TmkHelper
         } else {
             throw new EmptyCompanyList('Can`t upload file');
         }
+    }
+
+    public function uploadPhoto($file) {
+        return $this->uploadFile($file, self::PHOTO_DIRECTORY);
+    }
+
+    public function uploadPresentation($file) {
+        return $this->uploadFile($file, self::PRESENTATION_DIRECTORY);
     }
 
 }
