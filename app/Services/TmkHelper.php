@@ -39,7 +39,7 @@ class TmkHelper
 
     public function checkCompanyAvailability($profile, $companyCode)
     {
-        if (isset($profile->fields) and is_array($profile->fields) and isset($profile->fields['companies']) and is_array($profile->fields['companies'])) {
+        if (isset($profile->fields) and is_array($profile->fields) and isset($profile->fields['companies']) and is_array($profile->fields['companies']) and count($profile->fields['companies'])) {
             $schema = app(SchemaManager::Class)->find('Companies');
             $companies = app(ObjectManager::Class)->search($schema, [
                 'take' => -1,

@@ -215,10 +215,10 @@ class User
 
     public static function forgetSession($backend)
     {
-        Cookie::forget($backend->code . '-session-token');
-        Cookie::forget($backend->code . '-refresh-token');
-        Cookie::forget($backend->code . '-id');
-        Cookie::forget($backend->code . '-language');
+        Cookie::queue(Cookie::forget($backend->code . '-session-token'));
+        Cookie::queue(Cookie::forget($backend->code . '-refresh-token'));
+        Cookie::queue(Cookie::forget($backend->code . '-id'));
+        Cookie::queue(Cookie::forget($backend->code . '-language'));
     }
 
     public function regenerate(Backend $backend, Bool $storeSession = true)

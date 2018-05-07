@@ -13,7 +13,7 @@
 <body>
 
 <header class="main-header">
-  {% if autorized %}
+  {% if backend.token %}
   <div class="wrapper">
     <p class="main-header-logout">
       <a href="/logout/">Выйти</a>

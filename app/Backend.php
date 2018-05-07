@@ -76,11 +76,15 @@ class Backend
     {
       if (isset($this->token))
       {
-        self::request([
-          'method' => 'GET',
-          'headers' => ['X-Appercode-Session-Token' => $this->token],
-          'url' => $this->url . 'logout',
-        ]);
+        try {
+          self::request([
+            'method' => 'GET',
+            'headers' => ['X-Appercode-Session-Token' => $this->token],
+            'url' => $this->url . 'logout',
+          ], false);
+        } catch (\Exception $e) {
+
+        }
 
         User::forgetSession($this);
         $this->token = null;
