@@ -27,6 +27,15 @@ class SiteController extends Controller
 
             $this->helper = new TmkHelper(app(Backend::Class));
 
+            try {
+                $schemaManager = app(\App\Services\SchemaManager::Class);
+            } catch (\Exception $e) {
+                if ($e instanceof ClientException && $e->hasResponse() && $e->getResponse()->getStatusCode() == 401) {
+                    User::forgetSession(app(Backend::Class));
+                    return redirect()->route('index');
+                }
+            }
+
             return $next($request);
         });
     }

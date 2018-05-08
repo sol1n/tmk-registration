@@ -41,19 +41,19 @@
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
                 <label class="form-label" for="form-edit-{{ member.id }}-lastname">Фамилия</label>
-                <input data-translate-for="#form-lastname-en-{{ member.id }}" id="form-edit-{{ member.id }}-lastname" type="text" name="lastName" class="form-input" value="{{ member.fields.lastName }}">
+                <input id="form-edit-{{ member.id }}-lastname" type="text" name="lastName" class="form-input" value="{{ member.fields.lastName }}">
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
                 <label class="form-label" for="form-edit-{{ member.id }}-name">Имя</label>
-                <input data-translate-for="#form-name-en-{{ member.id }}" id="form-edit-{{ member.id }}-name" type="text" name="firstName" class="form-input" value="{{ member.fields.firstName }}">
+                <input id="form-edit-{{ member.id }}-name" type="text" name="firstName" class="form-input" value="{{ member.fields.firstName }}">
               </div>
             </div>
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">
                 <label class="form-label" for="form-edit-{{ member.id }}-middlename">Отчество</label>
-                <input data-translate-for="#form-middlename-en-{{ member.id }}" id="form-edit-{{ member.id }}-middlename" type="text" name="middleName" class="form-input" value="{{ member.fields.middleName }}">
+                <input id="form-edit-{{ member.id }}-middlename" type="text" name="middleName" class="form-input" value="{{ member.fields.middleName }}">
               </div>
             </div>
           </div>
@@ -150,6 +150,14 @@
             <textarea class="form-textarea" name="en[biography]" id="form-bio-en" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-bio-en-counter">{{ member.languages.en.biography }}</textarea>
             <div class="form-textarea-counter">
                 Максимальное количество символов: <span id="form-bio-en-counter">12000</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="form-rewards">Награды</label>
+            <textarea class="form-textarea" name="rewards" id="form-rewards" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-rewards-counter">{{ member.fields.rewards }}</textarea>
+            <div class="form-textarea-counter">
+                Максимальное количество символов: <span id="form-rewards-counter">12000</span>
             </div>
           </div>
 

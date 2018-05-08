@@ -98,5 +98,5 @@ return [
             'expire' => 60,
         ],
     ],
-
+    'cookieLifetime' => 60 * 24 * 5
 ];

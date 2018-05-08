@@ -70,6 +70,9 @@ class Backend
         if (Cookie::get($this->code . '-session-token')) {
           $this->token = Cookie::get($this->code . '-session-token');
         }
+        if (Cookie::get($this->code . '-refresh-token')) {
+          $this->refreshToken = Cookie::get($this->code . '-refresh-token');
+        }
     }
 
     public function logout()
