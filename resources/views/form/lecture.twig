@@ -54,7 +54,11 @@
   <div class="js-file-input form-file-input">
     <span class="icon no-td js-file-input-link form-file-input-link">
       {{ source('/svg/icon-presentation') }}
-      <span class="dotted">Загрузить презентацию</span>
+      {% if lecture.fields.presentationFileId %}
+        <span class="dotted">Изменить презентацию</span>
+      {% else %}
+        <span class="dotted">Загрузить презентацию</span>
+      {% endif %}
     </span>
 
     <input type="file" name="presentation[{{ lecture.id }}]" data-name="presentation[]" class="js-file-input-field form-file-input-field">
@@ -67,11 +71,10 @@
     </a>
   </div>
 
-  {% if lecture.fields.Presentation %}
+  {% if lecture.fields.presentationFileId  %}
     <p class="uploaded-file-link">
       Загруженный файл: 
-      <a href="/{{ lecture.fields.Presentation }}" target="_blank">{{ lecture.fields.Presentation }}</a>
+      <a href="{{ backend.url }}files/{{ lecture.fields.presentationFileId }}/download" target="_blank">{{ lecture.fields.presentationFileId }}</a>
     </p>
-    <input type="hidden" value="{{ lecture.fields.Presentation }}" name="saved-presentation[{{ lecture.id }}]" />
   {% endif %}
 </div>

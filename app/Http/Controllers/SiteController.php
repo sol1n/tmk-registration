@@ -124,7 +124,7 @@ class SiteController extends Controller
 
     
 
-    public function ProcessMember(Backend $backend, Request $request, $company, $profile)
+    public function ProcessMember(Backend $backend, Request $request, $company, $profileId)
     {
         $fields = $request->all();
         $fields['email'] = '';
@@ -145,24 +145,15 @@ class SiteController extends Controller
         }
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-        $member = app(\App\Services\ObjectManager::Class)->find($schema, $profile);
 
-        if ($request->file('photo'))
-        {
-            $path = $request->photo->store('images');
-            $fields['photo'] = $path;
-        }
-        else
-        {
-            $fields['photo'] = isset($member->fields['photo']) ? $member->fields['photo'] : null;
+        if ($request->file('photo')) {
+            $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 
-        $fields['userId'] = $member->fields['userId'];
-
-        app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $fields);
+        app(\App\Services\ObjectManager::Class)->save($schema, $profileId, $fields);
         if (count($enFields))
         {
-            app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+            app(\App\Services\ObjectManager::Class)->save($schema, $profileId, $enFields, 'en');
         }
 
         return redirect('/form/' . $company . '/');

@@ -7,7 +7,6 @@ use App\Backend;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use GuzzleHttp\Exception\ClientException;
-use Illuminate\Support\Facades\Log;
 
 trait AppercodeRequest
 {
@@ -37,7 +36,6 @@ trait AppercodeRequest
     protected static function request($data, $catch = true): GuzzleResponse
     {
         $client = new Client;
-        Log::info('Request: ' . $data['url']);
         list($method, $url, $params) = self::parseRequestData($data);
         try {
             return $client->request($method, $url, $params);

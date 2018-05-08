@@ -10,9 +10,12 @@ use App\Exceptions\Backend\BackendNoServerProvided;
 use App\Exceptions\Backend\LogoutException;
 use Illuminate\Support\Facades\Cookie;
 use App\Traits\Models\AppercodeRequest;
+use Illuminate\Support\Facades\Cache;
 
 class Backend
 {
+    const CHECK_CACHE_LIFETIME = 10;
+
     use AppercodeRequest;
 
     public $base;
@@ -23,6 +26,10 @@ class Backend
 
     private function check()
     {
+      if (env('APPERCODE_ENABLE_CACHING') == 1 && Cache::get('backend-exists-' . $this->code)) {
+        return true;
+      }
+
       $response = self::request([
         'method' => 'GET',
         'url' => $this->url . 'app/appropriateConfiguration'
@@ -32,6 +39,12 @@ class Backend
       {
         throw new BackendNotExists;
       }
+
+      if (env('APPERCODE_ENABLE_CACHING')) {
+        Cache::put('backend-exists-' . $this->code, 1, self::CHECK_CACHE_LIFETIME);
+      }
+
+      return true;
     }
 
     private function getBackendCode(): string
