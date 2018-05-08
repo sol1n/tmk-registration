@@ -8,13 +8,14 @@ use Illuminate\Http\Request;
 use App\Exceptions\User\WrongCredentialsException;
 use GuzzleHttp\Exception\ClientException;
 
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 use App\Services\TmkHelper;
 
 class SiteController extends Controller
 {
     const NEW_USER_ROLE = 'Participant';
     const LECTURE_STATUSES = ['07e6da63-a4d9-45fd-b181-58272cf40bb4'];
+    const CACHE_LIFETIME = 15;
 
     private $helper;
 
@@ -40,22 +41,52 @@ class SiteController extends Controller
         });
     }
 
+    private function getStatuses()
+    {
+        if (Cache::has('statuses')) {
+            return Cache::get('statuses');
+        } else {
+            $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
+            $statuses = app(\App\Services\ObjectManager::Class)->all($schema);
+            Cache::put('statuses', $statuses, self::CACHE_LIFETIME);
+            return $statuses;
+        }
+    }
+
+    private function getSections()
+    {
+        if (Cache::has('sections')) {
+            return Cache::get('sections');
+        } else {
+            $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
+            $sections = app(\App\Services\ObjectManager::Class)->all($schema);
+            Cache::put('sections', $sections, self::CACHE_LIFETIME);
+            return $sections;
+        }
+    }
+
+    private function getCompanies($user, $companyCode)
+    {
+        $key = 'companies-' . $user->id;
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        } else {
+            $companies = $this->helper->checkCompanyAvailability($user, $companyCode);
+            Cache::put($key, $companies, self::CACHE_LIFETIME);
+            return $companies;
+        }
+    }
+
     public function ShowEditForm(Backend $backend, $companyCode = null)
     {
         $user = $this->helper->getCurrentUser();
 
-        $companies = $this->helper->checkCompanyAvailability($user, $companyCode);
-
-
-        $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
-        $statuses = app(\App\Services\ObjectManager::Class)->all($schema);
-
-        $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
-        $sections = app(\App\Services\ObjectManager::Class)->all($schema);
-
+        $companies = $this->getCompanies($user, $companyCode);
+        $statuses = $this->getStatuses();
+        $sections = $this->getSections();
+        
         $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
         $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
-
         
         if (is_null($companyCode))
         {
