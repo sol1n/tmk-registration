@@ -14,7 +14,10 @@ use App\Services\TmkHelper;
 class SiteController extends Controller
 {
     const NEW_USER_ROLE = 'Participant';
-    const LECTURE_STATUSES = ['07e6da63-a4d9-45fd-b181-58272cf40bb4'];
+    const LECTURE_STATUSES = [
+        '07e6da63-a4d9-45fd-b181-58272cf40bb4',
+        '221b9fea-6586-4be4-ae9d-8bfac8817f56'
+    ];
     const CACHE_LIFETIME = 15;
 
     private $helper;
