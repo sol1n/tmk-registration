@@ -51,13 +51,13 @@ class ObjectManager
     {
         if (env('APPERCODE_ENABLE_CACHING') == 1)
         {
-            Cache::put($this->getCacheTag($schema), $data, $this->cacheLifetime);
+            //Cache::put($this->getCacheTag($schema), $data, $this->cacheLifetime);
         }
     }
 
     private function getFromCache(Schema $schema)
     {
-        if (Cache::has($this->getCacheTag($schema)) && (env('APPERCODE_ENABLE_CACHING') == 1)) {
+        if (Cache::has($this->getCacheTag($schema)) && 0) {
             return Cache::get($this->getCacheTag($schema));
         } else {
             return null;
