@@ -50,7 +50,12 @@ class SiteController extends Controller
             return Cache::get('statuses');
         } else {
             $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
-            $statuses = app(\App\Services\ObjectManager::Class)->all($schema);
+            $statuses = app(\App\Services\ObjectManager::Class)->search($schema, [
+                'take' => -1,
+                'order' => [
+                    'orderIndex' => 'asc'
+                ]
+            ]);
             Cache::put('statuses', $statuses, self::CACHE_LIFETIME);
             return $statuses;
         }
