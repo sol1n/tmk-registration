@@ -86,7 +86,7 @@ class SiteController extends Controller
         $sections = $this->getSections();
         
         $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-        $lectures = app(\App\Services\ObjectManager::Class)->allWithLang($schema, ['take' => -1], 'en');
+        $lectures = app(\App\Services\ObjectManager::Class)->search($schema, ['take' => -1]);
         
         if (is_null($companyCode))
         {
@@ -96,11 +96,11 @@ class SiteController extends Controller
         else
         {
             $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-            $members = app(\App\Services\ObjectManager::Class)->allWithLang($schema, [
+            $members = app(\App\Services\ObjectManager::Class)->search($schema, [
                 'order' => 'lastName', 
                 'take' => -1, 
                 'where' => ['team' => $companyCode]
-            ], 'en');
+            ]);
             
             $team = [];
             foreach ($members as $member)
@@ -165,7 +165,7 @@ class SiteController extends Controller
 
         $this->prepareLectures($fields);
 
-        $enFields = $fields['en'];
+        $enFields = $fields['en'] ?? [];
         unset($fields['en']);
         foreach ($enFields as $k => $value)
         {
@@ -177,7 +177,7 @@ class SiteController extends Controller
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
 
-        if ($request->file('photo')) {
+        if ($request->file('photo') && $request->file('photo')->isValid()) {
             $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 
@@ -253,7 +253,7 @@ class SiteController extends Controller
             foreach ($fields['subject'] as $k => $subject)
             {
                 $lecture = [];
-                if (isset($fields['presentation'][$k]))
+                if (isset($fields['presentation'][$k]) && $fields['presentation'][$k]->isValid())
                 {
                     $lecture['presentationFileId'] = $this->helper->uploadPresentation($fields['presentation'][$k]);
                 }
@@ -274,7 +274,7 @@ class SiteController extends Controller
                     $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $k, $lecture);
                 }
 
-                if ($enData['theses'][$k] || $enData['subject'][$k])
+                if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k]))
                 {
                     $enFields = [
                         'Title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
@@ -306,7 +306,7 @@ class SiteController extends Controller
 
         $this->prepareLectures($fields);
 
-        $enFields = $fields['en'];
+        $enFields = $fields['en'] ?? [];
         unset($fields['en']);
 
         foreach ($enFields as $k => $value)
@@ -317,7 +317,7 @@ class SiteController extends Controller
             }
         }
 
-        if ($request->file('photo')) {
+        if ($request->file('photo') && $request->file('photo')->isValid()) {
             $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 

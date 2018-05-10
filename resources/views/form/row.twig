@@ -59,45 +59,10 @@
           </div>
 
           <div class="row">
-              <div class="col-xs-12 col-sm-4">
-                <div class="form-group">
-                  <label class="form-label" for="form-lastname-en-{{ member.id }}">
-                    Фамилия <span class="c-gray">(англ)</span>
-                  </label>
-                  <input id="form-lastname-en-{{ member.id }}" type="text" name="en[lastName]" class="form-input" value="{{ member.languages.en.lastName }}">
-                </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                <div class="form-group">
-                  <label class="form-label" for="form-name-en-{{ member.id }}">
-                    Имя <span class="c-gray">(англ)</span>
-                  </label>
-                  <input id="form-name-en-{{ member.id }}" type="text" name="en[firstName]" class="form-input" value="{{ member.languages.en.firstName }}">
-                </div>
-              </div>
-              <div class="col-xs-12 col-sm-4">
-                <div class="form-group">
-                  <label class="form-label" for="form-middlename-en-{{ member.id }}">
-                    Отчество <span class="c-gray">(англ)</span>
-                  </label>
-                  <input id="form-middlename-en-{{ member.id }}" type="text" name="en[middleName]" class="form-input" value="{{ member.languages.en.middleName }}">
-                </div>
-              </div>
-          </div>
-
-          <div class="row">
-            <div class="col-xs-12 col-sm-6">
+            <div class="col-xs-12 col-sm-12">
               <div class="form-group">
                 <label class="form-label" for="form-edit-1-position">Должность</label>
                 <input id="form-edit-1-position" type="text" name="position" class="form-input" value="{{ member.fields.position }}">
-              </div>
-            </div>
-            <div class="col-xs-12 col-sm-6">
-              <div class="form-group">
-                <label class="form-label" for="form-edit-1-position">
-                  Должность <span class="c-gray">(англ)</span>
-                </label>
-                <input id="form-edit-1-position" type="text" name="en[position]" class="form-input" value="{{ member.languages.en.position }}">
               </div>
             </div>
           </div>
@@ -140,16 +105,6 @@
             <textarea class="form-textarea" name="biography" id="form-edit-{{ member.id }}-bio" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-edit-{{ member.id }}-bio-counter">{{ member.fields.biography }}</textarea>
             <div class="form-textarea-counter">
               Максимальное количество символов: <span id="form-edit-{{ member.id }}-bio-counter">12000</span>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="form-bio-en">
-              Биография <span class="c-gray">(англ)</span>
-            </label>
-            <textarea class="form-textarea" name="en[biography]" id="form-bio-en" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-bio-en-counter">{{ member.languages.en.biography }}</textarea>
-            <div class="form-textarea-counter">
-                Максимальное количество символов: <span id="form-bio-en-counter">12000</span>
             </div>
           </div>
 

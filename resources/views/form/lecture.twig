@@ -25,28 +25,12 @@
   </div>
 </div
 >
-<div class="form-group">
-  <label for="form-edit-1-subject" class="form-label">
-    Тема доклада <span class="c-gray">(англ)</span>
-  </label>
-  <input id="form-edit-1-subject" name="subject[en][{{ lecture.id }}]" data-name="subject[en][]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
-</div>
 
 <div class="form-group">
   <label for="form-edit-1-theses" class="form-label">Тезисы доклада</label>
   <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="12000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.fields.Description }}</textarea>
   <div class="form-textarea-counter">
       Максимальное количество символов: <span id="form-edit-1-theses-counter">12000</span>
-  </div>
-</div>
-
-<div class="form-group">
-  <label for="form-edit-1-theses" class="form-label">
-    Тезисы доклада <span class="c-gray">(англ)</span>
-  </label>
-  <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][]" id="form-edit-{{ lecture.id }}-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="12000" data-text-count data-text-count-block="#form-edit-{{ lecture.id }}-theses-counter">{{ lecture.languages.en.Description }}</textarea>
-  <div class="form-textarea-counter">
-      Максимальное количество символов: <span id="form-edit-{{ lecture.id }}-theses-counter">12000</span>
   </div>
 </div>
 
