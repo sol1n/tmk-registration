@@ -261,6 +261,7 @@ class SiteController extends Controller
             foreach ($fields['subject'] as $k => $subject)
             {
                 $lecture = [];
+                
                 if (isset($fields['presentation'][$k]) && $fields['presentation'][$k]->isValid())
                 {
                     $lecture['presentationFileId'] = $this->helper->uploadPresentation($fields['presentation'][$k]);
@@ -331,6 +332,12 @@ class SiteController extends Controller
 
         $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
 
+        $companySchema = app(\App\Services\SchemaManager::Class)->find('Companies');
+        $company = app(\App\Services\ObjectManager::Class)->find($companySchema, $companyId);
+
+        $role = $company->fields['roleId'] ?? self::NEW_USER_ROLE;
+        $conferences = $company->fields['conferencesIds'] ?? null;
+
         do {
             $duplicate = false;
             $login = $this->helper->getRandomPassword();
@@ -338,7 +345,7 @@ class SiteController extends Controller
                 $user = app(\App\Services\UserManager::Class)->create([
                     'username' => $login,
                     'password' => $login,
-                    'roleId' => self::NEW_USER_ROLE
+                    'roleId' => $role
                 ]);
             } catch(ClientException $e) {
                 $duplicate = true;
@@ -347,6 +354,7 @@ class SiteController extends Controller
 
         $fields['userId'] = $user->id;
         $fields['code'] = $login;
+        $fields['conferencesIds'] = $conferences;
 
         $member = app(\App\Services\ObjectManager::Class)->create($schema, $fields);
 
