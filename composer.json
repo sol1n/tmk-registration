@@ -21,7 +21,8 @@
         "symfony/css-selector": "2.8.*|3.0.*",
         "symfony/dom-crawler": "2.8.*|3.0.*",
         "filp/whoops": "~2.0",
-        "fideloper/proxy": "~4.0"
+        "fideloper/proxy": "~4.0",
+        "laravel/dusk": "^3.0"
     },
     "autoload": {
         "classmap": [

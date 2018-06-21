@@ -601,4 +601,22 @@ class User
         return $user;
     }
 
+    public static function loginByCode(string $code, Backend $backend = null)
+    {
+        if (is_null($backend)) {
+            $backend = app(Backend::Class);
+        }
+        
+        try {
+            return self::jsonRequest([
+                'method' => 'POST',
+                'url' => $backend->url . 'login/loginByCode',
+                'json' => [
+                    'code' => $code
+                ]
+            ]);
+        } catch (RequestException $e) {
+            throw new WrongCredentialsException;
+        }
+    }
 }

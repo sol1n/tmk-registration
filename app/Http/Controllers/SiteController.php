@@ -168,6 +168,7 @@ class SiteController extends Controller
         $fields = $request->all();
         $fields['email'] = '';
         $fields['photo'] = '';
+        $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
         $fields['team'] = $company;
         unset($fields['_token']);
 
@@ -311,6 +312,7 @@ class SiteController extends Controller
     {
         $fields = $request->all();
         $fields['team'] = $companyId;
+        $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
         unset($fields['_token']);
 
         $this->prepareLectures($fields);

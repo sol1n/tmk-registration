@@ -5,4 +5,5 @@ Homestead.yaml
 Homestead.json
 .php_cs.cache
 .env
+.env.dusk.local
 .idea
