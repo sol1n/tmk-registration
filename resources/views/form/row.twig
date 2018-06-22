@@ -27,7 +27,11 @@
 
           <div class="form-group m-t-lg">
               <label class="form-label" for="form-edit-1-status">Статус участника</label>
-              <select name="status[]" id="form-edit-1-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+              <select 
+                name="status[]" 
+                id="form-edit-1-status" 
+                data-placeholder="Выберите статус" 
+                multiple class="js-chosen-select js-form-status">
                 {% for status in statuses %}
                   {% if status.id in member.fields.status %}
                     <option selected value="{{ status.id }}">{{ status.fields.Title }}</option>

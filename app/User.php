@@ -606,7 +606,7 @@ class User
         if (is_null($backend)) {
             $backend = app(Backend::Class);
         }
-        
+
         try {
             return self::jsonRequest([
                 'method' => 'POST',
@@ -619,4 +619,5 @@ class User
             throw new WrongCredentialsException;
         }
     }
+
 }

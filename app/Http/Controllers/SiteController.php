@@ -11,6 +11,9 @@ use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Cache;
 use App\Services\TmkHelper;
 
+use App\Services\ObjectManager;
+use App\Services\SchemaManager;
+
 class SiteController extends Controller
 {
     const NEW_USER_ROLE = 'Participant';
@@ -32,7 +35,7 @@ class SiteController extends Controller
             $this->helper = new TmkHelper(app(Backend::Class));
 
             try {
-                $schemaManager = app(\App\Services\SchemaManager::Class);
+                $schemaManager = app(SchemaManager::Class);
             } catch (\Exception $e) {
                 if ($e instanceof ClientException && $e->hasResponse() && $e->getResponse()->getStatusCode() == 401) {
                     User::forgetSession(app(Backend::Class));
@@ -49,8 +52,8 @@ class SiteController extends Controller
         if (Cache::has('statuses')) {
             return Cache::get('statuses');
         } else {
-            $schema = app(\App\Services\SchemaManager::Class)->find('Statuses');
-            $statuses = app(\App\Services\ObjectManager::Class)->search($schema, [
+            $schema = app(SchemaManager::Class)->find('Statuses');
+            $statuses = app(ObjectManager::Class)->search($schema, [
                 'take' => -1,
                 'order' => [
                     'orderIndex' => 'asc'
@@ -66,8 +69,8 @@ class SiteController extends Controller
         if (Cache::has('sections')) {
             return Cache::get('sections');
         } else {
-            $schema = app(\App\Services\SchemaManager::Class)->find('Sections');
-            $sections = app(\App\Services\ObjectManager::Class)->all($schema);
+            $schema = app(SchemaManager::Class)->find('Sections');
+            $sections = app(ObjectManager::Class)->all($schema);
             Cache::put('sections', $sections, self::CACHE_LIFETIME);
             return $sections;
         }
@@ -93,8 +96,8 @@ class SiteController extends Controller
         $statuses = $this->getStatuses();
         $sections = $this->getSections();
         
-        $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-        $lectures = app(\App\Services\ObjectManager::Class)->search($schema, ['take' => -1]);
+        $schema = app(SchemaManager::Class)->find('Lectures');
+        $lectures = app(ObjectManager::Class)->search($schema, ['take' => -1]);
         
         if (is_null($companyCode))
         {
@@ -103,8 +106,8 @@ class SiteController extends Controller
         }
         else
         {
-            $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-            $members = app(\App\Services\ObjectManager::Class)->search($schema, [
+            $schema = app(SchemaManager::Class)->find('UserProfiles');
+            $members = app(ObjectManager::Class)->search($schema, [
                 'order' => 'lastName', 
                 'take' => -1, 
                 'where' => ['team' => $companyCode]
@@ -163,16 +166,65 @@ class SiteController extends Controller
 
     
 
-    public function ProcessMember(Backend $backend, Request $request, $company, $profileId)
+    public function ProcessMember(Backend $backend, Request $request, $companyId, $profileId)
     {
         $fields = $request->all();
         $fields['email'] = '';
         $fields['photo'] = '';
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
-        $fields['team'] = $company;
+        $fields['team'] = $companyId;
         unset($fields['_token']);
 
-        $this->prepareLectures($fields);
+        $fieldsSections = $this->prepareLectures($fields);
+
+        $companySchema = app(SchemaManager::Class)->find('Companies');
+        $company = app(ObjectManager::Class)->find($companySchema, $companyId);
+
+        $memberGroups = [];
+        if (isset($company->fields['groupId']) && $company->fields['groupId']) {
+            $memberGroups[] = $company->fields['groupId'];
+        }
+
+        if (isset($fields['status']) && $fields['status']) {
+            $memberStatuses = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Statuses'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $fields['status']
+                    ]
+                ]
+            ]);
+
+            if ($memberStatuses->isNotEmpty()) {
+                foreach ($memberStatuses as $status) {
+                    if (isset($status->fields['groupId']) && $status->fields['groupId']) {
+                        $memberGroups[] = $status->fields['groupId'];
+                    }
+                }
+            }
+        }
+
+        if (count($fieldsSections) > 0 ) {
+            $memberSections = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Sections'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $fieldsSections
+                    ]
+                ]
+            ]);
+
+            if ($memberSections->isNotEmpty()) {
+                foreach ($memberSections as $section) {
+                    if (isset($section->fields['groupId']) && $section->fields['groupId']) {
+                        $memberGroups[] = $section->fields['groupId'];
+                    }
+                }
+            }
+        }
+
+        $fields['groupIds'] = $memberGroups;
+        $fields['sections'] = $fieldsSections;
 
         $enFields = $fields['en'] ?? [];
         unset($fields['en']);
@@ -184,26 +236,26 @@ class SiteController extends Controller
             }
         }
 
-        $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
+        $schema = app(SchemaManager::Class)->find('UserProfiles');
 
         if ($request->file('photo') && $request->file('photo')->isValid()) {
             $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 
-        app(\App\Services\ObjectManager::Class)->save($schema, $profileId, $fields);
+        app(ObjectManager::Class)->save($schema, $profileId, $fields);
         if (count($enFields))
         {
-            app(\App\Services\ObjectManager::Class)->save($schema, $profileId, $enFields, 'en');
+            app(ObjectManager::Class)->save($schema, $profileId, $enFields, 'en');
         }
 
-        return redirect('/form/' . $company . '/');
+        return redirect()->route('company', ['company' => $companyId]);
     }
 
     public function RemoveMember(Backend $backend, Request $request, $companyId, $profileId)
     {
 
-        $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-        $member = app(\App\Services\ObjectManager::Class)->find($schema, $profileId);
+        $schema = app(SchemaManager::Class)->find('UserProfiles');
+        $member = app(ObjectManager::Class)->find($schema, $profileId);
 
         if ($member) {
             $userId = $member->fields['userId'] ?? null;
@@ -212,12 +264,12 @@ class SiteController extends Controller
             }
             if (isset($member->fields['lectures']) and is_array($member->fields['lectures'])) {
                 foreach ($member->fields['lectures'] as $lectureId) {
-                    $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
-                    app(\App\Services\ObjectManager::Class)->delete($schema, $lectureId);
+                    $schema = app(SchemaManager::Class)->find('Lectures');
+                    app(ObjectManager::Class)->delete($schema, $lectureId);
                 }
             }
-            $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
-            app(\App\Services\ObjectManager::Class)->delete($schema, $member->id);
+            $schema = app(SchemaManager::Class)->find('UserProfiles');
+            app(ObjectManager::Class)->delete($schema, $member->id);
         }
 
         return redirect()->route('company', ['company' => $companyId]);
@@ -225,6 +277,8 @@ class SiteController extends Controller
 
     private function prepareLectures(array &$fields)
     {
+        $sections = []; 
+
         if (isset($fields['theses']['en']) || isset($fields['subject']['en']))
         {
             $enData = [
@@ -257,7 +311,7 @@ class SiteController extends Controller
         if ($fields['subject'] && count($fields['subject']) && (!$emptyList))
         {
             $lectures = [];
-            $schema = app(\App\Services\SchemaManager::Class)->find('Lectures');
+            $schema = app(SchemaManager::Class)->find('Lectures');
 
             foreach ($fields['subject'] as $k => $subject)
             {
@@ -275,13 +329,15 @@ class SiteController extends Controller
                 $lecture['Description'] = $fields['theses'][$k];
                 $lecture['Section'] = $fields['section'][$k];
 
+                $sections[] = $fields['section'][$k];
+
                 if (is_numeric($k))
                 {
-                    $lecture = app(\App\Services\ObjectManager::Class)->create($schema, $lecture);
+                    $lecture = app(ObjectManager::Class)->create($schema, $lecture);
                 }
                 else
                 {
-                    $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $k, $lecture);
+                    $lecture = app(ObjectManager::Class)->save($schema, $k, $lecture);
                 }
 
                 if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k]))
@@ -290,7 +346,7 @@ class SiteController extends Controller
                         'Title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
                         'Description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null
                     ];
-                    $lecture = app(\App\Services\ObjectManager::Class)->save($schema, $lecture->id, $enFields, 'en');
+                    $lecture = app(ObjectManager::Class)->save($schema, $lecture->id, $enFields, 'en');
                 }
 
                 $lectures[] = $lecture->id;
@@ -305,7 +361,7 @@ class SiteController extends Controller
             $fields['lectures'] = $lectures;
         }
 
-        return true;
+        return $sections;
     }
 
     public function NewMember(Backend $backend, Request $request, $companyId)
@@ -313,9 +369,10 @@ class SiteController extends Controller
         $fields = $request->all();
         $fields['team'] = $companyId;
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
+
         unset($fields['_token']);
 
-        $this->prepareLectures($fields);
+        $fieldsSections = $this->prepareLectures($fields);
 
         $enFields = $fields['en'] ?? [];
         unset($fields['en']);
@@ -332,13 +389,55 @@ class SiteController extends Controller
             $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
 
-        $schema = app(\App\Services\SchemaManager::Class)->find('UserProfiles');
+        $schema = app(SchemaManager::Class)->find('UserProfiles');
 
-        $companySchema = app(\App\Services\SchemaManager::Class)->find('Companies');
-        $company = app(\App\Services\ObjectManager::Class)->find($companySchema, $companyId);
+        $companySchema = app(SchemaManager::Class)->find('Companies');
+        $company = app(ObjectManager::Class)->find($companySchema, $companyId);
+
+        $memberGroups = [];
+        if (isset($company->fields['groupId']) && $company->fields['groupId']) {
+            $memberGroups[] = $company->fields['groupId'];
+        }
+
+        if (isset($fields['status']) && $fields['status']) {
+            $memberStatuses = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Statuses'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $fields['status']
+                    ]
+                ]
+            ]);
+
+            if ($memberStatuses->isNotEmpty()) {
+                foreach ($memberStatuses as $status) {
+                    if (isset($status->fields['groupId']) && $status->fields['groupId']) {
+                        $memberGroups[] = $status->fields['groupId'];
+                    }
+                }
+            }
+        }
+
+        if (count($fieldsSections) > 0 ) {
+            $memberSections = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Sections'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $fieldsSections
+                    ]
+                ]
+            ]);
+
+            if ($memberSections->isNotEmpty()) {
+                foreach ($memberSections as $section) {
+                    if (isset($section->fields['groupId']) && $section->fields['groupId']) {
+                        $memberGroups[] = $section->fields['groupId'];
+                    }
+                }
+            }
+        }
 
         $role = $company->fields['roleId'] ?? self::NEW_USER_ROLE;
-        $conferences = $company->fields['conferencesIds'] ?? null;
 
         do {
             $duplicate = false;
@@ -356,13 +455,14 @@ class SiteController extends Controller
 
         $fields['userId'] = $user->id;
         $fields['code'] = $login;
-        $fields['conferencesIds'] = $conferences;
+        $fields['groupIds'] = $memberGroups;
+        $fields['sections'] = $fieldsSections;
 
-        $member = app(\App\Services\ObjectManager::Class)->create($schema, $fields);
+        $member = app(ObjectManager::Class)->create($schema, $fields);
 
         if (count($enFields))
         {
-            app(\App\Services\ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
+            app(ObjectManager::Class)->save($schema, $member->id, $enFields, 'en');
         }
 
         return redirect()->route('company', ['company' => $companyId]);
