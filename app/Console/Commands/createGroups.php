@@ -52,13 +52,13 @@ class createGroups extends Command
     private function init(string $project)
     {
         $backend = (new AdminTokens)->getSession($project);
-        app()->instance(Backend::Class, $backend);
+        app()->instance(Backend::class, $backend);
     }
 
     private function getParentGroup(string $collection)
     {
-        $schema = app(SchemaManager::Class)->find(self::GROUPS_COLLECTION);
-        $object = app(ObjectManager::Class)->search($schema, [
+        $schema = app(SchemaManager::class)->find(self::GROUPS_COLLECTION);
+        $object = app(ObjectManager::class)->search($schema, [
             'take' => 1,
             'where' => [
                 'title' => $collection
@@ -69,43 +69,48 @@ class createGroups extends Command
 
     private function createParentGroup(string $collection): string
     {
-        $schema = app(SchemaManager::Class)->find(self::GROUPS_COLLECTION);
-        return app(ObjectManager::Class)->create($schema, [
-            'title' => $collection
+        $schema = app(SchemaManager::class)->find(self::GROUPS_COLLECTION);
+        return app(ObjectManager::class)->create($schema, [
+            'title' => $collection,
+            'parentId' => [
+                '$exists' => false
+            ]
         ])->id;
     }
 
     private function createGroupForElement(string $title, $parentId = null)
     {
-        $schema = app(SchemaManager::Class)->find(self::GROUPS_COLLECTION);
-        return app(ObjectManager::Class)->create($schema, [
+        $schema = app(SchemaManager::class)->find(self::GROUPS_COLLECTION);
+        return app(ObjectManager::class)->create($schema, [
             'title' => $title,
             'parentId' => $parentId
-        ])->id; 
+        ])->id;
     }
 
     private function createGroupsForCollection(string $collection)
     {
         try {
-            $schema = app(SchemaManager::Class)->find($collection);
+            $schema = app(SchemaManager::class)->find($collection);
         } catch (\Exception $e) {
             $this->error("Can`t find $collection collection");
             return false;
-        }       
+        }
 
-        $schemaFields = collect($schema->fields)->mapWithKeys(function($item) {
+        $schemaFields = collect($schema->fields)->mapWithKeys(function ($item) {
             return [$item['name'] => true];
         })->toArray();
 
         if (isset($schemaFields['groupId'])) {
             $this->info("$collection is in progress");
 
-            $parentId = $this->getParentGroup($collection);
+            $schemaName = $schema->title ?? $schema->id;
+
+            $parentId = $this->getParentGroup($schemaName);
             if (is_null($parentId)) {
-                $parentId = $this->createParentGroup($collection);
+                $parentId = $this->createParentGroup($schemaName);
             }
 
-            $objects = app(ObjectManager::Class)->search($schema, [
+            $objects = app(ObjectManager::class)->search($schema, [
                 'take' => -1,
                 'where' => [
                     'groupId' => [
@@ -118,6 +123,10 @@ class createGroups extends Command
                 $title = $object->fields['title'] ?? $object->fields['Title'] ?? '';
                 if ($title) {
                     $id = $this->createGroupForElement($title, $parentId);
+
+                    app(ObjectManager::class)->save($schema, $object->id, [
+                        'groupId' => $id
+                    ]);
                     $this->info("Created $id element with $title title");
                 }
             }
