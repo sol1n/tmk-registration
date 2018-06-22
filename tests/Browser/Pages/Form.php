@@ -49,6 +49,7 @@ class Form extends Page
             '@logout' => 'header > div > p.main-header-logout > a',
             '@create' => '#new-member-form .button-orange-hollow',
             '@addButton' => '.icon-memeber-add',
+            '@creationStatusesList' => '#form-status',
         ];
     }
 
@@ -60,9 +61,27 @@ class Form extends Page
     public function createParticipant(Browser $browser, $model)
     {
         $browser->waitFor('@addButton')->click('@addButton');
-        foreach ($model as $field => $value) {
+
+        foreach ($model['listFields'] as $field => $value) {
+            if (is_array($value)) {
+                foreach ($value as $one) {
+                    $browser->select($field . '[]', $one);
+                }
+            } else {
+                $browser->select($field . '[]', $value);
+            }
+        }
+
+        foreach ($model['textFields'] as $field => $value) {
             $browser->type($field, $value);
         }
+
+        foreach ($model['lectures'] as $lecture) {
+            $browser->type('subject[]', $lecture['subject']);
+            $browser->type('theses[]', $lecture['theses']);
+            $browser->select('section[]', $lecture['section']);
+        }
+
         $browser->press('@create');
     }
 }

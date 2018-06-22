@@ -11,7 +11,17 @@
 
         <div class="form-group m-t-lg">
           <label class="form-label" for="form-status">Статус участника</label>
-          <select name="status[]" id="form-status" data-placeholder="Выберите статус" multiple class="js-chosen-select js-form-status">
+          <select 
+            name="status[]" 
+            id="form-status" 
+            data-placeholder="Выберите статус" 
+            multiple 
+            {% if config('app.env') == 'testing' %}
+              class="js-form-status"
+            {% else %}
+              class="js-chosen-select js-form-status"
+            {% endif %}
+          >
             {% for status in statuses %}
               <option value="{{ status.id }}">{{ status.fields.Title }}</option>
             {% endfor %}
