@@ -21,6 +21,12 @@ class SiteController extends Controller
         '07e6da63-a4d9-45fd-b181-58272cf40bb4',
         '221b9fea-6586-4be4-ae9d-8bfac8817f56'
     ];
+    const FOOTBALL_STATUSES = [
+        '6e1fca1c-5ad6-4105-a590-13adeeea0737'
+    ];
+    const KVN_STATUSES = [
+        'cad65dda-7add-4465-9a3a-744e7378752a'
+    ];
     const CACHE_LIFETIME = 15;
 
     private $helper;
@@ -88,6 +94,34 @@ class SiteController extends Controller
         }
     }
 
+    private function getFootballTeams()
+    {
+        if (Cache::has('footballTeams')) {
+            return Cache::get('footballTeams');
+        } else {
+            $schema = app(SchemaManager::Class)->find('footballTeam');
+            $teams = app(ObjectManager::Class)->search($schema, ['take' => -1])->mapWithKeys(function($item) {
+                return [$item->id => $item->fields['title']];
+            });
+            Cache::put('footballTeams', $teams, self::CACHE_LIFETIME);
+            return $teams;
+        }
+    }
+
+    private function getKVNTeams()
+    {
+        if (Cache::has('KVNTeams')) {
+            return Cache::get('KVNTeams');
+        } else {
+            $schema = app(SchemaManager::Class)->find('KVNTeams');
+            $teams = app(ObjectManager::Class)->search($schema, ['take' => -1])->mapWithKeys(function($item) {
+                return [$item->id => $item->fields['Title']];
+            });
+            Cache::put('KVNTeams', $teams, self::CACHE_LIFETIME);
+            return $teams;
+        }
+    }
+
     public function ShowEditForm(Backend $backend, $companyCode = null)
     {
         $user = $this->helper->getCurrentUser();
@@ -95,6 +129,8 @@ class SiteController extends Controller
         $companies = $this->getCompanies($user, $companyCode);
         $statuses = $this->getStatuses();
         $sections = $this->getSections();
+        $footballTeams = $this->getFootballTeams();
+        $KVNTeams = $this->getKVNTeams();
         
         $schema = app(SchemaManager::Class)->find('Lectures');
         $lectures = app(ObjectManager::Class)->search($schema, ['take' => -1]);
@@ -156,15 +192,17 @@ class SiteController extends Controller
 
         return view('form', [
             'lectureStatuses' => self::LECTURE_STATUSES,
+            'footballStatuses' => self::FOOTBALL_STATUSES,
+            'kvnStatuses' => self::KVN_STATUSES,
             'members' => $members ?? null,
             'statuses' => $statuses,
             'sections' => $sections,
             'companies' => $companies,
+            'footballTeams' => $footballTeams,
+            'KVNTeams' => $KVNTeams,
             'companyId' => $companyCode
         ]);
     }
-
-    
 
     public function ProcessMember(Backend $backend, Request $request, $companyId, $profileId)
     {

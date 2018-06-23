@@ -97,6 +97,56 @@
           </div>
         </div>
 
+        <div 
+          class="
+            row
+            member-additional-form 
+            js-member-status
+            {% for status in kvnStatuses %}
+              js-member-status-{{ status }} 
+            {% endfor %}
+          "
+        >
+          <div class="col-xs-12 col-sm-12">
+            <div class="form-group">
+              <label class="form-label" for="form-KVNTeam">Команда КВН</label>
+              <div class="form-select form-select-bold">
+                <select name="KVNTeam" id="form-KVNTeam">
+                  <option value="">Не выбрано</option>
+                  {% for id, team in KVNTeams %}
+                    <option value="{{ id }}">{{ team }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div 
+          class="
+            row
+            member-additional-form 
+            js-member-status
+            {% for status in footballStatuses %}
+              js-member-status-{{ status }} 
+            {% endfor %}
+          "
+        >
+          <div class="col-xs-12 col-sm-12">
+            <div class="form-group">
+              <label class="form-label" for="form-footballTeam">Команда мини-футбола</label>
+              <div class="form-select form-select-bold">
+                <select name="footballTeam" id="form-footballTeam">
+                  <option value="">Не выбрано</option>
+                  {% for id, team in footballTeams %}
+                    <option value="{{ id }}">{{ team }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="form-bio">Биография</label>
           <textarea class="form-textarea" name="description" id="form-bio" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-bio-counter"></textarea>

@@ -93,16 +93,7 @@
               </td>
             </tr>
             
-            {%
-              include 'form/row' 
-              with {
-                'companyId': companyId,
-                'member': member,
-                'statuses': statuses,
-                'sections': sections,
-                'lectureStatuses': lectureStatuses
-              } only
-            %}
+            {% include 'form/row' %}
 
           {% endfor %}
         </table>
@@ -115,16 +106,9 @@
         <span class="dotted">Добавить участника</span>
       </a>
     </div>
+    
+    {% include 'form/newmember' %}
 
-    {%
-      include 'form/newmember' 
-      with {
-        'companyId': companyId,
-        'statuses': statuses,
-        'sections': sections,
-        'lectureStatuses': lectureStatuses
-      } only
-    %}
   {% endif %}
 
 {% endblock %}

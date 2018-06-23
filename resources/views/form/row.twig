@@ -105,6 +105,58 @@
             </div>
           </div>
 
+          <div 
+            class="
+              row
+              {% if member.fields.KVNTeam %}active{% endif %} 
+              member-additional-form 
+              js-member-status
+              {% for status in kvnStatuses %}
+                js-member-status-{{ status }} 
+              {% endfor %}
+            "
+          >
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group">
+                <label class="form-label" for="form-edit-{{ member.id }}-KVNTeam">Команда КВН</label>
+                <div class="form-select form-select-bold">
+                  <select name="KVNTeam" id="form-edit-{{ member.id }}-KVNTeam">
+                    <option value="">Не выбрано</option>
+                    {% for id, team in KVNTeams %}
+                      <option {% if id == member.fields.KVNTeam %}selected{% endif %} value="{{ id }}">{{ team }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div 
+            class="
+              row
+              {% if member.fields.footballTeam %}active{% endif %} 
+              member-additional-form 
+              js-member-status
+              {% for status in footballStatuses %}
+                js-member-status-{{ status }} 
+              {% endfor %}
+            "
+          >
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group">
+                <label class="form-label" for="form-edit-{{ member.id }}-footballTeam">Команда мини-футбола</label>
+                <div class="form-select form-select-bold">
+                  <select name="footballTeam" id="form-edit-{{ member.id }}-footballTeam">
+                    <option value="">Не выбрано</option>
+                    {% for id, team in footballTeams %}
+                      <option {% if id == member.fields.footballTeam %}selected{% endif %} value="{{ id }}">{{ team }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="form-edit-{{ member.id }}-bio">Биография</label>
             <textarea class="form-textarea" name="description" id="form-edit-{{ member.id }}-bio" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-edit-{{ member.id }}-bio-counter">{{ member.fields.description }}</textarea>

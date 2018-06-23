@@ -51,6 +51,8 @@ class Form extends Page
             '@addButton' => '.icon-memeber-add',
             '@creationStatusesList' => '#form-status',
             '@creationSectionsList' => '#form-edit-1-section',
+            '@creationKVNTeamsList' => '#form-KVNTeam',
+            '@creationFootballTeamsList' => '#form-footballTeam',
         ];
     }
 

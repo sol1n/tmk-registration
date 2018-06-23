@@ -115,4 +115,52 @@ class FormComponentsTest extends DuskTestCase
             $browser->visit(new FormPage)->logOff();
         });
     }
+
+    /**
+     * Checks that form contains correct KVN teams list
+     * @group form
+     */
+    public function testKVNList()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $schema = app(SchemaManager::class)->find('KVNTeams');
+            $sections = app(ObjectManager::class)->search($schema, ['take' => -1])->map(function ($item) {
+                return $item->id;
+            });
+
+            $browser->visit(new FormPage($this->getCompaniesList()->first()))
+                ->assertSelectHasOptions('@creationKVNTeamsList', $sections->toArray());
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * Checks that form contains correct football teams list
+     * @group form
+     */
+    public function testFootballList()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $schema = app(SchemaManager::class)->find('footballTeam');
+            $sections = app(ObjectManager::class)->search($schema, ['take' => -1])->map(function ($item) {
+                return $item->id;
+            });
+
+            $browser->visit(new FormPage($this->getCompaniesList()->first()))
+                ->assertSelectHasOptions('@creationFootballTeamsList', $sections->toArray());
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
 }
