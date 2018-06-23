@@ -8,7 +8,7 @@ class Form extends Page
 {
     private $companyUrl;
 
-    public function __construct($companyUrl = null) 
+    public function __construct($companyUrl = null)
     {
         $this->companyUrl = $companyUrl;
     }
@@ -50,6 +50,7 @@ class Form extends Page
             '@create' => '#new-member-form .button-orange-hollow',
             '@addButton' => '.icon-memeber-add',
             '@creationStatusesList' => '#form-status',
+            '@creationSectionsList' => '#form-edit-1-section',
         ];
     }
 

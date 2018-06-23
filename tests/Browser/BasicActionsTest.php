@@ -88,9 +88,9 @@ class BasicActionsTest extends DuskTestCase
     private function deleteMember($profile)
     {
         if (isset($profile->fields['lectures']) && $profile->fields['lectures']) {
-            $lecturesSchema = app(SchemaManager::Class)->find('Lectures');
+            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
             foreach ($profile->fields['lectures'] as $lectureId) {
-                app(ObjectManager::Class)->delete($lecturesSchema, $lectureId);
+                app(ObjectManager::class)->delete($lecturesSchema, $lectureId);
             }
         }
         $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
@@ -99,37 +99,13 @@ class BasicActionsTest extends DuskTestCase
     }
 
     /**
-     * Checks form has correct companies list that matches administrator data
-     * @group form
-     */
-    public function testCompaniesList()
-    {
-        $this->browse(function (Browser $browser) {
-            $browser->visit(new LoginPage)->signIn([
-                'login' => env('USER'),
-                'password' => env('PASSWORD')
-            ]);
-
-            $userCompanies = $this->getCompaniesList();
-
-            $browser->visit(new FormPage)
-                ->assertSelectHasOptions('company', $userCompanies->toArray())
-                ->select('company', $userCompanies->first())
-                ->assertPathIs($userCompanies->first())
-                ->assertSelected('company', $userCompanies->first())
-                ->logOff();
-        });
-    }
-
-    /**
      * Checks correctness form-added users data:
      *
      * personal data
      * statuses list
      * section field from member lectures
-     * 
+     *
      * @group creation
-     * @group form
      */
     public function testAddedMemberHasCorrectData()
     {
@@ -170,7 +146,6 @@ class BasicActionsTest extends DuskTestCase
      * Checks that users added by form can login into appercode backend,
      * and correctness of generated codes
      * @group creation
-     * @group form
      */
     public function testAddedMemberCanStartAppercodeSession()
     {
@@ -213,9 +188,8 @@ class BasicActionsTest extends DuskTestCase
      * selected company
      * selected statuses
      * added lectures
-     * 
+     *
      * @group creation
-     * @group form
      */
     public function testGroupsSupport()
     {
@@ -235,29 +209,29 @@ class BasicActionsTest extends DuskTestCase
             $company = $this->getCompanies()->first();
             $companyGroup = $company->fields['groupId'] ?? null;
 
-            $statusesGroups = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Statuses'), [
+            $statusesGroups = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Statuses'), [
                 'take' => -1,
                 'where' => [
                     'id' => [
                         '$in' => $participant['listFields']['status']
                     ]
                 ]
-            ])->map(function($item) {
+            ])->map(function ($item) {
                 return $item->fields['groupId'] ?? null;
             });
 
-            $participantLecturesSections = collect($participant['lectures'])->map(function($item) {
+            $participantLecturesSections = collect($participant['lectures'])->map(function ($item) {
                 return $item['section'];
             });
 
-            $lecturesGroups = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('Sections'), [
+            $lecturesGroups = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Sections'), [
                 'take' => -1,
                 'where' => [
                     'id' => [
                         '$in' => $participantLecturesSections->toArray()
                     ]
                 ]
-            ])->map(function($item) {
+            ])->map(function ($item) {
                 return $item->fields['groupId'] ?? null;
             });
 
@@ -273,30 +247,6 @@ class BasicActionsTest extends DuskTestCase
             }
 
             $this->deleteMember($profile);
-
-            $browser->visit(new FormPage)->logOff();
-        });
-    }
-
-    /**
-     * Checks that form contains correct statuses list
-     * @group form
-     */
-    public function testStatusesList()
-    {
-        $this->browse(function (Browser $browser) {
-            $browser->visit(new LoginPage)->signIn([
-                'login' => env('USER'),
-                'password' => env('PASSWORD')
-            ]);
-
-            $schema = app(SchemaManager::Class)->find('Statuses');
-            $statuses = app(ObjectManager::Class)->search($schema, ['take' => -1])->map(function($item) {
-                return $item->id;
-            });
-
-            $browser->visit(new FormPage($this->getCompaniesList()->first()))
-                ->assertSelectHasOptions('@creationStatusesList', $statuses->toArray());
 
             $browser->visit(new FormPage)->logOff();
         });
