@@ -71,7 +71,11 @@ class Form extends Page
                     $browser->select($field . '[]', $one);
                 }
             } else {
-                $browser->select($field . '[]', $value);
+                if (in_array($field, ['KVNTeam', 'footballTeam'])) {
+                    $browser->select($field, $value);
+                } else {
+                    $browser->select($field . '[]', $value);
+                }
             }
         }
 

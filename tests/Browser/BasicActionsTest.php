@@ -15,6 +15,10 @@ use Tests\Browser\Pages\Form as FormPage;
 
 class BasicActionsTest extends DuskTestCase
 {
+    const EVENT_GROUP = '1ad70d49-3efc-436c-b806-4a303aa2679c';
+    const KVN_STATUS = 'cad65dda-7add-4465-9a3a-744e7378752a';
+    const FOOTBALL_STATUS = '6e1fca1c-5ad6-4105-a590-13adeeea0737';
+
     /**
      * Basic form data
      * @return array
@@ -48,6 +52,25 @@ class BasicActionsTest extends DuskTestCase
                 ]
             ]
         ];
+    }
+
+    /**
+     * Extend basic participant by kvn & football teams and statuses
+     * @return array
+     */
+    private function footballAndKVNParticipant()
+    {
+        $participant = $this->participant();
+        $participant['listFields']['status'][] = self::KVN_STATUS;
+        $participant['listFields']['status'][] = self::FOOTBALL_STATUS;
+        $participant['listFields']['KVNTeam'] = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('KVNTeams'), [
+            'take' => 1
+        ])->first()->id;
+        $participant['listFields']['footballTeam'] = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('footballTeam'), [
+            'take' => 1
+        ])->first()->id;
+
+        return $participant;
     }
 
     /**
@@ -188,6 +211,9 @@ class BasicActionsTest extends DuskTestCase
      * selected company
      * selected statuses
      * added lectures
+     * common event group
+     * kvn team group if selected
+     * football team group if selected
      *
      * @group creation
      */
@@ -199,16 +225,25 @@ class BasicActionsTest extends DuskTestCase
                 'password' => env('PASSWORD')
             ]);
 
-            $participant = $this->participant();
+            $participant = $this->footballAndKVNParticipant();
 
             $browser->visit(new FormPage($this->getCompaniesList()->first()))
                 ->createParticipant($participant);
 
             $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
 
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->find($userProfilesSchema, $id);
+
+            // Common event group
+            $this->assertContains(self::EVENT_GROUP, $profile->fields['groupIds']);
+
+            // Selected company group
             $company = $this->getCompanies()->first();
             $companyGroup = $company->fields['groupId'] ?? null;
+            $this->assertContains($companyGroup, $profile->fields['groupIds']);
 
+            // Member selected statuses groups
             $statusesGroups = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Statuses'), [
                 'take' => -1,
                 'where' => [
@@ -219,11 +254,14 @@ class BasicActionsTest extends DuskTestCase
             ])->map(function ($item) {
                 return $item->fields['groupId'] ?? null;
             });
+            foreach ($statusesGroups->toArray() as $statusesGroup) {
+                $this->assertContains($statusesGroup, $profile->fields['groupIds']);
+            }
 
+            // Lectures sections groups
             $participantLecturesSections = collect($participant['lectures'])->map(function ($item) {
                 return $item['section'];
             });
-
             $lecturesGroups = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Sections'), [
                 'take' => -1,
                 'where' => [
@@ -234,20 +272,21 @@ class BasicActionsTest extends DuskTestCase
             ])->map(function ($item) {
                 return $item->fields['groupId'] ?? null;
             });
-
-            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
-            $profile = app(ObjectManager::class)->find($userProfilesSchema, $id);
-
-            $this->assertContains($companyGroup, $profile->fields['groupIds']);
-            foreach ($statusesGroups->toArray() as $statusesGroup) {
-                $this->assertContains($statusesGroup, $profile->fields['groupIds']);
-            }
             foreach ($lecturesGroups->toArray() as $lecturesGroup) {
                 $this->assertContains($lecturesGroup, $profile->fields['groupIds']);
             }
 
-            $this->deleteMember($profile);
+            // Selected KVN team group
+            $kvnTeamGroup = app(ObjectManager::Class)->find(app(SchemaManager::Class)->find('KVNTeams'), $participant['listFields']['KVNTeam'])
+                ->fields['groupId'];
+            $this->assertContains($kvnTeamGroup, $profile->fields['groupIds']);
 
+            // Selected Fooltball team group
+            $footballTeamGroup = app(ObjectManager::Class)->find(app(SchemaManager::Class)->find('footballTeam'), $participant['listFields']['footballTeam'])
+                ->fields['groupId'];
+            $this->assertContains($kvnTeamGroup, $profile->fields['groupIds']);
+
+            $this->deleteMember($profile);
             $browser->visit(new FormPage)->logOff();
         });
     }

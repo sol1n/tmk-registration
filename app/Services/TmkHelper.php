@@ -8,12 +8,17 @@ use App\Services\SchemaManager;
 use App\Services\ObjectManager;
 use App\Services\FileManager;
 
+use Illuminate\Support\Facades\Cache;
+
 use App\Exceptions\Site\EmptyCompanyList;
 
 class TmkHelper
 {
     const PHOTO_DIRECTORY = '892630b0-b07c-4cfa-9290-378cd0bfd16e';
     const PRESENTATION_DIRECTORY = '43308c2c-f012-4877-bd12-ffa697b5a42b';
+    const EVENT_GROUP = '1ad70d49-3efc-436c-b806-4a303aa2679c';
+
+    const CACHE_LIFETIME = 15;
 
     private $backend;
 
@@ -22,7 +27,7 @@ class TmkHelper
         $this->backend = $backend;
     }
 
-    public function getRandomPassword(int $length = 6): string 
+    public function getRandomPassword(int $length = 6): string
     {
         return (string) rand(100000, 999999);
     }
@@ -31,7 +36,7 @@ class TmkHelper
     {
         $user = new User();
 
-        return app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('UserProfiles'), [
+        return app(ObjectManager::class)->search(app(SchemaManager::class)->find('UserProfiles'), [
             'take' => 1,
             'where' => ['userId' => $user->id]
         ])->first();
@@ -40,11 +45,11 @@ class TmkHelper
     public function checkCompanyAvailability($profile, $companyCode)
     {
         if (isset($profile->fields) and is_array($profile->fields) and isset($profile->fields['companies']) and is_array($profile->fields['companies']) and count($profile->fields['companies'])) {
-            $schema = app(SchemaManager::Class)->find('Companies');
-            $companies = app(ObjectManager::Class)->search($schema, [
+            $schema = app(SchemaManager::class)->find('Companies');
+            $companies = app(ObjectManager::class)->search($schema, [
                 'take' => -1,
                 'where' => ['id' => ['$in' => $profile->fields['companies']]]
-            ])->mapWithKeys(function($item) {
+            ])->mapWithKeys(function ($item) {
                 return [$item->id => $item->fields];
             });
             
@@ -58,7 +63,8 @@ class TmkHelper
         }
     }
 
-    public function uploadFile($file, $parent) {
+    public function uploadFile($file, $parent)
+    {
         $fileProperties = [
             'name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),
@@ -79,18 +85,181 @@ class TmkHelper
         );
         if ($uploadResult) {
             return $result['file']->id;
-            
         } else {
             throw new EmptyCompanyList('Can`t upload file');
         }
     }
 
-    public function uploadPhoto($file) {
+    public function uploadPhoto($file)
+    {
         return $this->uploadFile($file, self::PHOTO_DIRECTORY);
     }
 
-    public function uploadPresentation($file) {
+    public function uploadPresentation($file)
+    {
         return $this->uploadFile($file, self::PRESENTATION_DIRECTORY);
     }
 
+    /**
+     * Returns groups for specified in input fields elements:
+     *
+     * company,
+     * statuses,
+     * sections,
+     * KVN team,
+     * Football team
+     *
+     * @param  array $fields    input data
+     * @param  string $companyId selected company
+     * @param  array $sections sections list by lectures
+     * @return array
+     */
+    public function getGroups(array $fields, array $sections, string $companyId): array
+    {
+        $groups = [self::EVENT_GROUP];
+
+        // Company group
+        $companySchema = app(SchemaManager::class)->find('Companies');
+        $company = app(ObjectManager::class)->find($companySchema, $companyId);
+        if (isset($company->fields['groupId']) && $company->fields['groupId']) {
+            $groups[] = $company->fields['groupId'];
+        }
+
+        // Member statuses group
+        if (isset($fields['status']) && $fields['status']) {
+            $memberStatuses = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Statuses'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $fields['status']
+                    ]
+                ]
+            ]);
+            if ($memberStatuses->isNotEmpty()) {
+                foreach ($memberStatuses as $status) {
+                    if (isset($status->fields['groupId']) && $status->fields['groupId']) {
+                        $groups[] = $status->fields['groupId'];
+                    }
+                }
+            }
+        }
+
+        // Member lectures sections groups
+        if (count($sections) > 0) {
+            $memberSections = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Sections'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => $sections
+                    ]
+                ]
+            ]);
+            if ($memberSections->isNotEmpty()) {
+                foreach ($memberSections as $section) {
+                    if (isset($section->fields['groupId']) && $section->fields['groupId']) {
+                        $groups[] = $section->fields['groupId'];
+                    }
+                }
+            }
+        }
+
+        // KNV team group if selected
+        if (isset($fields['KVNTeam']) && $fields['KVNTeam']) {
+            $team = app(ObjectManager::class)->search(app(SchemaManager::class)->find('KVNTeams'), [
+                'take' => 1,
+                'where' => [
+                    'id' => $fields['KVNTeam']
+                ]
+            ])->first();
+
+            if (!is_null($team) && isset($team->fields['groupId']) && $team->fields['groupId']) {
+                $groups[] = $team->fields['groupId'];
+            }
+        }
+
+        // Football team group if selected
+        if (isset($fields['footballTeam']) && $fields['footballTeam']) {
+            $team = app(ObjectManager::class)->search(app(SchemaManager::class)->find('footballTeam'), [
+                'take' => 1,
+                'where' => [
+                    'id' => $fields['footballTeam']
+                ]
+            ])->first();
+
+            if (!is_null($team) && isset($team->fields['groupId']) && $team->fields['groupId']) {
+                $groups[] = $team->fields['groupId'];
+            }
+        }
+
+        return $groups;
+    }
+
+    public function getStatuses()
+    {
+        if (Cache::has('statuses')) {
+            return Cache::get('statuses');
+        } else {
+            $schema = app(SchemaManager::class)->find('Statuses');
+            $statuses = app(ObjectManager::class)->search($schema, [
+                'take' => -1,
+                'order' => [
+                    'orderIndex' => 'asc'
+                ]
+            ]);
+            Cache::put('statuses', $statuses, self::CACHE_LIFETIME);
+            return $statuses;
+        }
+    }
+
+    public function getSections()
+    {
+        if (Cache::has('sections')) {
+            return Cache::get('sections');
+        } else {
+            $schema = app(SchemaManager::class)->find('Sections');
+            $sections = app(ObjectManager::class)->all($schema);
+            Cache::put('sections', $sections, self::CACHE_LIFETIME);
+            return $sections;
+        }
+    }
+
+    public function getCompanies($user, $companyCode)
+    {
+        $key = 'companies-' . $user->id;
+        if (Cache::has($key)) {
+            return Cache::get($key);
+        } else {
+            $companies = $this->checkCompanyAvailability($user, $companyCode);
+            Cache::put($key, $companies, self::CACHE_LIFETIME);
+            return $companies;
+        }
+    }
+
+    public function getFootballTeams()
+    {
+        if (Cache::has('footballTeams')) {
+            return Cache::get('footballTeams');
+        } else {
+            $schema = app(SchemaManager::class)->find('footballTeam');
+            $teams = app(ObjectManager::class)->search($schema, ['take' => -1])->mapWithKeys(function ($item) {
+                return [$item->id => $item->fields['title']];
+            });
+            Cache::put('footballTeams', $teams, self::CACHE_LIFETIME);
+            return $teams;
+        }
+    }
+
+    public function getKVNTeams()
+    {
+        if (Cache::has('KVNTeams')) {
+            return Cache::get('KVNTeams');
+        } else {
+            $schema = app(SchemaManager::class)->find('KVNTeams');
+            $teams = app(ObjectManager::class)->search($schema, ['take' => -1])->mapWithKeys(function ($item) {
+                return [$item->id => $item->fields['Title']];
+            });
+            Cache::put('KVNTeams', $teams, self::CACHE_LIFETIME);
+            return $teams;
+        }
+    }
 }
