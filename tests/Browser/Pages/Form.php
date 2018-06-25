@@ -91,4 +91,9 @@ class Form extends Page
 
         $browser->press('@create');
     }
+
+    public function deleteParticipant(Browser $browser, string $id)
+    {
+        $browser->click('[data-delete-member=' . $id . ']');
+    }
 }

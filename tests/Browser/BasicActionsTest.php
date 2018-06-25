@@ -18,6 +18,7 @@ class BasicActionsTest extends DuskTestCase
     const EVENT_GROUP = '1ad70d49-3efc-436c-b806-4a303aa2679c';
     const KVN_STATUS = 'cad65dda-7add-4465-9a3a-744e7378752a';
     const FOOTBALL_STATUS = '6e1fca1c-5ad6-4105-a590-13adeeea0737';
+    const DEFAULT_ROLE = 'Participant';
 
     /**
      * Basic form data
@@ -63,10 +64,10 @@ class BasicActionsTest extends DuskTestCase
         $participant = $this->participant();
         $participant['listFields']['status'][] = self::KVN_STATUS;
         $participant['listFields']['status'][] = self::FOOTBALL_STATUS;
-        $participant['listFields']['KVNTeam'] = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('KVNTeams'), [
+        $participant['listFields']['KVNTeam'] = app(ObjectManager::class)->search(app(SchemaManager::class)->find('KVNTeams'), [
             'take' => 1
         ])->first()->id;
-        $participant['listFields']['footballTeam'] = app(ObjectManager::Class)->search(app(SchemaManager::Class)->find('footballTeam'), [
+        $participant['listFields']['footballTeam'] = app(ObjectManager::class)->search(app(SchemaManager::class)->find('footballTeam'), [
             'take' => 1
         ])->first()->id;
 
@@ -198,6 +199,7 @@ class BasicActionsTest extends DuskTestCase
 
             $this->assertTrue(isset($session['sessionId']) && !empty($session['sessionId']));
             $this->assertTrue(isset($session['userId']) && is_numeric($session['userId']));
+            $this->assertEquals($session['roleId'], self::DEFAULT_ROLE);
 
             $this->deleteMember($profile);
 
@@ -277,16 +279,118 @@ class BasicActionsTest extends DuskTestCase
             }
 
             // Selected KVN team group
-            $kvnTeamGroup = app(ObjectManager::Class)->find(app(SchemaManager::Class)->find('KVNTeams'), $participant['listFields']['KVNTeam'])
+            $kvnTeamGroup = app(ObjectManager::class)->find(app(SchemaManager::class)->find('KVNTeams'), $participant['listFields']['KVNTeam'])
                 ->fields['groupId'];
             $this->assertContains($kvnTeamGroup, $profile->fields['groupIds']);
 
             // Selected Fooltball team group
-            $footballTeamGroup = app(ObjectManager::Class)->find(app(SchemaManager::Class)->find('footballTeam'), $participant['listFields']['footballTeam'])
+            $footballTeamGroup = app(ObjectManager::class)->find(app(SchemaManager::class)->find('footballTeam'), $participant['listFields']['footballTeam'])
                 ->fields['groupId'];
             $this->assertContains($kvnTeamGroup, $profile->fields['groupIds']);
 
             $this->deleteMember($profile);
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * Checks that user has correct team fields and statuses after setting kvn & football team
+     * @group creation
+     */
+    public function testFootballAndKVNMemberCorrectData()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $participant = $this->footballAndKVNParticipant();
+            $userCompanies = $this->getCompaniesList();
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->createParticipant($participant)
+                ->assertSee($participant['textFields']['firstName']);
+
+            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->find($userProfilesSchema, $id);
+
+            $this->assertEquals($profile->fields['KVNTeam'], $participant['listFields']['KVNTeam']);
+            $this->assertEquals($profile->fields['footballTeam'], $participant['listFields']['footballTeam']);
+
+            $this->assertContains(self::FOOTBALL_STATUS, $profile->fields['status']);
+            $this->assertContains(self::KVN_STATUS, $profile->fields['status']);
+
+            $this->deleteMember($profile);
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * Checks form delete action that should delete:
+     *
+     * user
+     * user profile
+     * user lectures
+     *
+     * @group creation
+     */
+    public function testDeleting()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $participant = $this->participant();
+            $userCompanies = $this->getCompaniesList();
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->createParticipant($participant);
+
+            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->find($userProfilesSchema, $id);
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->deleteParticipant($id)
+                ->assertDontSee($participant['textFields']['firstName']);
+
+            // profile check
+            $profileAfterDeleting = app(ObjectManager::class)->search($userProfilesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $profile->id
+                ]
+            ])->first();
+            $this->assertNull($profileAfterDeleting);
+
+            // lectures list check
+            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
+            foreach ($profile->fields['lectures'] as $lectureId) {
+                $lectureAfterDeleting = app(ObjectManager::class)->search($lecturesSchema, [
+                    'take' => 1,
+                    'where' => [
+                        'id' => $lectureId
+                    ]
+                ])->first();
+                $this->assertNull($lectureAfterDeleting);
+            }
+
+            // user check
+            $userAfterDeleting = app(UserManager::class)->search([
+                'take' => 1,
+                'where' => json_encode([
+                    'id' => $profile->fields['userId']
+                ])
+            ])->first();
+            $this->assertNull($userAfterDeleting);
+
             $browser->visit(new FormPage)->logOff();
         });
     }

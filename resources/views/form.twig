@@ -87,7 +87,14 @@
               </td>
 
               <td class="members-table-cell members-table-del">
-                <a href="{{ route('removeMember', {company: companyId, profile: member.id}) }}" class="members-table-del-link" data-action-confirm="Вы действительно хотите удалить этого участника?">
+                <a 
+                  href="{{ route('removeMember', {company: companyId, profile: member.id}) }}" 
+                  class="members-table-del-link"
+                  data-delete-member="{{ member.id }}"
+                  {% if config('app.env') != 'testing' %}
+                    data-action-confirm="Вы действительно хотите удалить этого участника?"
+                  {% endif %}
+                >
                   {{ source('svg/icon-trash') }}
                 </a>
               </td>
