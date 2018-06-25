@@ -63,18 +63,18 @@ class SiteController extends Controller
         $companies = $this->helper->getCompanies($user, $companyCode);
         
         $schema = app(SchemaManager::class)->find('Lectures');
-        $lectures = app(ObjectManager::class)->search($schema, ['take' => -1]);
+        $lectures = app(ObjectManager::class)->allWithLang($schema, ['take' => -1], 'en');
         
         if (is_null($companyCode)) {
             $company = null;
             $team = null;
         } else {
             $schema = app(SchemaManager::class)->find('UserProfiles');
-            $members = app(ObjectManager::class)->search($schema, [
+            $members = app(ObjectManager::class)->allWithLang($schema, [
                 'order' => 'lastName',
                 'take' => -1,
                 'where' => ['team' => $companyCode]
-            ]);
+            ], 'en');
             
             $team = [];
             foreach ($members as $member) {
@@ -132,7 +132,7 @@ class SiteController extends Controller
 
         $sections = $this->prepareLectures($fields);
 
-        $fields['groupIds'] = $$this->helper->getGroups($fields, $sections, $companyId);
+        $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
         $fields['sections'] = $sections;
 
         $enFields = $fields['en'] ?? [];

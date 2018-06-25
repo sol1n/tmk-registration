@@ -50,7 +50,19 @@ class BasicActionsTest extends DuskTestCase
                     'theses' => 'theses',
                     'subject' => 'subject',
                     'section' => 'daa72dc4-5fe4-4c3d-82e0-247e272a53ab',
+                ],
+                [
+                    'theses' => 'theses2',
+                    'subject' => 'subject2',
+                    'section' => '0421f11d-9287-4ac6-adcc-5802bbf316ef',
                 ]
+            ],
+            'en' => [
+                'lastName' => 'lastNameEn',
+                'firstName' => 'firstNameEn',
+                'middleName' => 'middleNameEn',
+                'description' => 'descriptionEn',
+                'rewards' => 'rewardsEn'
             ]
         ];
     }
@@ -128,6 +140,7 @@ class BasicActionsTest extends DuskTestCase
      * personal data
      * statuses list
      * section field from member lectures
+     * english fields
      *
      * @group creation
      */
@@ -149,13 +162,27 @@ class BasicActionsTest extends DuskTestCase
             $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
 
             $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
-            $profile = app(ObjectManager::class)->find($userProfilesSchema, $id);
+            $profile = app(ObjectManager::class)->allWithLang($userProfilesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $id
+                ]
+            ], 'en')->first();
             
+            // personal data
             foreach ($participant['textFields'] as $field => $value) {
                 $this->assertEquals($profile->fields[$field], $value);
             }
 
+            // english fields of personal data
+            foreach ($participant['en'] as $field => $value) {
+                $this->assertEquals($profile->languages['en'][$field], $value);
+            }
+
+            // statuses list
             $this->assertEquals($profile->fields['status'], $participant['listFields']['status']);
+
+            // lections sections list
             foreach ($participant['lectures'] as $lecture) {
                 $this->assertContains($lecture['section'], $profile->fields['sections']);
             }
@@ -390,6 +417,62 @@ class BasicActionsTest extends DuskTestCase
                 ])
             ])->first();
             $this->assertNull($userAfterDeleting);
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * Checks that lectures is creating with correct data
+     * @group creation
+     */
+    public function testLecturesCreation()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $participant = $this->participant();
+            $userCompanies = $this->getCompaniesList();
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->createParticipant($participant)
+                ->assertSee($participant['textFields']['firstName']);
+
+            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->search($userProfilesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $id
+                ]
+            ])->first();
+
+            $this->assertEquals(count($profile->fields['lectures']), count($participant['lectures']));
+            
+            $lecturesIds = $profile->fields['lectures'];
+
+            $lecturesSchema = app(SchemaManager::Class)->find('Lectures');
+            $lectures = app(ObjectManager::Class)->search($lecturesSchema, [
+                'take' => -1,
+                'order' => 'createdAt',
+                'where' => [
+                    'id' => [
+                        '$in' => $lecturesIds
+                    ]
+                ]
+            ])->toArray();
+
+            foreach ($participant['lectures'] as $index => $lecture) {
+                $this->assertEquals($lecture['theses'], $lectures[$index]->fields['Description']);
+                $this->assertEquals($lecture['subject'], $lectures[$index]->fields['Title']);
+                $this->assertEquals($lecture['section'], $lectures[$index]->fields['Section']);
+            }
+
+            $this->deleteMember($profile);
 
             $browser->visit(new FormPage)->logOff();
         });

@@ -83,10 +83,20 @@ class Form extends Page
             $browser->type($field, $value);
         }
 
-        foreach ($model['lectures'] as $lecture) {
-            $browser->type('subject[]', $lecture['subject']);
-            $browser->type('theses[]', $lecture['theses']);
-            $browser->select('section[]', $lecture['section']);
+        if (isset($model['en']) && is_array($model['en'])) {
+            foreach ($model['en'] as $field => $value) {
+                $browser->type('en[' . $field . ']', $value);
+            }
+        }
+
+        foreach ($model['lectures'] as $index => $lecture) {
+            $browser->value('#new-member-form .lecture-form-' . $index . ' [name="subject[]"]', $lecture['subject']);
+            $browser->value('#new-member-form .lecture-form-' . $index . ' [name="theses[]"]', $lecture['theses']);
+            $browser->select('#new-member-form .lecture-form-' . $index . ' [name="section[]"]', $lecture['section']);
+
+            if (($index + 1) < count($model['lectures'])) {
+                $browser->click('#new-member-form .more-lecture');
+            }
         }
 
         $browser->press('@create');
@@ -94,6 +104,6 @@ class Form extends Page
 
     public function deleteParticipant(Browser $browser, string $id)
     {
-        $browser->click('[data-delete-member=' . $id . ']');
+        $browser->click('.members-table-del-link');
     }
 }

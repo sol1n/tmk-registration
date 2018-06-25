@@ -49,13 +49,48 @@
           </div>
         </div>
 
+        <div class="row"> 
+          <div class="col-xs-12 col-sm-4"> 
+            <div class="form-group"> 
+              <label class="form-label" for="form-lastname-en"> 
+                Фамилия <span class="c-gray">(англ)</span> 
+              </label> 
+              <input id="form-lastname-en" type="text" name="en[lastName]" class="form-input" value=""> 
+            </div> 
+          </div> 
+          <div class="col-xs-12 col-sm-4"> 
+            <div class="form-group"> 
+              <label class="form-label" for="form-name-en"> 
+                Имя <span class="c-gray">(англ)</span> 
+              </label> 
+              <input id="form-name-en" type="text" name="en[firstName]" class="form-input" value=""> 
+            </div> 
+          </div> 
+          <div class="col-xs-12 col-sm-4"> 
+            <div class="form-group"> 
+              <label class="form-label" for="form-middlename-en"> 
+                Отчество <span class="c-gray">(англ)</span> 
+              </label> 
+              <input id="form-middlename-en" type="text" name="en[middleName]" class="form-input" value=""> 
+            </div> 
+          </div> 
+        </div>
+
         <div class="row">
-          <div class="col-xs-12 col-sm-12">
+          <div class="col-xs-12 col-sm-6">
             <div class="form-group">
               <label class="form-label" for="form-position">Должность</label>
               <input id="form-position" type="text" name="position" class="form-input" value="">
             </div>
           </div>
+          <div class="col-xs-12 col-sm-6"> 
+              <div class="form-group"> 
+                <label class="form-label" for="form-position"> 
+                  Должность <span class="c-gray">(англ)</span> 
+                </label> 
+                <input id="form-position" type="text" name="en[position]" class="form-input" value=""> 
+              </div> 
+            </div> 
         </div>
 
         <div class="row">
@@ -154,6 +189,16 @@
               Максимальное количество символов: <span id="form-bio-counter">12000</span>
           </div>
         </div>
+
+        <div class="form-group"> 
+          <label class="form-label" for="form-bio-en"> 
+            Биография <span class="c-gray">(англ)</span> 
+          </label> 
+          <textarea class="form-textarea" name="en[description]" id="form-bio-en" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-bio-en-counter"></textarea> 
+          <div class="form-textarea-counter"> 
+              Максимальное количество символов: <span id="form-bio-en-counter">12000</span> 
+          </div> 
+        </div> 
         
         <div class="form-group">
           <label class="form-label" for="form-rewards">Награды</label>
@@ -163,9 +208,19 @@
           </div>
         </div>
 
+        <div class="form-group">
+          <label class="form-label" for="form-en-rewards">Награды</label>
+          <textarea class="form-textarea" name="en[rewards]" id="form-en-rewards" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-rewards-en-counter"></textarea>
+          <div class="form-textarea-counter">
+              Максимальное количество символов: <span id="form-rewards-en-counter">12000</span>
+          </div>
+        </div>
+
         <div class="
-          member-additional-form 
+          lecture-form 
+          lecture-form-0 
           js-member-status
+          member-additional-form 
           {% for status in lectureStatuses %}
             js-member-status-{{ status }} 
           {% endfor %}

@@ -14,6 +14,8 @@ function toLatin(text){
 $(function(){
 	$(document).on('click', '.more-lecture', function(){
 		var form = $(this).parents('.member-additional-form');
+		var count = $(this).parents('.form-block').find('.lecture-form').length;
+
 		var newform = form.clone().hide();
 		form.after(newform);
 		newform.fadeIn();
@@ -27,6 +29,10 @@ $(function(){
 		newform.find('input').first().focus();
 		newform.find('.uploaded-file-link').remove();
 		newform.find('.js-file-input').fileInput();
+
+		
+		newform.removeClass('lecture-form-' + (count - 1));
+		newform.addClass('lecture-form-' + count);
 		return false;
 	});
 
