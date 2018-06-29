@@ -52,6 +52,17 @@ class SiteController extends Controller
         });
     }
 
+    public function LectureForm()
+    {
+        return view('form/lecture', [
+            'sections' => $this->helper->getSections(),
+            'index' => request()->get('index') ?? 0,
+            'statuses' => self::LECTURE_STATUSES,
+            'active' => true,
+            'showMoreButton' => true
+        ]);
+    }
+
     public function ShowEditForm(Backend $backend, $companyCode = null)
     {
         $user = $this->helper->getCurrentUser();
@@ -220,11 +231,13 @@ class SiteController extends Controller
                 } elseif (isset($fields['saved-presentation'][$k]) && $fields['saved-presentation'][$k]) {
                     $lecture['presentationFileId'] = $fields['saved-presentation'][$k];
                 }
-                $lecture['Title'] = $fields['subject'][$k];
-                $lecture['Description'] = $fields['theses'][$k];
-                $lecture['Section'] = $fields['section'][$k];
+                $lecture['Title'] = isset($fields['subject'][$k]) ? $fields['subject'][$k] : null;
+                $lecture['Description'] = isset($fields['theses'][$k]) ? $fields['theses'][$k] : null;
+                $lecture['Section'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
 
-                $sections[] = $fields['section'][$k];
+                if (isset($fields['section'][$k]) and !is_null($fields['section'][$k])) {
+                    $sections[] = $fields['section'][$k];
+                }
 
                 if (is_numeric($k)) {
                     $lecture = app(ObjectManager::class)->create($schema, $lecture);

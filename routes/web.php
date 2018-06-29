@@ -12,6 +12,7 @@
 */
 
 
+Route::get('/lecture', 'SiteController@LectureForm');
 Route::get('/form/{company}/', 'SiteController@ShowEditForm')->name('company');
 Route::get('/form', 'SiteController@ShowEditForm')->name('form');
 Route::get('/form/{company}/user/{profile}/remove', 'SiteController@RemoveMember')->name('removeMember');

@@ -209,36 +209,25 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="form-en-rewards">Награды</label>
+          <label class="form-label" for="form-en-rewards">
+            Награды <span class="c-gray">(англ)</span> 
+          </label>
           <textarea class="form-textarea" name="en[rewards]" id="form-en-rewards" cols="30" rows="10" maxlength="12000" data-text-count data-text-count-block="#form-rewards-en-counter"></textarea>
           <div class="form-textarea-counter">
               Максимальное количество символов: <span id="form-rewards-en-counter">12000</span>
           </div>
         </div>
 
-        <div class="
-          lecture-form 
-          lecture-form-0 
-          js-member-status
-          member-additional-form 
-          {% for status in lectureStatuses %}
-            js-member-status-{{ status }} 
-          {% endfor %}
-          "
-        >
-          {%
-            include 'form/lecture' 
-            with {
-              'sections': sections
-            } only
-          %}
-
-          <p>
-            <a class="more-lecture">
-              Добавить еще один доклад
-            </a>
-          </p>
-        </div>
+        {%
+          include 'form/lecture' 
+          with {
+            'sections': sections,
+            'index': 0,
+            'statuses': lectureStatuses,
+            'active': false,
+            'showMoreButton': true
+          } only
+        %}
 
         <div class="text-right">
             <button type="submit" class="button button-orange-hollow">Сохранить</button>

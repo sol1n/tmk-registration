@@ -1,64 +1,103 @@
-<hr class="form-block-hr m-b-lg">
-<div class="row">
-  <div class="col-xs-12 col-sm-8">
-    <div class="form-group">
-      <label for="form-edit-1-subject" class="form-label">Тема доклада</label>
-      <input id="form-edit-1-subject" data-name="subject[]" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.Title }}">
-    </div>
-  </div>
-  <div class="col-xs-12 col-sm-4">
-    <div class="form-group">
-      <label for="form-edit-1-section" class="form-label">Секция</label>
-      <div class="form-select">
-        <select name="section[{{ lecture.id }}]" data-name="section[]" id="form-edit-1-section">
-          <option value="">Не выбрано</option>
-          {% for section in sections %}
-            {% if section.id == lecture.fields.Section %}
-              <option selected value="{{ section.id }}">{{ section.fields.Title }}</option>
-            {% else %}
-              <option value="{{ section.id }}">{{ section.fields.Title }}</option>
-            {% endif %}
-          {% endfor %}
-        </select>
+{% if lecture %}
+  {% set prefix = 'lecture-' ~ lecture.id ~ '-edit-' ~ index %}
+{% else %}
+  {% set prefix = 'lecture-create-' ~ index %}
+{% endif %}
+<div class="
+  lecture-form 
+  lecture-form-{{ index }}
+  {% if active %}active{% endif %}
+  member-additional-form 
+  js-member-status
+  {% for status in statuses %}
+    js-member-status-{{ status }} 
+  {% endfor %}
+  ">
+  <hr class="form-block-hr m-b-lg">
+  <div class="row">
+    
+    <div class="col-xs-12 col-sm-12">
+      <div class="form-group">
+        <label for="{{ prefix }}-section" class="form-label">Секция</label>
+        <div class="form-select">
+          <select name="section[{{ lecture.id }}]" data-name="section[]" id="{{ prefix }}-section">
+            <option value="">Не выбрано</option>
+            {% for section in sections %}
+              {% if section.id == lecture.fields.Section %}
+                <option selected value="{{ section.id }}">{{ section.fields.Title }}</option>
+              {% else %}
+                <option value="{{ section.id }}">{{ section.fields.Title }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
       </div>
     </div>
-  </div>
-</div
->
 
-<div class="form-group">
-  <label for="form-edit-1-theses" class="form-label">Тезисы доклада</label>
-  <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="form-edit-1-theses" cols="30" rows="10" class="form-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада" maxlength="12000" data-text-count data-text-count-block="#form-edit-1-theses-counter">{{ lecture.fields.Description }}</textarea>
-  <div class="form-textarea-counter">
-      Максимальное количество символов: <span id="form-edit-1-theses-counter">12000</span>
-  </div>
-</div>
+    <div class="col-xs-12 col-sm-12">
+      <div class="form-group">
+        <label for="{{ prefix }}-subject" class="form-label">Тема доклада</label>
+        <input id="{{ prefix }}-subject" data-name="subject[]" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.Title }}">
+      </div>
+    </div>
 
-<div class="form-group">
-  <div class="js-file-input form-file-input">
-    <span class="icon no-td js-file-input-link form-file-input-link">
-      {{ source('/svg/icon-presentation') }}
-      {% if lecture.fields.presentationFileId %}
-        <span class="dotted">Изменить презентацию</span>
-      {% else %}
-        <span class="dotted">Загрузить презентацию</span>
-      {% endif %}
-    </span>
+    <div class="col-xs-12 col-sm-12">
+      <div class="form-group">
+        <label for="{{ prefix }}-subject" class="form-label">
+          Тема доклада <span class="c-gray">(англ)</span> 
+        </label>
+        <input id="{{ prefix }}-subject" data-name="subject[en][{{ lecture.id }}]" name="subject[en][{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
+      </div>
+    </div>
+  </div
+  >
 
-    <input type="file" name="presentation[{{ lecture.id }}]" data-name="presentation[]" class="js-file-input-field form-file-input-field">
-
-    <div class="js-file-input-photo form-file-input-photo"></div>
-    <div class="js-file-input-name form-file-input-name"></div>
-
-    <a href="#" class="js-file-input-del form-file-input-del">
-      {{ source('/svg/icon-list-del') }}
-    </a>
+  <div class="form-group">
+    <label for="{{ prefix }}-theses" class="form-label">Тезисы доклада</label>
+    <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада">{{ lecture.fields.Description|raw }}</textarea>
   </div>
 
-  {% if lecture.fields.presentationFileId  %}
-    <p class="uploaded-file-link">
-      Загруженный файл: 
-      <a href="{{ backend.url }}files/{{ lecture.fields.presentationFileId }}/download" target="_blank">{{ lecture.fields.presentationFileId }}</a>
+  <div class="form-group">
+    <label for="{{ prefix }}-theses" class="form-label">
+      Тезисы доклада <span class="c-gray">(англ)</span> 
+    </label>
+    <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][{{ lecture.id }}]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада">{{ lecture.languages.en.Description|raw }}</textarea>
+  </div>
+
+  <div class="form-group">
+    <div class="js-file-input form-file-input">
+      <span class="icon no-td js-file-input-link form-file-input-link">
+        {{ source('/svg/icon-presentation') }}
+        {% if lecture.fields.presentationFileId %}
+          <span class="dotted">Изменить презентацию</span>
+        {% else %}
+          <span class="dotted">Загрузить презентацию</span>
+        {% endif %}
+      </span>
+
+      <input type="file" name="presentation[{{ lecture.id }}]" data-name="presentation[]" class="js-file-input-field form-file-input-field">
+
+      <div class="js-file-input-photo form-file-input-photo"></div>
+      <div class="js-file-input-name form-file-input-name"></div>
+
+      <a href="#" class="js-file-input-del form-file-input-del">
+        {{ source('/svg/icon-list-del') }}
+      </a>
+    </div>
+
+    {% if lecture.fields.presentationFileId  %}
+      <p class="uploaded-file-link">
+        Загруженный файл: 
+        <a href="{{ backend.url }}files/{{ lecture.fields.presentationFileId }}/download" target="_blank">{{ lecture.fields.presentationFileId }}</a>
+      </p>
+    {% endif %}
+  </div>
+
+  {% if showMoreButton %}
+    <p>
+      <a class="more-lecture">
+        Добавить еще один доклад
+      </a>
     </p>
   {% endif %}
 </div>

@@ -230,58 +230,29 @@
 
           {% if (member.fields.lectures|length) %}
             {% for lecture in member.fields.lectures %}
-              <div class="
-                active 
-                member-additional-form 
-                js-member-status
-                {% for status in lectureStatuses %}
-                  js-member-status-{{ status }} 
-                {% endfor %}
-                ">
-
                 {%
                   include 'form/lecture' 
                   with {
                     'sections': sections,
-                    'lecture': lecture
+                    'lecture': lecture,
+                    'index': loop.index0,
+                    'statuses': lectureStatuses,
+                    'active': true,
+                    'showMoreButton' : loop.last
                   } only
                 %}
-
-                {% if loop.last %}
-                  <p>
-                    <a class="more-lecture">
-                      Добавить еще один доклад
-                    </a>
-                  </p>
-                {% endif %}
-
-              </div>
             {% endfor %}
           {% else %}
-
-            <div class="
-              {% if member.report %}active{% endif %} 
-                member-additional-form 
-                js-member-status 
-                {% for status in lectureStatuses %}
-                  js-member-status-{{ status }} 
-                {% endfor %}
-              ">
-
               {%
                 include 'form/lecture' 
                 with {
-                  'sections': sections
+                  'sections': sections,
+                  'index': 0,
+                  'statuses': lectureStatuses,
+                  'active': member.report,
+                  'showMoreButton': true
                 } only
               %}
-
-              <p>
-                <a class="more-lecture">
-                  Добавить еще один доклад
-                </a>
-              </p>
-            </div>
-
           {% endif %}
 
           <div class="text-right">
