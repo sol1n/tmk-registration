@@ -1,5 +1,5 @@
 <?php
 
 return [
-  'ref_count_for_select' => 300
+  'objects_per_page' => 25
 ];

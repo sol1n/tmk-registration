@@ -27,13 +27,33 @@
   {% if companyId %}
 
     {% if members|length %}
-      <div class="block-title">Участники</div>
+      <div class="table-header">
+        <div class="block-title">
+          Участники
+        </div>
+        <div class="settings" data-settings="1300">
+          {% for index, setting in settings %}
+            <div class="settings-group settings-group-{{ index }}">
+              <div class="form-select">
+                <select name="{{ index }}" id="settings-{{ index }}">
+                  {% for value, title in setting %}
+                    <option {% if selectedSettings[index] == value %}selected{% endif %} value="{{ value }}">{{ title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
       <div class="form-block m-b-lg">
         <table class="members-table">
           <tr class="members-table-heading">
             <th class="members-table-cell">&nbsp;</th>
             <th class="members-table-cell">Фото</th>
-            <th class="members-table-cell">ФИО</th>
+            <th class="members-table-cell">
+              ФИО
+            </th>
             <th class="members-table-cell">Логин</th>
             <th class="members-table-cell"><span class="no-wrap">Статус участника</span></th>
             <th class="members-table-cell">Телефон</th>
@@ -51,7 +71,7 @@
                 <a href="#" title="Редактировать участника" data-member-edit="#member-{{ member.id }}-edit">
                   {% if member.fields.photoFileId %}
                     <div class="members-table-photo">
-                      <img src="{{ backend.url }}images/{{ member.fields.photoFileId }}/download/photo-{{ member.id }}.jpg?width=50&height=50" class="" alt="">
+                      <img src="{{ backend.url }}images/{{ member.fields.photoFileId }}/download/photo-{{ member.id }}.jpg?width=50&height=50&stretch=UniformToFill">
                     </div>
                   {% endif %}
                 </a>
@@ -104,6 +124,9 @@
 
           {% endfor %}
         </table>
+
+        {{ members.links()|raw }}
+
       </div>
     {% endif %}
 

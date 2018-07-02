@@ -32,26 +32,7 @@ $(function(){
 				form.after(newform);
 			}
 		});
-
-		// var newform = form.clone().hide();
-		// form.after(newform);
-		// newform.fadeIn();
-		// newform.find('textarea, select, input').each(function(){
-		// 	$(this).val('');
-		// 	var name = $(this).data('name');
-		// 	$(this).attr('name', name);
-		// });
-		// //.trumbowyg('empty');
-		// console.log(newform.find('.lecture-textarea'));
-		// newform.find('.js-file-input').removeClass('is-filled').removeClass('is-image');
-		// $(this).hide();
-		// newform.find('input').first().focus();
-		// newform.find('.uploaded-file-link').remove();
-		// newform.find('.js-file-input').fileInput();
-
 		
-		// newform.removeClass('lecture-form-' + (count - 1));
-		// newform.addClass('lecture-form-' + count);
 		return false;
 	});
 
@@ -68,4 +49,24 @@ $(function(){
 		btns: [['formatting'], ['bold', 'italic'], ['justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull']],
 		lang: 'ru'
 	});
+
+	$('[data-settings]').each(function(){
+		var countdown = $(this).data('settings');
+		$(this).find('select').on('change', function(){
+			if (window.settingsTimeout) {
+				clearTimeout(window.settingsTimeout);
+			}
+			window.settingsTimeout = setTimeout(function() {
+				var href = window.location.href.split('?')[0] + '?';
+				var count = $('[data-settings] select').length;
+				$('[data-settings] select').each(function(index) {
+					href += $(this).attr('name') + '=' + $(this).val();
+					if (index !== count - 1) {
+						href += '&';
+					}
+				});
+				document.location.href = href;
+			}, countdown);
+		})
+	})
 })

@@ -1,6 +1,23 @@
+.mouse-hover(@rules) {
+  @media (hover: hover) {
+    &:hover {
+      @rules();
+    }
+  }
+}
+
+.ul-reset {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 @import (less) "../../../node_modules/trumbowyg/dist/ui/trumbowyg.css";
 @import (less) "./css/style.min.css";
 @import (less) "./css/additional.css";
+@import (less) "colors";
+@import (less) "components/settings";
+@import (less) "components/pagination";
 
 .trumbowyg-box.trumbowyg-editor-visible {
   min-height: 150px;

@@ -207,21 +207,30 @@ class Object
             $tempData[$rawData['id']] = $rawData;
         }
 
-        $headers['X-Appercode-Language'] = $language;
-
-        $json = self::jsonRequest([
-            'method' => 'POST',
-            'headers' => $headers,
-            'url' => $url,
-            'json' => $query
-        ]);
-
-        foreach ($json as $localizedRawData) {
-            $id = $localizedRawData['id'];
-            $localizedData = [
-                $language => $localizedRawData
+        if ($tempData) {
+            $headers['X-Appercode-Language'] = $language;
+            $query['where'] = [
+                'id' => [
+                    '$in' => array_keys($tempData)
+                ]
             ];
-            $list->push(Object::build($schema, $tempData[$id], $localizedData));
+            unset($query['skip']);
+
+            $json = self::jsonRequest([
+                'method' => 'POST',
+                'headers' => $headers,
+                'url' => $url,
+                'json' => $query
+            ]);
+
+
+            foreach ($json as $localizedRawData) {
+                $id = $localizedRawData['id'];
+                $localizedData = [
+                    $language => $localizedRawData
+                ];
+                $list->push(Object::build($schema, $tempData[$id], $localizedData));
+            }
         }
 
         return $list;

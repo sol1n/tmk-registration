@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\User;
 use App\Backend;
 use Illuminate\Http\Request;
-use App\Exceptions\User\WrongCredentialsException;
 use GuzzleHttp\Exception\ClientException;
 
 use App\Services\TmkHelper;
 
 use App\Services\ObjectManager;
 use App\Services\SchemaManager;
+
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SiteController extends Controller
 {
@@ -63,6 +64,27 @@ class SiteController extends Controller
         ]);
     }
 
+    private function settings()
+    {
+        return [
+            'sorting' => [
+                'lastName' => 'По возрастанию ФИО',
+                '-lastName' => 'По убыванию ФИО',
+                'createdAt' => 'По убыванию даты создания',
+                '-createdAt' => 'По убыванию даты создания',
+                'updatedAt' => 'По убыванию даты обновления',
+                '-updatedAt' => 'По убыванию даты обновления',
+            ],
+            'count' => [
+                '25' => 25,
+                '50' => 50,
+                '100' => 100,
+                '500' => 500,
+                '1000' => 1000
+            ]
+        ];
+    }
+
     public function ShowEditForm(Backend $backend, $companyCode = null)
     {
         $user = $this->helper->getCurrentUser();
@@ -80,14 +102,22 @@ class SiteController extends Controller
             $company = null;
             $team = null;
         } else {
+            $selectedSettings = [
+                'count' => (int) (request()->get('count') ?? config('objects.objects_per_page')),
+                'sorting' => request()->get('sorting') ?? '-updatedAt',
+                'page' => (int) (request()->get('page') ?? 1)
+            ];
+
             $schema = app(SchemaManager::class)->find('UserProfiles');
             $members = app(ObjectManager::class)->allWithLang($schema, [
-                'order' => 'lastName',
-                'take' => -1,
+                'order' => $selectedSettings['sorting'],
+                'take' => $selectedSettings['count'],
+                'skip' => ($selectedSettings['page'] - 1) * $selectedSettings['count'],
                 'where' => ['team' => $companyCode]
             ], 'en');
+
+            $count = app(ObjectManager::class)->count($schema, ['search' => ['team' => $companyCode]]);
             
-            $team = [];
             foreach ($members as $member) {
                 if (isset($member->fields['lectures']) && count($member->fields['lectures'])) {
                     foreach ($member->fields['lectures'] as $k => $lectureID) {
@@ -113,9 +143,15 @@ class SiteController extends Controller
                     }
                     $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
                 }
-
-                $team[] = $member;
             }
+
+            $members = new LengthAwarePaginator(
+                $members,
+                $count,
+                $selectedSettings['count'],
+                $selectedSettings['page'],
+                ['path' => request()->url(), 'query' => request()->query()]
+            );
         }
 
         return view('form', [
@@ -128,7 +164,9 @@ class SiteController extends Controller
             'companies' => $companies,
             'footballTeams' => $footballTeams,
             'KVNTeams' => $KVNTeams,
-            'companyId' => $companyCode
+            'companyId' => $companyCode,
+            'settings' => $this->settings(),
+            'selectedSettings' => $selectedSettings
         ]);
     }
 
