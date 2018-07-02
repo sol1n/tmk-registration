@@ -455,8 +455,8 @@ class BasicActionsTest extends DuskTestCase
             
             $lecturesIds = $profile->fields['lectures'];
 
-            $lecturesSchema = app(SchemaManager::Class)->find('Lectures');
-            $lectures = app(ObjectManager::Class)->search($lecturesSchema, [
+            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
+            $lectures = app(ObjectManager::class)->search($lecturesSchema, [
                 'take' => -1,
                 'order' => 'createdAt',
                 'where' => [
@@ -470,6 +470,65 @@ class BasicActionsTest extends DuskTestCase
                 $this->assertEquals($lecture['theses'], $lectures[$index]->fields['Description']);
                 $this->assertEquals($lecture['subject'], $lectures[$index]->fields['Title']);
                 $this->assertEquals($lecture['section'], $lectures[$index]->fields['Section']);
+            }
+
+            $this->deleteMember($profile);
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * Checks correction set of created member profile:
+     *
+     * company tag,
+     * statuses tags,
+     * lectures sections tags
+     *
+     * @group creation
+     */
+    public function testMemberTags()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $participant = $this->participant();
+            $userCompanies = $this->getCompaniesList();
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->createParticipant($participant);
+
+            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->search($userProfilesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $id
+                ]
+            ])->first();
+
+            $tagSources = [
+                $this->getCompanies()->first()->id
+            ];
+            foreach ($participant['listFields']['status'] as $status) {
+                $tagSources[] = $status;
+            }
+            foreach ($participant['lectures'] as $lecture) {
+                $tagSources[] = $lecture['section'];
+            }
+
+            $tagsSchema = app(SchemaManager::class)->find('UserProfilesTags');
+            $tags =  app(ObjectManager::class)->search($tagsSchema, ['take' => -1])->map(function ($item) use ($tagSources) {
+                if (isset($item->fields['external']) && in_array($item->fields['external'], $tagSources)) {
+                    return $item->id;
+                }
+            })->filter()->values()->toArray();
+
+            foreach ($tags as $tag) {
+                $this->assertContains($tag, $profile->fields['tagsIds']);
             }
 
             $this->deleteMember($profile);

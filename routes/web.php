@@ -14,7 +14,7 @@
 
 Route::get('/lecture', 'SiteController@LectureForm');
 Route::get('/form/{company}/', 'SiteController@ShowEditForm')->name('company');
-Route::get('/form', 'SiteController@ShowEditForm')->name('form');
+Route::get('/form', 'SiteController@ShowCompanySelect')->name('form');
 Route::get('/form/{company}/user/{profile}/remove', 'SiteController@RemoveMember')->name('removeMember');
 Route::post('/form/{company}/user/new/', 'SiteController@NewMember')->name('newMember');
 Route::post('/form/{company}/user/{profile}/', 'SiteController@ProcessMember')->name('saveMember');

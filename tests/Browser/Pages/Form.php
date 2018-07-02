@@ -50,7 +50,7 @@ class Form extends Page
             '@create' => '#new-member-form .button-orange-hollow',
             '@addButton' => '.icon-memeber-add',
             '@creationStatusesList' => '#form-status',
-            '@creationSectionsList' => '#form-edit-1-section',
+            '@creationSectionsList' => '#lecture-create-0-section',
             '@creationKVNTeamsList' => '#form-KVNTeam',
             '@creationFootballTeamsList' => '#form-footballTeam',
         ];
@@ -90,12 +90,13 @@ class Form extends Page
         }
 
         foreach ($model['lectures'] as $index => $lecture) {
-            $browser->value('#new-member-form .lecture-form-' . $index . ' [name="subject[]"]', $lecture['subject']);
-            $browser->value('#new-member-form .lecture-form-' . $index . ' [name="theses[]"]', $lecture['theses']);
-            $browser->select('#new-member-form .lecture-form-' . $index . ' [name="section[]"]', $lecture['section']);
+            $browser->select('#lecture-create-' . $index . '-section', $lecture['section']);
+            $browser->value('#lecture-create-' . $index . '-subject', $lecture['subject']);
+            $browser->value('#lecture-create-' . $index . '-theses', $lecture['theses']);
 
             if (($index + 1) < count($model['lectures'])) {
                 $browser->click('#new-member-form .more-lecture');
+                $browser->waitFor('.lecture-form-' . ($index + 1));
             }
         }
 

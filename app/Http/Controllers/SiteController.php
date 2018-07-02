@@ -85,7 +85,17 @@ class SiteController extends Controller
         ];
     }
 
-    public function ShowEditForm(Backend $backend, $companyCode = null)
+    public function ShowCompanySelect()
+    {
+        $user = $this->helper->getCurrentUser();
+        $companies = $this->helper->getCompanies($user);
+
+        return view('form', [
+            'companies' => $companies
+        ]);
+    }
+
+    public function ShowEditForm(Backend $backend, string $companyCode)
     {
         $user = $this->helper->getCurrentUser();
 
@@ -98,61 +108,56 @@ class SiteController extends Controller
         $schema = app(SchemaManager::class)->find('Lectures');
         $lectures = app(ObjectManager::class)->allWithLang($schema, ['take' => -1], 'en');
         
-        if (is_null($companyCode)) {
-            $company = null;
-            $team = null;
-        } else {
-            $selectedSettings = [
-                'count' => (int) (request()->get('count') ?? config('objects.objects_per_page')),
-                'sorting' => request()->get('sorting') ?? '-updatedAt',
-                'page' => (int) (request()->get('page') ?? 1)
-            ];
+        $selectedSettings = [
+            'count' => (int) (request()->get('count') ?? config('objects.objects_per_page')),
+            'sorting' => request()->get('sorting') ?? '-updatedAt',
+            'page' => (int) (request()->get('page') ?? 1)
+        ];
 
-            $schema = app(SchemaManager::class)->find('UserProfiles');
-            $members = app(ObjectManager::class)->allWithLang($schema, [
-                'order' => $selectedSettings['sorting'],
-                'take' => $selectedSettings['count'],
-                'skip' => ($selectedSettings['page'] - 1) * $selectedSettings['count'],
-                'where' => ['team' => $companyCode]
-            ], 'en');
+        $schema = app(SchemaManager::class)->find('UserProfiles');
+        $members = app(ObjectManager::class)->allWithLang($schema, [
+            'order' => $selectedSettings['sorting'],
+            'take' => $selectedSettings['count'],
+            'skip' => ($selectedSettings['page'] - 1) * $selectedSettings['count'],
+            'where' => ['team' => $companyCode]
+        ], 'en');
 
-            $count = app(ObjectManager::class)->count($schema, ['search' => ['team' => $companyCode]]);
-            
-            foreach ($members as $member) {
-                if (isset($member->fields['lectures']) && count($member->fields['lectures'])) {
-                    foreach ($member->fields['lectures'] as $k => $lectureID) {
-                        foreach ($lectures as $lecture) {
-                            if ($lectureID == $lecture->id) {
-                                $member->fields['lectures'][$k] = $lecture;
-                            }
+        $count = app(ObjectManager::class)->count($schema, ['search' => ['team' => $companyCode]]);
+        
+        foreach ($members as $member) {
+            if (isset($member->fields['lectures']) && count($member->fields['lectures'])) {
+                foreach ($member->fields['lectures'] as $k => $lectureID) {
+                    foreach ($lectures as $lecture) {
+                        if ($lectureID == $lecture->id) {
+                            $member->fields['lectures'][$k] = $lecture;
                         }
                     }
-                }
-
-                if (isset($member->fields['status']) && count($member->fields['status'])) {
-                    $tmp = [];
-                    foreach ($member->fields['status'] as $k => $statusID) {
-                        if (in_array($statusID, self::LECTURE_STATUSES)) {
-                            $member->report = true;
-                        }
-                        foreach ($statuses as $status) {
-                            if ($statusID == $status->id) {
-                                $tmp[] = $status->fields['Title'];
-                            }
-                        }
-                    }
-                    $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
                 }
             }
 
-            $members = new LengthAwarePaginator(
-                $members,
-                $count,
-                $selectedSettings['count'],
-                $selectedSettings['page'],
-                ['path' => request()->url(), 'query' => request()->query()]
-            );
+            if (isset($member->fields['status']) && count($member->fields['status'])) {
+                $tmp = [];
+                foreach ($member->fields['status'] as $k => $statusID) {
+                    if (in_array($statusID, self::LECTURE_STATUSES)) {
+                        $member->report = true;
+                    }
+                    foreach ($statuses as $status) {
+                        if ($statusID == $status->id) {
+                            $tmp[] = $status->fields['Title'];
+                        }
+                    }
+                }
+                $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
+            }
         }
+            
+        $members = new LengthAwarePaginator(
+            $members,
+            $count,
+            $selectedSettings['count'],
+            $selectedSettings['page'],
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('form', [
             'lectureStatuses' => self::LECTURE_STATUSES,
@@ -182,6 +187,7 @@ class SiteController extends Controller
         $sections = $this->prepareLectures($fields);
 
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
+        $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
         $fields['sections'] = $sections;
 
         $enFields = $fields['en'] ?? [];
@@ -203,7 +209,7 @@ class SiteController extends Controller
             app(ObjectManager::class)->save($schema, $profileId, $enFields, 'en');
         }
 
-        return redirect()->route('company', ['company' => $companyId]);
+        return back();
     }
 
     public function RemoveMember(Backend $backend, Request $request, $companyId, $profileId)
@@ -226,7 +232,7 @@ class SiteController extends Controller
             app(ObjectManager::class)->delete($schema, $member->id);
         }
 
-        return redirect()->route('company', ['company' => $companyId]);
+        return back();
     }
 
     private function prepareLectures(array &$fields)
@@ -348,6 +354,7 @@ class SiteController extends Controller
         $fields['userId'] = $user->id;
         $fields['code'] = $login;
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
+        $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
         $fields['sections'] = $sections;
 
         $member = app(ObjectManager::class)->create($schema, $fields);
@@ -356,6 +363,6 @@ class SiteController extends Controller
             app(ObjectManager::class)->save($schema, $member->id, $enFields, 'en');
         }
 
-        return redirect()->route('company', ['company' => $companyId]);
+        return back();
     }
 }

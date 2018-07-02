@@ -100,6 +100,26 @@ class TmkHelper
         return $this->uploadFile($file, self::PRESENTATION_DIRECTORY);
     }
 
+    public function getTags(array $fields, array $sections, string $companyId)
+    {
+        $externalIds = [$companyId];
+
+        if (isset($fields['status']) && $fields['status']) {
+            $externalIds = array_merge($externalIds, $fields['status']);
+        }      
+
+        if ($sections) {
+            $externalIds = array_merge($externalIds, $sections);
+        }
+
+        $tagsSchema = app(SchemaManager::Class)->find('UserProfilesTags');
+        return app(ObjectManager::class)->search($tagsSchema, ['take' => -1])->map(function($item) use ($externalIds){
+            if (isset($item->fields['external']) && in_array($item->fields['external'], $externalIds)) {
+                return $item->id;
+            }
+        })->filter()->values()->toArray();
+    }
+
     /**
      * Returns groups for specified in input fields elements:
      *
@@ -223,7 +243,7 @@ class TmkHelper
         }
     }
 
-    public function getCompanies($user, $companyCode)
+    public function getCompanies($user, $companyCode = null)
     {
         $key = 'companies-' . $user->id;
         if (Cache::has($key)) {
