@@ -70,9 +70,9 @@ class SiteController extends Controller
             'sorting' => [
                 'lastName' => 'По возрастанию ФИО',
                 '-lastName' => 'По убыванию ФИО',
-                'createdAt' => 'По убыванию даты создания',
+                'createdAt' => 'По возрастанию даты создания',
                 '-createdAt' => 'По убыванию даты создания',
-                'updatedAt' => 'По убыванию даты обновления',
+                'updatedAt' => 'По возрастанию даты обновления',
                 '-updatedAt' => 'По убыванию даты обновления',
             ],
             'count' => [
