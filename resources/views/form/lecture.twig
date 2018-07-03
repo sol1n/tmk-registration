@@ -54,14 +54,14 @@
 
   <div class="form-group">
     <label for="{{ prefix }}-theses" class="form-label">Тезисы доклада</label>
-    <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада">{{ lecture.fields.Description|raw }}</textarea>
+    <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.fields.Description|raw }}</textarea>
   </div>
 
   <div class="form-group">
     <label for="{{ prefix }}-theses" class="form-label">
       Тезисы доклада <span class="c-gray">(англ)</span> 
     </label>
-    <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][{{ lecture.id }}]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Основные тезисы помогут дополнить тему вашего доклада">{{ lecture.languages.en.Description|raw }}</textarea>
+    <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][{{ lecture.id }}]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.languages.en.Description|raw }}</textarea>
   </div>
 
   <div class="form-group">
