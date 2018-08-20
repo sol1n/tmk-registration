@@ -24,9 +24,9 @@
             <option value="">Не выбрано</option>
             {% for section in sections %}
               {% if section.id == lecture.fields.Section %}
-                <option selected value="{{ section.id }}">{{ section.fields.Title }}</option>
+                <option selected value="{{ section.id }}">{{ section.fields.title }}</option>
               {% else %}
-                <option value="{{ section.id }}">{{ section.fields.Title }}</option>
+                <option value="{{ section.id }}">{{ section.fields.title }}</option>
               {% endif %}
             {% endfor %}
           </select>
