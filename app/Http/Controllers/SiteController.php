@@ -199,6 +199,9 @@ class SiteController extends Controller
         $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
 
         $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
+        foreach ($sections as $k => $section) {
+            unset($sections[$k]);
+        }
 
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
         $fields['team'] = $companyId;
@@ -339,6 +342,9 @@ class SiteController extends Controller
         $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
 
         $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
+        foreach ($sections as $k => $section) {
+            unset($sections[$k]);
+        }
 
         foreach ($enFields as $k => $value) {
             if (! $value) {
