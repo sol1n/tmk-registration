@@ -9,6 +9,7 @@ use App\User;
 use App\Services\SchemaManager;
 use App\Services\ObjectManager;
 use App\Services\UserManager;
+use App\Services\TmkHelper;
 
 use Tests\Browser\Pages\LoginPage;
 use Tests\Browser\Pages\Form as FormPage;
@@ -105,7 +106,14 @@ class FormComponentsTest extends DuskTestCase
             ]);
 
             $schema = app(SchemaManager::class)->find('Sections');
-            $sections = app(ObjectManager::class)->search($schema, ['take' => -1])->map(function ($item) {
+            $sections = app(ObjectManager::class)->search($schema, [
+                'take' => -1,
+                'where' => [
+                    'parentId' => [
+                        '$in' => array_keys(TmkHelper::GENERAL_SECTIONS)
+                    ]
+                ]
+            ])->map(function ($item) {
                 return $item->id;
             });
 

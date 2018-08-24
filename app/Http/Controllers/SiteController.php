@@ -27,7 +27,7 @@ class SiteController extends Controller
     const KVN_STATUSES = [
         'cad65dda-7add-4465-9a3a-744e7378752a'
     ];
-
+    const GROUP_TITLE = 'Доклады';
 
     private $helper;
 
@@ -105,9 +105,6 @@ class SiteController extends Controller
         $footballTeams = $this->helper->getFootballTeams();
         $companies = $this->helper->getCompanies($user, $companyCode);
         
-        $schema = app(SchemaManager::class)->find('Lectures');
-        $lectures = app(ObjectManager::class)->allWithLang($schema, ['take' => -1], 'en');
-        
         $selectedSettings = [
             'count' => (int) (request()->get('count') ?? config('objects.objects_per_page')),
             'sorting' => request()->get('sorting') ?? '-updatedAt',
@@ -123,17 +120,36 @@ class SiteController extends Controller
         ], 'en');
 
         $count = app(ObjectManager::class)->count($schema, ['search' => ['team' => $companyCode]]);
-        
-        foreach ($members as $member) {
-            if (isset($member->fields['lectures']) && count($member->fields['lectures'])) {
-                foreach ($member->fields['lectures'] as $k => $lectureID) {
-                    foreach ($lectures as $lecture) {
-                        if ($lectureID == $lecture->id) {
-                            $member->fields['lectures'][$k] = $lecture;
+        $profilesIds = $members->map(function ($item) {
+            return $item->id;
+        })->toArray();
+
+        $lecturesMap = [];
+        if ($profilesIds) {
+            $schema = app(SchemaManager::class)->find('Sections');
+            $lectures = app(ObjectManager::class)->allWithLang($schema, [
+                'take' => -1,
+                'where' => [
+                    'userProfileIds' => [
+                        '$containsAny' => $profilesIds
+                    ]
+                ]
+            ], 'en');
+
+            foreach ($lectures as $lecture) {
+                if (isset($lecture->fields['userProfileIds']) && is_array($lecture->fields['userProfileIds'])) {
+                    foreach ($lecture->fields['userProfileIds'] as $profileId) {
+                        if (! isset($lecturesMap[$profileId])) {
+                            $lecturesMap[$profileId] = [];
                         }
+                        $lecturesMap[$profileId][] = $lecture;
                     }
                 }
             }
+        }
+
+        foreach ($members as $member) {
+            $member->fields['lectures'] = $lecturesMap[$member->id] ?? [];
 
             if (isset($member->fields['status']) && count($member->fields['status'])) {
                 $tmp = [];
@@ -150,7 +166,7 @@ class SiteController extends Controller
                 $member->fields['textstatus'] = ! empty($tmp) ? implode(', ', $tmp) : '';
             }
         }
-            
+
         $members = new LengthAwarePaginator(
             $members,
             $count,
@@ -177,15 +193,14 @@ class SiteController extends Controller
 
     public function ProcessMember(Backend $backend, Request $request, $companyId, $profileId)
     {
-        $fields = $request->all();
-        $fields['email'] = '';
-        $fields['photo'] = '';
+        $enFields = $request->only(['en']);
+        $fields = $request->except(['subject', 'theses', 'section', 'presentation', 'saved-presentation', '_token', 'en']);
+        $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
+
+        $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
+
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
         $fields['team'] = $companyId;
-        unset($fields['_token']);
-
-        $sections = $this->prepareLectures($fields);
-
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
         $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
         $fields['sections'] = $sections;
@@ -205,9 +220,11 @@ class SiteController extends Controller
         }
 
         app(ObjectManager::class)->save($schema, $profileId, $fields);
-        if (count($enFields)) {
-            app(ObjectManager::class)->save($schema, $profileId, $enFields, 'en');
+        if (count($enFields) && isset($enFields['en'])) {
+            app(ObjectManager::class)->save($schema, $profileId, $enFields['en'], 'en');
         }
+
+        $this->processLectures($lectures, $profileId);
 
         return back();
     }
@@ -222,22 +239,33 @@ class SiteController extends Controller
             if (! is_null($userId)) {
                 app(\App\Services\UserManager::class)->delete($userId);
             }
-            if (isset($member->fields['lectures']) and is_array($member->fields['lectures'])) {
-                foreach ($member->fields['lectures'] as $lectureId) {
-                    $schema = app(SchemaManager::class)->find('Lectures');
-                    app(ObjectManager::class)->delete($schema, $lectureId);
-                }
-            }
+            
             $schema = app(SchemaManager::class)->find('UserProfiles');
             app(ObjectManager::class)->delete($schema, $member->id);
+
+            $lecturesSchema = app(SchemaManager::class)->find('Sections');
+            $memberLectures = app(ObjectManager::class)->search($lecturesSchema, [
+                'take' => -1,
+                'where' => [
+                    'userProfileIds' => [
+                        '$contains' => [$profileId]
+                    ]
+                ]
+            ]);
+
+            if ($memberLectures->count()) {
+                foreach ($memberLectures as $lecture) {
+                    app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
+                }
+            }
         }
 
         return back();
     }
 
-    private function prepareLectures(array &$fields)
+    private function processLectures(array &$fields, string $member)
     {
-        $sections = [];
+        $lectures = [];
 
         if (isset($fields['theses']['en']) || isset($fields['subject']['en'])) {
             $enData = [
@@ -264,8 +292,7 @@ class SiteController extends Controller
         }
 
         if ($fields['subject'] && count($fields['subject']) && (!$emptyList)) {
-            $lectures = [];
-            $schema = app(SchemaManager::class)->find('Lectures');
+            $schema = app(SchemaManager::class)->find('Sections');
 
             foreach ($fields['subject'] as $k => $subject) {
                 $lecture = [];
@@ -275,15 +302,14 @@ class SiteController extends Controller
                 } elseif (isset($fields['saved-presentation'][$k]) && $fields['saved-presentation'][$k]) {
                     $lecture['presentationFileId'] = $fields['saved-presentation'][$k];
                 }
-                $lecture['Title'] = isset($fields['subject'][$k]) ? $fields['subject'][$k] : null;
-                $lecture['Description'] = isset($fields['theses'][$k]) ? $fields['theses'][$k] : null;
-                $lecture['Section'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
-
-                if (isset($fields['section'][$k]) and !is_null($fields['section'][$k])) {
-                    $sections[] = $fields['section'][$k];
-                }
+                $lecture['title'] = isset($fields['subject'][$k]) ? $fields['subject'][$k] : null;
+                $lecture['description'] = isset($fields['theses'][$k]) ? $fields['theses'][$k] : null;
+                $lecture['parentId'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
+                $lecture['groupIds'] = $this->helper->getLectureGroups();
+                $lecture['groupTitle'] = self::GROUP_TITLE;
 
                 if (is_numeric($k)) {
+                    $lecture['userProfileIds'] = [$member];
                     $lecture = app(ObjectManager::class)->create($schema, $lecture);
                 } else {
                     $lecture = app(ObjectManager::class)->save($schema, $k, $lecture);
@@ -291,39 +317,26 @@ class SiteController extends Controller
 
                 if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k])) {
                     $enFields = [
-                        'Title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
-                        'Description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null
+                        'title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
+                        'description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null
                     ];
                     $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');
                 }
 
                 $lectures[] = $lecture->id;
             }
-
-            unset($fields['subject']);
-            unset($fields['theses']);
-            unset($fields['section']);
-            unset($fields['presentation']);
-            unset($fields['saved-presentation']);
-
-            $fields['lectures'] = $lectures;
         }
 
-        return $sections;
+        return $lectures;
     }
 
     public function NewMember(Backend $backend, Request $request, $companyId)
     {
-        $fields = $request->all();
-        $fields['team'] = $companyId;
-        $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
+        $enFields = $request->only(['en']);
+        $fields = $request->except(['subject', 'theses', 'section', 'presentation', 'saved-presentation', '_token', 'en']);
+        $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
 
-        unset($fields['_token']);
-
-        $sections = $this->prepareLectures($fields);
-
-        $enFields = $fields['en'] ?? [];
-        unset($fields['en']);
+        $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
 
         foreach ($enFields as $k => $value) {
             if (! $value) {
@@ -331,11 +344,7 @@ class SiteController extends Controller
             }
         }
 
-        if ($request->file('photo') && $request->file('photo')->isValid()) {
-            $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
-        }
-
-        $schema = app(SchemaManager::class)->find('UserProfiles');
+        $userProfileSchema = app(SchemaManager::class)->find('UserProfiles');
 
         do {
             $duplicate = false;
@@ -356,12 +365,20 @@ class SiteController extends Controller
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
         $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
         $fields['sections'] = $sections;
+        $fields['team'] = $companyId;
+        $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
 
-        $member = app(ObjectManager::class)->create($schema, $fields);
-
-        if (count($enFields)) {
-            app(ObjectManager::class)->save($schema, $member->id, $enFields, 'en');
+        if ($request->file('photo') && $request->file('photo')->isValid()) {
+            $fields['photoFileId'] = $this->helper->uploadPhoto($request->file('photo'));
         }
+
+        $member = app(ObjectManager::class)->create($userProfileSchema, $fields);
+
+        if (count($enFields) && isset($enFields['en'])) {
+            app(ObjectManager::class)->save($userProfileSchema, $member->id, $enFields['en'], 'en');
+        }
+
+        $this->processLectures($lectures, $member->id);
 
         return back();
     }

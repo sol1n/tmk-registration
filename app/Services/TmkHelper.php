@@ -18,6 +18,11 @@ class TmkHelper
     const PRESENTATION_DIRECTORY = '43308c2c-f012-4877-bd12-ffa697b5a42b';
     const EVENT_GROUP = '1ad70d49-3efc-436c-b806-4a303aa2679c';
 
+    const GENERAL_SECTIONS = [
+        '2756d0f5-2976-46ce-9d99-d7939bab960e' => 'ГС',
+        '3e098ddf-41ef-4e98-95af-3c38da087bf7' => 'TMK'
+    ];
+
     const CACHE_LIFETIME = 15;
 
     private $backend;
@@ -106,14 +111,14 @@ class TmkHelper
 
         if (isset($fields['status']) && $fields['status']) {
             $externalIds = array_merge($externalIds, $fields['status']);
-        }      
+        }
 
         if ($sections) {
             $externalIds = array_merge($externalIds, $sections);
         }
 
-        $tagsSchema = app(SchemaManager::Class)->find('UserProfilesTags');
-        return app(ObjectManager::class)->search($tagsSchema, ['take' => -1])->map(function($item) use ($externalIds){
+        $tagsSchema = app(SchemaManager::class)->find('UserProfilesTags');
+        return app(ObjectManager::class)->search($tagsSchema, ['take' => -1])->map(function ($item) use ($externalIds) {
             if (isset($item->fields['external']) && in_array($item->fields['external'], $externalIds)) {
                 return $item->id;
             }
@@ -214,6 +219,11 @@ class TmkHelper
         return $groups;
     }
 
+    public function getLectureGroups()
+    {
+        return [self::EVENT_GROUP];
+    }
+
     public function getStatuses()
     {
         if (Cache::has('statuses')) {
@@ -237,7 +247,21 @@ class TmkHelper
             return Cache::get('sections');
         } else {
             $schema = app(SchemaManager::class)->find('Sections');
-            $sections = app(ObjectManager::class)->all($schema);
+            $sections = app(ObjectManager::class)->search($schema, [
+                'take' => -1,
+                'where' => [
+                    'parentId' => [
+                        '$in' => array_keys(self::GENERAL_SECTIONS)
+                    ]
+                ],
+                'order' => [
+                    'title' => 'asc'
+                ]
+            ])->mapWithKeys(function ($item) {
+                $item->parent = isset($item->fields['parentId']) && $item->fields['parentId'] ? self::GENERAL_SECTIONS[$item->fields['parentId']] : '';
+                return [$item->id => $item];
+            });
+
             Cache::put('sections', $sections, self::CACHE_LIFETIME);
             return $sections;
         }

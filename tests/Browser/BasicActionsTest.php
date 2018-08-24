@@ -123,12 +123,22 @@ class BasicActionsTest extends DuskTestCase
      */
     private function deleteMember($profile)
     {
-        if (isset($profile->fields['lectures']) && $profile->fields['lectures']) {
-            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
-            foreach ($profile->fields['lectures'] as $lectureId) {
-                app(ObjectManager::class)->delete($lecturesSchema, $lectureId);
+        $lecturesSchema = app(SchemaManager::class)->find('Sections');
+        $memberLectures = app(ObjectManager::class)->search($lecturesSchema, [
+            'take' => -1,
+            'where' => [
+                'userProfileIds' => [
+                    '$contains' => [$profile->id]
+                ]
+            ]
+        ]);
+
+        if ($memberLectures->count()) {
+            foreach ($memberLectures as $lecture) {
+                app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
             }
         }
+
         $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
         app(UserManager::class)->delete($profile->fields['userId']);
         app(ObjectManager::class)->delete($userProfilesSchema, $profile->id);
@@ -398,16 +408,16 @@ class BasicActionsTest extends DuskTestCase
             $this->assertNull($profileAfterDeleting);
 
             // lectures list check
-            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
-            foreach ($profile->fields['lectures'] as $lectureId) {
-                $lectureAfterDeleting = app(ObjectManager::class)->search($lecturesSchema, [
-                    'take' => 1,
-                    'where' => [
-                        'id' => $lectureId
+            $lecturesSchema = app(SchemaManager::class)->find('Sections');
+            $lectureAfterDeleting = app(ObjectManager::class)->search($lecturesSchema, [
+                'take' => 1,
+                'where' => [
+                    'userProfileIds' => [
+                        '$contains' => [$profile->id]
                     ]
-                ])->first();
-                $this->assertNull($lectureAfterDeleting);
-            }
+                ]
+            ])->first();
+            $this->assertNull($lectureAfterDeleting);
 
             // user check
             $userAfterDeleting = app(UserManager::class)->search([
@@ -441,35 +451,31 @@ class BasicActionsTest extends DuskTestCase
                 ->createParticipant($participant)
                 ->assertSee($participant['textFields']['firstName']);
 
-            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+            $profileId = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
 
             $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
             $profile = app(ObjectManager::class)->search($userProfilesSchema, [
                 'take' => 1,
                 'where' => [
-                    'id' => $id
+                    'id' => $profileId
                 ]
             ])->first();
 
-            $this->assertEquals(count($profile->fields['lectures']), count($participant['lectures']));
-            
-            $lecturesIds = $profile->fields['lectures'];
-
-            $lecturesSchema = app(SchemaManager::class)->find('Lectures');
+            $lecturesSchema = app(SchemaManager::class)->find('Sections');
             $lectures = app(ObjectManager::class)->search($lecturesSchema, [
                 'take' => -1,
                 'order' => 'createdAt',
                 'where' => [
-                    'id' => [
-                        '$in' => $lecturesIds
+                    'userProfileIds' => [
+                        '$contains' => [$profileId]
                     ]
                 ]
             ])->toArray();
 
             foreach ($participant['lectures'] as $index => $lecture) {
-                $this->assertEquals($lecture['theses'], $lectures[$index]->fields['Description']);
-                $this->assertEquals($lecture['subject'], $lectures[$index]->fields['Title']);
-                $this->assertEquals($lecture['section'], $lectures[$index]->fields['Section']);
+                $this->assertEquals($lecture['theses'], $lectures[$index]->fields['description']);
+                $this->assertEquals($lecture['subject'], $lectures[$index]->fields['title']);
+                $this->assertEquals($lecture['section'], $lectures[$index]->fields['parentId']);
             }
 
             $this->deleteMember($profile);
