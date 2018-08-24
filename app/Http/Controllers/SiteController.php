@@ -311,6 +311,9 @@ class SiteController extends Controller
                 $lecture['parentId'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
                 $lecture['groupIds'] = $this->helper->getLectureGroups();
                 $lecture['groupTitle'] = self::GROUP_TITLE;
+                if (!$lecture['title']) {
+                    $lecture['childViewType'] = 'hidden';
+                }
 
                 if (is_numeric($k)) {
                     $lecture['userProfileIds'] = [$member];
