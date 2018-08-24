@@ -28,6 +28,7 @@ class SiteController extends Controller
         'cad65dda-7add-4465-9a3a-744e7378752a'
     ];
     const GROUP_TITLE = 'Доклады';
+    const GROUP_TITLE_EN = 'Reports';
 
     private $helper;
 
@@ -318,7 +319,8 @@ class SiteController extends Controller
                 if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k])) {
                     $enFields = [
                         'title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
-                        'description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null
+                        'description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null,
+                        'groupTitle' => self::GROUP_TITLE_EN
                     ];
                     $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');
                 }
