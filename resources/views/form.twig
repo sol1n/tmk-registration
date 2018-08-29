@@ -14,9 +14,9 @@
           <option value="">Выберите компанию</option>
           {% for id, company in companies %}
             {% if id == companyId %}
-              <option selected value="/form/{{ id }}/">{{ company.Title }}</option>
+              <option selected value="/form/{{ id }}/">{{ company.title }}</option>
             {% else %}
-              <option value="/form/{{ id }}/">{{ company.Title }}</option>
+              <option value="/form/{{ id }}/">{{ company.title }}</option>
             {% endif %}
           {% endfor %}
         </select>

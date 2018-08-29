@@ -15,7 +15,6 @@
   ">
   <hr class="form-block-hr m-b-lg">
   <div class="row">
-    
     <div class="col-xs-12 col-sm-12">
       <div class="form-group">
         <label for="{{ prefix }}-section" class="form-label">Секция</label>
@@ -23,10 +22,14 @@
           <select name="section[{{ lecture.id }}]" data-name="section[]" id="{{ prefix }}-section">
             <option value="">Не выбрано</option>
             {% for section in sections %}
-              {% if section.id == lecture.fields.Section %}
-                <option selected value="{{ section.id }}">{{ section.fields.title }}</option>
+              {% if section.id == lecture.fields.parentId %}
+                <option selected value="{{ section.id }}">
+                  {{ section.fields.title }}{% if (section.parent) %} ({{ section.parent }}){% endif %}
+                </option>
               {% else %}
-                <option value="{{ section.id }}">{{ section.fields.title }}</option>
+                <option value="{{ section.id }}">
+                  {{ section.fields.title }}{% if (section.parent) %} ({{ section.parent }}){% endif %}
+                </option>
               {% endif %}
             {% endfor %}
           </select>
@@ -37,7 +40,7 @@
     <div class="col-xs-12 col-sm-12">
       <div class="form-group">
         <label for="{{ prefix }}-subject" class="form-label">Тема доклада</label>
-        <input id="{{ prefix }}-subject" data-name="subject[]" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.Title }}">
+        <input id="{{ prefix }}-subject" data-name="subject[]" name="subject[{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.fields.title }}">
       </div>
     </div>
 
@@ -46,7 +49,7 @@
         <label for="{{ prefix }}-subject" class="form-label">
           Тема доклада <span class="c-gray">(англ)</span> 
         </label>
-        <input id="{{ prefix }}-subject" data-name="subject[en][{{ lecture.id }}]" name="subject[en][{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.Title }}">
+        <input id="{{ prefix }}-subject" data-name="subject[en][{{ lecture.id }}]" name="subject[en][{{ lecture.id }}]" class="form-input" type="text" placeholder="Введите тему доклада" value="{{ lecture.languages.en.title }}">
       </div>
     </div>
   </div
@@ -54,14 +57,14 @@
 
   <div class="form-group">
     <label for="{{ prefix }}-theses" class="form-label">Тезисы доклада</label>
-    <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.fields.Description|raw }}</textarea>
+    <textarea name="theses[{{ lecture.id }}]" data-name="theses[]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.fields.description|raw }}</textarea>
   </div>
 
   <div class="form-group">
     <label for="{{ prefix }}-theses" class="form-label">
       Тезисы доклада <span class="c-gray">(англ)</span> 
     </label>
-    <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][{{ lecture.id }}]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.languages.en.Description|raw }}</textarea>
+    <textarea name="theses[en][{{ lecture.id }}]" data-name="theses[en][{{ lecture.id }}]" id="{{ prefix }}-theses" cols="30" rows="10" class="form-textarea lecture-textarea" placeholder="Введите тезисы доклада">{{ lecture.languages.en.description|raw }}</textarea>
   </div>
 
   <div class="form-group">
