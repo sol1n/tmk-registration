@@ -209,7 +209,6 @@ class SiteController extends Controller
         $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
         $fields['sections'] = $sections;
 
-        $enFields = $fields['en'] ?? [];
         unset($fields['en']);
         foreach ($enFields as $k => $value) {
             if (! $value) {
