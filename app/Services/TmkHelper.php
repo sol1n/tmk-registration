@@ -27,6 +27,14 @@ class TmkHelper
 
     private $backend;
 
+    public static function isReport($element)
+    {
+        return (
+            isset($element->fields['parentId'])
+            && !in_array($element->fields['parentId'], array_keys(self::GENERAL_SECTIONS))
+        );
+    }
+
     public function __construct(Backend $backend)
     {
         $this->backend = $backend;

@@ -504,4 +504,21 @@ class Object
     public function updatedAtRaw() {
         return $this->updatedAt->format("Y-m-d\TH:i:s.uP");
     }
+
+    public static function update(Backend $backend, Schema $schema, array $ids, array $changes)
+    {
+        $result = self::jsonRequest([
+            'method' => 'PUT',
+            'json' => [
+                'ids' => $ids,
+                'changes' => $changes
+            ],
+            'headers' => [
+                'X-Appercode-Session-Token' => $backend->token()
+            ],
+            'url' => $backend->url . 'objects/' . $schema->id . '/batch',
+        ]);
+        
+        return true;
+    }
 }

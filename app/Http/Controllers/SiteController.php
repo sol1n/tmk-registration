@@ -27,6 +27,10 @@ class SiteController extends Controller
     const KVN_STATUSES = [
         'cad65dda-7add-4465-9a3a-744e7378752a'
     ];
+    const EXPERT_STATUSES = [
+        '9fe747c3-5020-44fd-b97b-00fce46fa42a',
+        '70630e35-ab1c-4375-b76b-fc2aeb8b1128'
+    ];
     const GROUP_TITLE = 'Доклады';
     const GROUP_TITLE_EN = 'Reports';
 
@@ -158,6 +162,9 @@ class SiteController extends Controller
                     if (in_array($statusID, self::LECTURE_STATUSES)) {
                         $member->report = true;
                     }
+                    if (in_array($statusID, self::EXPERT_STATUSES)) {
+                        $member->expertStatusesActive = true;
+                    }
                     foreach ($statuses as $status) {
                         if ($statusID == $status->id) {
                             $tmp[] = $status->fields['Title'];
@@ -180,6 +187,7 @@ class SiteController extends Controller
             'lectureStatuses' => self::LECTURE_STATUSES,
             'footballStatuses' => self::FOOTBALL_STATUSES,
             'kvnStatuses' => self::KVN_STATUSES,
+            'expertStatuses' => self::EXPERT_STATUSES,
             'members' => $members ?? null,
             'statuses' => $statuses,
             'sections' => $sections,
@@ -199,9 +207,25 @@ class SiteController extends Controller
         $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
 
         $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
-        foreach ($sections as $k => $section) {
-            unset($sections[$k]);
+        if ($request->get('memberSections')) {
+            $sections = array_merge($sections, $request->get('memberSections'));
+
+            $sectionsSchema = app(SchemaManager::class)->find('Sections');
+            app(ObjectManager::class)->update($sectionsSchema, $request->get('memberSections'), [
+                'userProfileIds' => [
+                    'action' => 'append',
+                    'value' => [$profileId]
+                ]
+            ]);
         }
+
+        foreach ($sections as $k => $section) {
+            if (is_null($section)) {
+                unset($sections[$k]);
+            }
+        }
+
+        $sections = array_values($sections);
 
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
         $fields['team'] = $companyId;
@@ -258,7 +282,9 @@ class SiteController extends Controller
 
             if ($memberLectures->count()) {
                 foreach ($memberLectures as $lecture) {
-                    app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
+                    if (TmkHelper::isReport($lecture)) {
+                        app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
+                    }
                 }
             }
         }
@@ -341,9 +367,18 @@ class SiteController extends Controller
         $lectures = $request->only(['subject', 'theses', 'section', 'presentation', 'saved-presentation']);
 
         $sections = isset($lectures['section']) && is_array($lectures['section']) ? $lectures['section'] : [];
-        foreach ($sections as $k => $section) {
-            unset($sections[$k]);
+
+        if ($request->get('memberSections')) {
+            $sections = array_merge($sections, $request->get('memberSections'));
         }
+
+        foreach ($sections as $k => $section) {
+            if (is_null($section)) {
+                unset($sections[$k]);
+            }
+        }
+
+        $sections = array_values($sections);
 
         foreach ($enFields as $k => $value) {
             if (! $value) {
@@ -386,6 +421,18 @@ class SiteController extends Controller
         }
 
         $this->processLectures($lectures, $member->id);
+
+        if ($request->get('memberSections')) {
+            $sections = array_merge($sections, $request->get('memberSections'));
+
+            $sectionsSchema = app(SchemaManager::class)->find('Sections');
+            app(ObjectManager::class)->update($sectionsSchema, $request->get('memberSections'), [
+                'userProfileIds' => [
+                    'action' => 'append',
+                    'value' => [$member->id]
+                ]
+            ]);
+        }
 
         return back();
     }

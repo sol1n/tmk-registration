@@ -202,4 +202,9 @@ class ObjectManager
 //        }
         return $searchQuery;
     }
+
+    public function update(Schema $schema, array $ids, array $changes)
+    {
+        return $this->model::update($this->backend, $schema, $ids, $changes);
+    }
 }

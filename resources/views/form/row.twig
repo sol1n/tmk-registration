@@ -42,6 +42,39 @@
               </select>
           </div>
 
+          <div class="
+            row
+            js-member-status
+            member-additional-form 
+            {% if (not member.fields.sections is empty) or member.expertStatusesActive %}active{% endif %}
+            {% for status in expertStatuses %}
+              js-member-status-{{ status }} 
+            {% endfor %}
+          ">
+            <div class="col-xs-12 col-sm-12">
+              <div class="form-group">
+                <label class="form-label" for="form-memberSections">Секции эксперта</label>
+                <select 
+                  name="memberSections[]" 
+                  id="form-memberSections" 
+                  data-placeholder="Выберите секции" 
+                  multiple 
+                  {% if config('app.env') != 'testing' %}
+                    class="js-chosen-select"
+                  {% endif %}
+                >
+                  {% for section in sections %}
+                    {% if section.id in member.fields.sections %}
+                      <option selected value="{{ section.id }}">{{ section.fields.title }}{% if (section.parent) %} ({{ section.parent }}){% endif %}</option>
+                    {% else %}
+                      <option value="{{ section.id }}">{{ section.fields.title }}{% if (section.parent) %} ({{ section.parent }}){% endif %}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-xs-12 col-sm-4">
               <div class="form-group">

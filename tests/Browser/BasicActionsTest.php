@@ -9,6 +9,7 @@ use App\User;
 use App\Services\SchemaManager;
 use App\Services\ObjectManager;
 use App\Services\UserManager;
+use App\Services\TmkHelper;
 
 use Tests\Browser\Pages\LoginPage;
 use Tests\Browser\Pages\Form as FormPage;
@@ -18,6 +19,7 @@ class BasicActionsTest extends DuskTestCase
     const EVENT_GROUP = '1ad70d49-3efc-436c-b806-4a303aa2679c';
     const KVN_STATUS = 'cad65dda-7add-4465-9a3a-744e7378752a';
     const FOOTBALL_STATUS = '6e1fca1c-5ad6-4105-a590-13adeeea0737';
+    const EXPERT_STATUS = '9fe747c3-5020-44fd-b97b-00fce46fa42a';
     const DEFAULT_ROLE = 'Participant';
 
     /**
@@ -67,6 +69,11 @@ class BasicActionsTest extends DuskTestCase
         ];
     }
 
+    private function getExpertSection()
+    {
+        return '932c6cc9-dc6e-4e7f-87e6-8944816cc9c5';
+    }
+
     /**
      * Extend basic participant by kvn & football teams and statuses
      * @return array
@@ -82,6 +89,23 @@ class BasicActionsTest extends DuskTestCase
         $participant['listFields']['footballTeam'] = app(ObjectManager::class)->search(app(SchemaManager::class)->find('footballTeam'), [
             'take' => 1
         ])->first()->id;
+
+        return $participant;
+    }
+
+    private function expertParticipantWithLectures()
+    {
+        $participant = $this->participant();
+        $participant['listFields']['status'][] = self::EXPERT_STATUS;
+        $participant['listFields']['memberSections'][] = $this->getExpertSection();
+
+        return $participant;
+    }
+
+    private function expertParticipant()
+    {
+        $participant = $this->expertParticipantWithLectures();
+        $participant['lectures'] = [];
 
         return $participant;
     }
@@ -135,7 +159,9 @@ class BasicActionsTest extends DuskTestCase
 
         if ($memberLectures->count()) {
             foreach ($memberLectures as $lecture) {
-                app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
+                if (TmkHelper::isReport($lecture)) {
+                    app(ObjectManager::class)->delete($lecturesSchema, $lecture->id);
+                }
             }
         }
 
@@ -374,6 +400,7 @@ class BasicActionsTest extends DuskTestCase
      * user lectures
      *
      * @group creation
+     * @group deleting
      */
     public function testDeleting()
     {
@@ -383,7 +410,7 @@ class BasicActionsTest extends DuskTestCase
                 'password' => env('PASSWORD')
             ]);
 
-            $participant = $this->participant();
+            $participant = $this->expertParticipantWithLectures();
             $userCompanies = $this->getCompaniesList();
 
             $browser->visit(new FormPage($userCompanies->first()))
@@ -414,6 +441,9 @@ class BasicActionsTest extends DuskTestCase
                 'where' => [
                     'userProfileIds' => [
                         '$contains' => [$profile->id]
+                    ],
+                    'parentId' => [
+                        '$nin' => array_keys(TmkHelper::GENERAL_SECTIONS)
                     ]
                 ]
             ])->first();
@@ -427,6 +457,15 @@ class BasicActionsTest extends DuskTestCase
                 ])
             ])->first();
             $this->assertNull($userAfterDeleting);
+
+            // section check
+            $section = app(ObjectManager::class)->search($lecturesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $this->getExpertSection()
+                ]
+            ])->first();
+            $this->assertNotNull($section);
 
             $browser->visit(new FormPage)->logOff();
         });
@@ -535,6 +574,79 @@ class BasicActionsTest extends DuskTestCase
 
             foreach ($tags as $tag) {
                 $this->assertContains($tag, $profile->fields['tagsIds']);
+            }
+
+            $this->deleteMember($profile);
+
+            $browser->visit(new FormPage)->logOff();
+        });
+    }
+
+    /**
+     * @group creation
+     */
+    public function testExpertAdditionsWithCorrectSections()
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit(new LoginPage)->signIn([
+                'login' => env('USER'),
+                'password' => env('PASSWORD')
+            ]);
+
+            $participant = $this->expertParticipant();
+
+            $userCompanies = $this->getCompaniesList();
+
+            $browser->visit(new FormPage($userCompanies->first()))
+                ->createParticipant($participant);
+
+            $id = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
+            $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
+            $profile = app(ObjectManager::class)->search($userProfilesSchema, [
+                'take' => 1,
+                'where' => [
+                    'id' => $id
+                ]
+            ])->first();
+
+            $section = app(ObjectManager::class)->find(app(SchemaManager::class)->find('Sections'), self::getExpertSection());
+
+            $this->assertFalse(TmkHelper::isReport($section));
+            $this->assertNotEmpty($profile->fields['sections']);
+            $this->assertContains($section->id, $profile->fields['sections']);
+            $this->assertContains($profile->id, $section->fields['userProfileIds']);
+
+            $tagSources = [$this->getExpertSection()];
+            $tagsSchema = app(SchemaManager::class)->find('UserProfilesTags');
+            $tags =  app(ObjectManager::class)->search($tagsSchema, [
+                'take' => -1,
+                'where' => [
+                    'external' => [
+                        '$in' => $tagSources
+                    ]
+                ]
+            ])->map(function ($item) use ($tagSources) {
+                if (isset($item->fields['external']) && in_array($item->fields['external'], $tagSources)) {
+                    return $item->id;
+                }
+            })->filter()->values()->toArray();
+
+            foreach ($tags as $tag) {
+                $this->assertContains($tag, $profile->fields['tagsIds']);
+            }
+
+            $lecturesGroups = app(ObjectManager::class)->search(app(SchemaManager::class)->find('Sections'), [
+                'take' => -1,
+                'where' => [
+                    'id' => [
+                        '$in' => [self::getExpertSection()]
+                    ]
+                ]
+            ])->map(function ($item) {
+                return $item->fields['groupId'] ?? null;
+            });
+            foreach ($lecturesGroups->toArray() as $lecturesGroup) {
+                $this->assertContains($lecturesGroup, $profile->fields['groupIds']);
             }
 
             $this->deleteMember($profile);

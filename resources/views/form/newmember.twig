@@ -28,6 +28,34 @@
           </select>
         </div>
 
+        <div class="
+          row
+          member-additional-form 
+          js-member-status
+          {% for status in expertStatuses %}
+            js-member-status-{{ status }} 
+          {% endfor %}
+        ">
+          <div class="col-xs-12 col-sm-12">
+            <div class="form-group">
+              <label class="form-label" for="form-memberSections">Секции эксперта</label>
+              <select 
+                name="memberSections[]" 
+                id="form-memberSections" 
+                data-placeholder="Выберите секции" 
+                multiple 
+                {% if config('app.env') != 'testing' %}
+                  class="js-chosen-select"
+                {% endif %}
+              >
+                {% for section in sections %}
+                  <option value="{{ section.id }}">{{ section.fields.title }}{% if (section.parent) %} ({{ section.parent }}){% endif %}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
         <div class="row">
           <div class="col-xs-12 col-sm-4">
             <div class="form-group">
