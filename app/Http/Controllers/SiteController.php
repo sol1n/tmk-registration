@@ -137,6 +137,9 @@ class SiteController extends Controller
                 'where' => [
                     'userProfileIds' => [
                         '$containsAny' => $profilesIds
+                    ],
+                    'parentId' => [
+                        '$nin' => array_keys(TmkHelper::GENERAL_SECTIONS)
                     ]
                 ]
             ], 'en');
