@@ -308,7 +308,7 @@ class TmkHelper
         } else {
             $schema = app(SchemaManager::class)->find('KVNTeams');
             $teams = app(ObjectManager::class)->search($schema, ['take' => -1])->mapWithKeys(function ($item) {
-                return [$item->id => $item->fields['Title']];
+                return [$item->id => $item->fields['title'] ?? ''];
             });
             Cache::put('KVNTeams', $teams, self::CACHE_LIFETIME);
             return $teams;
