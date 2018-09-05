@@ -194,42 +194,39 @@ class Object
         $headers = ['X-Appercode-Session-Token' => $backend->token];
         $url = $backend->url . 'objects/' . $schema->id . '/query';
 
-        $json = self::jsonRequest([
+        $elementsJson = self::jsonRequest([
             'method' => 'POST',
             'headers' => $headers,
             'url' => $url,
             'json' => $query
         ]);
 
-        $tempData = [];
+        $elementsIds = collect($elementsJson)->map(function($item) {
+            return $item['id'];
+        })->toArray();
 
-        foreach ($json as $rawData) {
-            $tempData[$rawData['id']] = $rawData;
-        }
-
-        if ($tempData) {
+        if ($elementsIds) {
             $headers['X-Appercode-Language'] = $language;
-            $query['where'] = [
-                'id' => [
-                    '$in' => array_keys($tempData)
-                ]
-            ];
-            unset($query['skip']);
 
-            $json = self::jsonRequest([
+            $mappedLocales = collect(self::jsonRequest([
                 'method' => 'POST',
                 'headers' => $headers,
                 'url' => $url,
-                'json' => $query
-            ]);
+                'json' => [
+                    'id' => [
+                        '$in' => $elementsIds
+                    ],
+                    'take' => -1
+                ]
+            ]))->mapWithKeys(function($item) {
+                return [$item['id'] => $item];
+            });
 
-
-            foreach ($json as $localizedRawData) {
-                $id = $localizedRawData['id'];
+            foreach ($elementsJson as $element) {
                 $localizedData = [
-                    $language => $localizedRawData
+                    $language => $mappedLocales[$element['id']] ?? null
                 ];
-                $list->push(Object::build($schema, $tempData[$id], $localizedData));
+                $list->push(Object::build($schema, $element, $localizedData));
             }
         }
 
