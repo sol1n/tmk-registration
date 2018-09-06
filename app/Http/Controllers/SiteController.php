@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use GuzzleHttp\Exception\ClientException;
 
 use App\Services\TmkHelper;
+use App\Helpers\HtmlSanitizer;
 
 use App\Services\ObjectManager;
 use App\Services\SchemaManager;
@@ -335,7 +336,7 @@ class SiteController extends Controller
                     $lecture['presentationFileId'] = $fields['saved-presentation'][$k];
                 }
                 $lecture['title'] = isset($fields['subject'][$k]) ? $fields['subject'][$k] : null;
-                $lecture['description'] = isset($fields['theses'][$k]) ? $fields['theses'][$k] : null;
+                $lecture['description'] = isset($fields['theses'][$k]) ? HtmlSanitizer::clear($fields['theses'][$k]) : null;
                 $lecture['parentId'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
                 $lecture['groupIds'] = $this->helper->getLectureGroups();
                 $lecture['groupTitle'] = self::GROUP_TITLE;
@@ -350,7 +351,7 @@ class SiteController extends Controller
                 if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k])) {
                     $enFields = [
                         'title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
-                        'description' => isset($enData['theses'][$k]) ? $enData['theses'][$k] : null,
+                        'description' => isset($enData['theses'][$k]) ? HtmlSanitizer::clear($enData['theses'][$k]) : null,
                         'groupTitle' => self::GROUP_TITLE_EN
                     ];
                     $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');
