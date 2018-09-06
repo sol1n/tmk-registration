@@ -218,10 +218,8 @@ class BasicActionsTest extends DuskTestCase
             // statuses list
             $this->assertEquals($profile->fields['status'], $participant['listFields']['status']);
 
-            // lections sections list
-            foreach ($participant['lectures'] as $lecture) {
-                $this->assertContains($lecture['section'], $profile->fields['sections']);
-            }
+            // sections list should be empty for non-expert profiles
+            $this->assertEmpty($profile->fields['sections']);
 
             $this->deleteMember($profile);
 
@@ -515,6 +513,7 @@ class BasicActionsTest extends DuskTestCase
                 $this->assertEquals($lecture['theses'], $lectures[$index]->fields['description']);
                 $this->assertEquals($lecture['subject'], $lectures[$index]->fields['title']);
                 $this->assertEquals($lecture['section'], $lectures[$index]->fields['parentId']);
+                $this->assertEquals($lectures[$index]->fields['subtitle'], $profile->fields['lastName'] . ' ' . $profile->fields['firstName']);
             }
 
             $this->deleteMember($profile);

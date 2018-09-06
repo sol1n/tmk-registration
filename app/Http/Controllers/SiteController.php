@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\Object;
 use App\Backend;
 use Illuminate\Http\Request;
 use GuzzleHttp\Exception\ClientException;
@@ -235,7 +236,7 @@ class SiteController extends Controller
         $fields['team'] = $companyId;
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
         $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
-        $fields['sections'] = $sections;
+        $fields['sections'] = $request->get('memberSections') ?? [];
 
         unset($fields['en']);
         foreach ($enFields as $k => $value) {
@@ -255,7 +256,9 @@ class SiteController extends Controller
             app(ObjectManager::class)->save($schema, $profileId, $enFields['en'], 'en');
         }
 
-        $this->processLectures($lectures, $profileId);
+        $profile = app(ObjectManager::class)->find($schema, $profileId);
+
+        $this->processLectures($lectures, $profile);
 
         return back();
     }
@@ -296,7 +299,7 @@ class SiteController extends Controller
         return back();
     }
 
-    private function processLectures(array &$fields, string $member)
+    private function processLectures(array &$fields, Object $member)
     {
         $lectures = [];
 
@@ -340,9 +343,10 @@ class SiteController extends Controller
                 $lecture['parentId'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
                 $lecture['groupIds'] = $this->helper->getLectureGroups();
                 $lecture['groupTitle'] = self::GROUP_TITLE;
+                $lecture['subtitle'] = $member->fields['lastName'] . ' ' . $member->fields['firstName'];
 
                 if (is_numeric($k)) {
-                    $lecture['userProfileIds'] = [$member];
+                    $lecture['userProfileIds'] = [$member->id];
                     $lecture = app(ObjectManager::class)->create($schema, $lecture);
                 } else {
                     $lecture = app(ObjectManager::class)->save($schema, $k, $lecture);
@@ -410,7 +414,7 @@ class SiteController extends Controller
         $fields['code'] = $login;
         $fields['groupIds'] = $this->helper->getGroups($fields, $sections, $companyId);
         $fields['tagsIds'] = $this->helper->getTags($fields, $sections, $companyId);
-        $fields['sections'] = $sections;
+        $fields['sections'] = $request->get('memberSections') ?? [];
         $fields['team'] = $companyId;
         $fields['phoneNumber'] = str_replace(['(', ')', ' ', '-'], '', $fields['phoneNumber']);
 
@@ -424,11 +428,9 @@ class SiteController extends Controller
             app(ObjectManager::class)->save($userProfileSchema, $member->id, $enFields['en'], 'en');
         }
 
-        $this->processLectures($lectures, $member->id);
+        $this->processLectures($lectures, $member);
 
         if ($request->get('memberSections')) {
-            $sections = array_merge($sections, $request->get('memberSections'));
-
             $sectionsSchema = app(SchemaManager::class)->find('Sections');
             app(ObjectManager::class)->update($sectionsSchema, $request->get('memberSections'), [
                 'userProfileIds' => [
