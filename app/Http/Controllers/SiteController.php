@@ -259,7 +259,7 @@ class SiteController extends Controller
 
         $profile = app(ObjectManager::class)->find($schema, $profileId);
 
-        $this->processLectures($lectures, $profile);
+        $this->processLectures($lectures, $profile, $enFields ?? []);
 
         return back();
     }
@@ -300,7 +300,7 @@ class SiteController extends Controller
         return back();
     }
 
-    private function processLectures(array &$fields, Object $member)
+    private function processLectures(array &$fields, Object $member, $memberlanguagesData = [])
     {
         $lectures = [];
 
@@ -353,14 +353,21 @@ class SiteController extends Controller
                     $lecture = app(ObjectManager::class)->save($schema, $k, $lecture);
                 }
 
+                $enFields = [];
+
+                if (isset($memberlanguagesData['en']['lastName']) && isset($memberlanguagesData['en']['firstName'])) {
+                    $enFields['subtitle'] = $memberlanguagesData['en']['lastName'] . ' ' . $memberlanguagesData['en']['firstName'];
+                }
+
                 if ((isset($enData['theses'][$k]) && $enData['theses'][$k]) || (isset($enData['subject'][$k]) && $enData['subject'][$k])) {
                     $enFields = [
                         'title' => isset($enData['subject'][$k]) ? $enData['subject'][$k] : null,
                         'description' => isset($enData['theses'][$k]) ? HtmlSanitizer::clear($enData['theses'][$k]) : null,
-                        'groupTitle' => self::GROUP_TITLE_EN
+                        'groupTitle' => self::GROUP_TITLE_EN,
                     ];
-                    $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');
                 }
+
+                $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');
 
                 $lectures[] = $lecture->id;
             }
@@ -429,7 +436,7 @@ class SiteController extends Controller
             app(ObjectManager::class)->save($userProfileSchema, $member->id, $enFields['en'], 'en');
         }
 
-        $this->processLectures($lectures, $member);
+        $this->processLectures($lectures, $member, $enFields ?? []);
 
         if ($request->get('memberSections')) {
             $sectionsSchema = app(SchemaManager::class)->find('Sections');

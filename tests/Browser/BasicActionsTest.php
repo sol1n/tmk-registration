@@ -491,15 +491,15 @@ class BasicActionsTest extends DuskTestCase
             $profileId = $browser->attribute('.js-members-table-row-edit', 'data-member-id');
 
             $userProfilesSchema = app(SchemaManager::class)->find('UserProfiles');
-            $profile = app(ObjectManager::class)->search($userProfilesSchema, [
+            $profile = app(ObjectManager::class)->allWithLang($userProfilesSchema, [
                 'take' => 1,
                 'where' => [
                     'id' => $profileId
                 ]
-            ])->first();
+            ], 'en')->first();
 
             $lecturesSchema = app(SchemaManager::class)->find('Sections');
-            $lectures = app(ObjectManager::class)->search($lecturesSchema, [
+            $lectures = app(ObjectManager::class)->allWithLang($lecturesSchema, [
                 'take' => -1,
                 'order' => 'createdAt',
                 'where' => [
@@ -507,13 +507,14 @@ class BasicActionsTest extends DuskTestCase
                         '$contains' => [$profileId]
                     ]
                 ]
-            ])->toArray();
+            ], 'en');
 
             foreach ($participant['lectures'] as $index => $lecture) {
                 $this->assertEquals($lecture['theses'], $lectures[$index]->fields['description']);
                 $this->assertEquals($lecture['subject'], $lectures[$index]->fields['title']);
                 $this->assertEquals($lecture['section'], $lectures[$index]->fields['parentId']);
                 $this->assertEquals($lectures[$index]->fields['subtitle'], $profile->fields['lastName'] . ' ' . $profile->fields['firstName']);
+                $this->assertEquals($lectures[$index]->languages['en']['subtitle'], $profile->languages['en']['lastName'] . ' ' . $profile->languages['en']['firstName']);
             }
 
             $this->deleteMember($profile);
