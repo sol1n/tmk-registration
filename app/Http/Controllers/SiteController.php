@@ -21,7 +21,8 @@ class SiteController extends Controller
     const NEW_USER_ROLE = 'Participant';
     const LECTURE_STATUSES = [
         '07e6da63-a4d9-45fd-b181-58272cf40bb4',
-        '221b9fea-6586-4be4-ae9d-8bfac8817f56'
+        '221b9fea-6586-4be4-ae9d-8bfac8817f56',
+        '61f6a888-2690-4b32-b339-6155e50eea17'
     ];
     const FOOTBALL_STATUSES = [
         '6e1fca1c-5ad6-4105-a590-13adeeea0737'
