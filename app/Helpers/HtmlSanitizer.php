@@ -9,7 +9,7 @@ class HtmlSanitizer
     public static function clear(string $string, $config = null)
     {
     	return Purify::clean($string, $config ?? [
-    		'HTML.Allowed' => 'p,b,i,blockquote,a[href],ul,ol,li,h1,h2,h3,h4'
+    		'HTML.Allowed' => 'p,b,i,em,strong,blockquote,a[href],ul,ol,li,h1,h2,h3,h4'
     	]);
     }
 }
