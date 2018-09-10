@@ -341,6 +341,14 @@ class SiteController extends Controller
                 }
                 $lecture['title'] = isset($fields['subject'][$k]) ? $fields['subject'][$k] : null;
                 $lecture['description'] = isset($fields['theses'][$k]) ? HtmlSanitizer::clear($fields['theses'][$k]) : null;
+
+                if (mb_strpos($lecture['description'], '<h3>') === false) {
+                    $lecture['description'] = view('lectures/description', [
+                        'title' => $lecture['title'],
+                        'description' => $lecture['description']
+                    ])->render();
+                }
+
                 $lecture['parentId'] = isset($fields['section'][$k]) ? $fields['section'][$k] : null;
                 $lecture['groupIds'] = $this->helper->getLectureGroups();
                 $lecture['groupTitle'] = self::GROUP_TITLE;
@@ -365,6 +373,13 @@ class SiteController extends Controller
                         'description' => isset($enData['theses'][$k]) ? HtmlSanitizer::clear($enData['theses'][$k]) : null,
                         'groupTitle' => self::GROUP_TITLE_EN,
                     ];
+
+                    if (mb_strpos($enFields['description'], '<h3>') === false) {
+                        $enFields['description'] = view('lectures/description', [
+                            'title' => $enFields['title'],
+                            'description' => $enFields['description']
+                        ])->render();
+                    }
                 }
 
                 $lecture = app(ObjectManager::class)->save($schema, $lecture->id, $enFields, 'en');

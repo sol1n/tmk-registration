@@ -472,6 +472,7 @@ class BasicActionsTest extends DuskTestCase
     /**
      * Checks that lectures is creating with correct data
      * @group creation
+     * @group current
      */
     public function testLecturesCreation()
     {
@@ -510,7 +511,12 @@ class BasicActionsTest extends DuskTestCase
             ], 'en');
 
             foreach ($participant['lectures'] as $index => $lecture) {
-                $this->assertEquals($lecture['theses'], $lectures[$index]->fields['description']);
+                $renderedDescription = view('lectures/description', [
+                    'title' => $lecture['subject'],
+                    'description' => $lecture['theses']
+                ])->render();
+
+                $this->assertEquals($renderedDescription, $lectures[$index]->fields['description']);
                 $this->assertEquals($lecture['subject'], $lectures[$index]->fields['title']);
                 $this->assertEquals($lecture['section'], $lectures[$index]->fields['parentId']);
                 $this->assertEquals($lectures[$index]->fields['subtitle'], $profile->fields['lastName'] . ' ' . $profile->fields['firstName']);
